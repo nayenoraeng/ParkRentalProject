@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>커뮤니티</title>
+    <link rel="stylesheet" th:href="@{/css/board.css}" />
+    <link rel="stylesheet" th:href="@{/css/communityboard.css}" />
+</head>
+<body>
+
+    <!-- 헤더랑 네비바 섹션 -->
+    <header>
+        <nav>
+            <div class="logo">NATIONAL PARK</div>
+
+            <!-- 중앙에 위치할 메뉴 -->
+            <ul class="center-menu">
+                <li><a href="#">소개</a></li>
+                <li>
+                    <a href="#">공원 검색</a>
+                    <ul class="dropdown">
+                        <li><a href="#">국립공원</a></li>
+                        <li><a href="#">자연공원</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#">물품 대여</a>
+                    <ul class="dropdown">
+                        <li><a href="#">텐트</a></li>
+                        <li><a href="#">자전거</a></li>
+                        <li><a href="#">배낭</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#">게시판</a>
+                    <ul class="dropdown">
+                        <li><a href="#">공지사항</a></li>
+                        <li><a href="#">문의사항</a></li>
+                        <li><a href="#">커뮤니티</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <!-- 오른쪽에 위치할 메뉴 -->
+            <ul class="right-menu">
+                <li><a href="#">로그인</a></li>
+                <li><a href="#">회원가입</a></li>
+            </ul>
+        </nav>
+        <!-- 배경 이미지 위의 텍스트 -->
+        <div class="background-text-wrapper">
+            <h1 style="all: unset; font-size: 50px; color: white;">A NATIONAL PARK</h1>
+            <p>공기 좋고 물 좋은 공원에서 데이트해요!!!</p>
+        </div>
+    </header>
+
+    
+            <table>
+                <thead>
+                    <tr>
+                        <th>카테고리</th>
+                        <th>제목</th>
+                        <th>작성자</th>
+                        <th>작성일</th>
+                        <th>조회수</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="category">필독</td>
+                        <td class="title">슬기로운 카페 생활 Update [260]</td>
+                        <td>게시삼</td>
+                        <td>2023.04.06</td>
+                        <td class="views">3,589</td>
+                    </tr>
+                    <tr>
+                        <td class="category">공지</td>
+                        <td class="title">카페 필독 공지 (2024년 1월 Update) [3957]</td>
+                        <td>게시삼</td>
+                        <td>2024.01.16</td>
+                        <td class="views">999</td>
+                    </tr>
+                    <tr>
+                        <td class="category">공지</td>
+                        <td class="title">미리부끄의 비밀번호 - 보안등급 안내... [36]</td>
+                        <td>게시삼</td>
+                        <td>2024.06.02</td>
+                        <td class="views">647</td>
+                    </tr>
+                    <tr>
+                        <td class="category">공지</td>
+                        <td class="title">10차 기부 아동 학업비 지원 기부 [80]</td>
+                        <td>게시삼</td>
+                        <td>2024.05.20</td>
+                        <td class="views">1,554</td>
+                    </tr>
+                    <tr>
+                        <td class="category">공지</td>
+                        <td class="title">미리부끄에게 전해줄 세상 따뜻한 이야기 [73]</td>
+                        <td>게시삼</td>
+                        <td>2024.02.16</td>
+                        <td class="views">1,441</td>
+                    </tr>
+                    <tr>
+                        <td class="category notice">일반</td>
+                        <td>공학박물관에서 10월 31일 특강진행 예정 [1]</td>
+                        <td>은하수</td>
+                        <td>15:15</td>
+                        <td class="views">9</td>
+                    </tr>
+                    <tr>
+                        <td class="category notice">일반</td>
+                        <td>[EC #7] Community Service (Volunteer) [8]</td>
+                        <td>게시삼</td>
+                        <td>15:09</td>
+                        <td class="views">51</td>
+                    </tr>
+                    <tr>
+                        <td class="category notice">일반</td>
+                        <td>Yale 대학교 에세이에서 강조하는 '틴턴랩' [61]</td>
+                        <td>게시삼</td>
+                        <td>10:38</td>
+                        <td class="views">323</td>
+                    </tr>
+                </tbody>
+            </table>
+            <!-- 페이징 처리 -->
+            <ul class="pagination">
+                <li class="active"><a href="#">1</a></li>
+                <li><a href="#">2</a></li>
+                <li><a href="#">3</a></li>
+                <li><a href="#">4</a></li>
+                <li><a href="#">5</a></li>
+                <li><a href="#">다음</a></li>
+            </ul>
+        
+            <!-- 검색 바 -->
+            <div class="search-container">
+                <select>
+                    <option value="전체기간">전체기간</option>
+                    <!-- 기간 선택 옵션 추가 가능 -->
+                </select>
+        
+                <select>
+                    <option value="제목만">제목만</option>
+                    <!-- 필터링 옵션 추가 가능 -->
+                </select>
+        
+                <input type="text" placeholder="검색어를 입력해 주세요" />
+        
+                <button>검색</button>
+            </div>
+            <div class="button-container">
+                <button class="write-button">글쓰기</button>
+                <button class="edit-button">수정</button>
+            </div>
+
+
+    <!-- 풋터 섹션 -->
+    <footer>
+        <p>풋터입니다. 추가 사항을 입력하세요.</p>
+        <ul>
+            <li>항목 1</li>
+            <li>항목 2</li>
+            <li>항목 3</li>
+            <li>항목 4</li>
+        </ul>
+        <p>Copyright © 2023 한화시스템(주). 모든 권리는 보유됩니다.</p>
+    </footer>
+
+</body>
+</html>

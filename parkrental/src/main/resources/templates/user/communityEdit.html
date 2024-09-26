@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문의게시판</title>
+    <link rel="stylesheet" th:href="@{/css/board.css}" />
+    <link rel="stylesheet" th:href="@{/css/communityboard.css}" />
+    <link rel="stylesheet" th:href="@{/css/communitywrite.css}" />
+    
+</head>
+<body>
+
+    <!-- 헤더랑 네비바 섹션 -->
+    <header>
+        <nav>
+            <div class="logo">NATIONAL PARK</div>
+
+            <!-- 중앙에 위치할 메뉴 -->
+            <ul class="center-menu">
+                <li><a href="#">소개</a></li>
+                <li>
+                    <a href="#">공원 검색</a>
+                    <ul class="dropdown">
+                        <li><a href="#">국립공원</a></li>
+                        <li><a href="#">자연공원</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#">물품 대여</a>
+                    <ul class="dropdown">
+                        <li><a href="#">텐트</a></li>
+                        <li><a href="#">자전거</a></li>
+                        <li><a href="#">배낭</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#">게시판</a>
+                    <ul class="dropdown">
+                        <li><a href="#">공지사항</a></li>
+                        <li><a href="#">문의사항</a></li>
+                        <li><a href="#">커뮤니티</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <!-- 오른쪽에 위치할 메뉴 -->
+            <ul class="right-menu">
+                <li><a href="#">로그인</a></li>
+                <li><a href="#">회원가입</a></li>
+            </ul>
+        </nav>
+        <!-- 배경 이미지 위의 텍스트 -->
+        <div class="background-text-wrapper">
+            <h1 style="all: unset; font-size: 50px; color: white;">A NATIONAL PARK</h1>
+            <p>공기 좋고 물 좋은 공원에서 데이트해요!!!</p>
+        </div>
+    </header>
+    <br/><br/><br/>
+    <div class="container">
+        <h1>수정</h1>
+
+        <!-- 게시판 선택 -->
+        <div class="form-group">
+            <label for="board-select">작성자</label>
+            <input type="text" id="name" placeholder="작성자.">
+      
+        </div>
+
+        <!-- 제목 입력 -->
+        <div class="form-group">
+            <label for="title">제목을 입력해 주세요.</label>
+            <input type="text" id="title" placeholder="제목을 입력해 주세요.">
+        </div>
+
+        <!-- 내용 입력 -->
+        <div class="form-group">
+            <label for="content">내용을 입력해 주세요.</label>
+            <textarea id="content" rows="10" placeholder="내용을 입력해 주세요."></textarea>
+        </div>
+
+        <!-- 버튼 -->
+        <div class="form-group">
+            <label for="inquiry_ofile">첨부 파일</label>
+            <input type="file" class="form-control-file" id="inquiry_ofile" name="inquiry_ofile"/>
+            <img id="imagePreview" class="img-preview" src="" alt="이미지 미리보기" style="display:none;"/>
+        </div>
+        <div class="form-group btn-group">
+            <button type="submit" class="btn btn-primary btn-custom">등록</button>
+            <button type="button" class="btn btn-secondary btn-custom">목록 바로가기</button>
+        </div>
+    </div>
+    <br/><br/><br/>
+
+
+
+    <!-- 풋터 섹션 -->
+    <footer>
+        <p>풋터입니다. 추가 사항을 입력하세요.</p>
+        <ul>
+            <li>항목 1</li>
+            <li>항목 2</li>
+            <li>항목 3</li>
+            <li>항목 4</li>
+        </ul>
+        <p>Copyright © 2023 한화시스템(주). 모든 권리는 보유됩니다.</p>
+    </footer>
+
+</body>
+</html>

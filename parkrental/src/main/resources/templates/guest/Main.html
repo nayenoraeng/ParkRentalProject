@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공원</title>
+    <link rel="stylesheet" th:href="@{/css/Footer.css}" />
+    <link rel="stylesheet" th:href="@{/css/MainImages.css}" />
+    <link rel="stylesheet" th:href="@{/css/MainSession.css}" />
+    <link rel="stylesheet" th:href="@{/css/Search.css}"/>
+</head>
+<body>
+
+    <!-- 헤더랑 네비바 섹션 -->
+    <header>
+        <nav>
+            <div class="logo">NATIONAL PARK</div>
+
+            <!-- 중앙에 위치할 메뉴 -->
+            <ul class="center-menu">
+                <li><a href="#">소개</a></li>
+                <li>
+                    <a href="#">공원 검색</a>
+                    <ul class="dropdown">
+                        <li><a href="#">국립공원</a></li>
+                        <li><a href="#">자연공원</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#">물품 대여</a>
+                    <ul class="dropdown">
+                        <li><a href="#">텐트</a></li>
+                        <li><a href="#">자전거</a></li>
+                        <li><a href="#">배낭</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#">게시판</a>
+                    <ul class="dropdown">
+                        <li><a href="#">공지사항</a></li>
+                        <li><a href="#">문의사항</a></li>
+                        <li><a href="#">커뮤니티</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <!-- 오른쪽에 위치할 메뉴 -->
+            <ul class="right-menu">
+                <li><a href="#">로그인</a></li>
+                <li><a href="#">회원가입</a></li>
+            </ul>
+        </nav>
+        <div class="container">
+            <form action="" class="search-bar">
+            <input type="text" placeholder="search anything" name="q">
+            <button type="submit"><img th:src="@{/image/search.png}"></button>
+        </form>
+        </div>
+        <!-- 배경 이미지 위의 텍스트 -->
+        <div class="background-text-wrapper">
+            <h1 style="all: unset; font-size: 50px; color: white;">A NATIONAL PARK</h1>
+            <p>공기 좋고 물 좋은 공원에서 데이트해요!!!</p>
+        </div>
+    </header>
+
+    <!-- 소개 섹션 -->
+    <section>
+        <p>공원 페이지 소개 글을 적어주세요.</p>
+        <ul>
+            <li>정보 1</li>
+            <li>정보 2</li>
+            <li>정보 3</li>
+        </ul>
+    </section>
+
+    <!-- 지도 섹션 -->
+    <section class="defense-section">
+        <div class="content-container">
+            <h2>공원 지도</h2>
+            <img th:src="@{/image/map.jpg}" alt="MAP Image">
+        </div>
+    </section>
+
+    <!-- 계절별 섹션 -->
+    <section class="slider-container">
+        <div class="central-text">
+            <p>#봄&nbsp;&nbsp;#여름&nbsp;&nbsp;#가을&nbsp; #겨울 &nbsp;#공원&nbsp; #여행 &nbsp;#데이트</p>
+          </div>
+        <div class="slider-images">
+          <div class="slider-img">
+            <img th:src="@{/image/봄.jpg}" alt="봄" />
+            <h1>Spring</h1>
+            <div class="details">
+              <h2>봄</h2>
+              <p>web3 Developer</p>
+            </div>
+          </div>
+          <div class="slider-img">
+            <img th:src="@{/image/여름.jpg}" alt="여름" />
+            <h1>Summer</h1>
+            <div class="details">
+              <h2>여름</h2>
+              <p>wordpress Developer</p>
+            </div>
+          </div>
+          <div class="slider-img">
+            <img th:src="@{/image/가을.jpg}" alt="가을" />
+            <h1>Autumn</h1>
+            <div class="details">
+              <h2>가을</h2>
+              <p>java Developer</p>
+            </div>
+          </div>
+          <div class="slider-img active">
+            <img th:src="@{/image/Date.jpg}" alt="Date" />
+            <h1>Date</h1>
+            <div class="details">
+              <h2>데이트</h2>
+              <p>web Developer</p>
+            </div>
+          </div>
+          <div class="slider-img">
+            <img th:src="@{/image/겨울.jpg}" alt="겨울" />
+            <h1>Winter</h1>
+            <div class="details">
+              <h2>겨울</h2>
+              <p>sql Developer</p>
+            </div>
+          </div>
+          <div class="slider-img">
+            <img th:src="@{/image/park.jpg}" alt="park" />
+            <h1>Park</h1>
+            <div class="details">
+              <h2>공원</h2>
+              <p>php Developer</p>
+            </div>
+          </div>
+          <div class="slider-img">
+            <img th:src="@{/image/Trip.jpg}" alt="Trip" />
+            <h1>Trip</h1>
+            <div class="details">
+              <h2>여행</h2>
+              <p>seo Developer</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <script th:src="@{/js/jQuery.js}"></script>
+      <script>
+        jQuery(document).ready(function ($) {
+          $(".slider-img").on("click", function () {
+            $(".slider-img").removeClass("active");
+            $(this).addClass("active");
+          });
+        });
+      </script>
+
+    <!-- 뉴스 섹션 -->
+    <section class="news-section">
+        <h3>최신 뉴스</h3>
+        <p>최신 공원 소식을 확인하세요.</p>
+        <ul>
+            <li>뉴스 1</li>
+            <li>뉴스 2</li>
+            <li>뉴스 3</li>
+        </ul>
+    </section>
+
+    <!-- 풋터 섹션 -->
+    <footer>
+        <p>풋터입니다. 추가 사항을 입력하세요.</p>
+        <ul>
+            <li>항목 1</li>
+            <li>항목 2</li>
+            <li>항목 3</li>
+            <li>항목 4</li>
+        </ul>
+        <p>Copyright © 2023 한화시스템(주). 모든 권리는 보유됩니다.</p>
+    </footer>
+
+</body>
+</html>
