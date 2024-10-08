@@ -1,12 +1,13 @@
 package com.project.parkrental.inquiryBoard;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
 import java.sql.Timestamp;
 
 @Entity
-public class inquiry {
+public class Inquiry {
 
     @Id
     private Long idx;
@@ -17,8 +18,9 @@ public class inquiry {
     private String content;
     private Timestamp postdate;
     private int viewCount;
-    private int response;
+    private int responses;
     private String ofile;
     private String sfile;
+    @Column(name = "inquiryPassword")
     private String inquiryPassword;
 }

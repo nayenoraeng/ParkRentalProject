@@ -203,7 +203,7 @@
             <h2 class="example-text brand-font-700 centered-text">
 		        <a href="/" style="color: #4e4f4e; text-decoration: none;">NATIONAL PARK</a>
 		    </h2>
-            <form class="login-form" id="login-form" method="post" th:action="@{/Login}">
+            <form class="login-form" id="login-form" method="post" th:action="@{/api/auth/login}">
                 <div class="form-group mb-3">
                     <div class="input-wrapper">
                         <input type="text" id="login-id" name="userName" required placeholder=" ">
@@ -244,7 +244,7 @@
             
             <div class="text-center mt-3 links">
                 <a th:href="@{/FindIdPw}">아이디 / 비밀번호 찾기</a>
-                <a th:href="@{/register_form}">회원가입</a>
+                <a th:href="@{/guest/Signup}">회원가입</a>
             </div>
     </div>  
 
