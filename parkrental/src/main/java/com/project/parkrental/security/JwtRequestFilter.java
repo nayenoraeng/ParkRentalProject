@@ -16,6 +16,7 @@ import java.io.IOException;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
+
     @Autowired
     private JwtUtil jwtUtil;
 
@@ -45,5 +46,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(req, res);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest req) throws ServletException {
+        String path = req.getRequestURI();
+        return path.startsWith("/guest")|| path.startsWith("/static") || path.equals("/");
     }
 }

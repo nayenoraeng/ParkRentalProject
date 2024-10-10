@@ -15,7 +15,7 @@ import java.security.Key;
 
 @Component
 public class JwtUtil {
-    private String SECRET_KEY = "cdd25add35d284a7ef5f06ace359bfe5241dd3b2151dae03e9487155c9c8ada7";
+    private final String SECRET_KEY = "cdd25add35d284a7ef5f06ace359bfe5241dd3b2151dae03e9487155c9c8ada7";
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -48,7 +48,9 @@ public class JwtUtil {
 
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username);
+        String token = createToken(claims, username);
+        System.out.println("JWT generated:" + token);
+        return token;
     }
 
     public Date extractExpiration(String token) {

@@ -1,12 +1,17 @@
 package com.project.parkrental.security;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -21,7 +26,13 @@ public class UserController {
     private UserService userService;
 
     @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
     private AuthenticationManager authManager;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @GetMapping("/Signup")
     public String signup (Model model) {
@@ -53,8 +64,7 @@ public class UserController {
 
     @PostMapping("/Signup")
     public String registerUser(@Valid @ModelAttribute User user, BindingResult result, Model model) {
-        System.out.println("typed password: " + user.getPassword());
-        System.out.println("Result:" + result);
+
         if (result.hasErrors()) {
             result.getAllErrors().forEach(violation -> {
                 System.out.println("error: " + violation.getDefaultMessage());
@@ -64,19 +74,30 @@ public class UserController {
 
         if (!user.getPassword().equals(user.getConfirmPassword())) {
             model.addAttribute("passwordError", "비밀번호가 일치하지 않습니다.");
+            return "guest/Signup";
         }
-        System.out.println("Received password: " + user.getPassword());
+
         userService.registerNewUser(user);
         return "redirect:/guest/Login";
     }
 
     @PostMapping("Login")
-    public String authUser(@RequestParam String username, @RequestParam String password) {
-        Authentication authentication = authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password)
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        return "redirect:/home";
+    public String authUser(@RequestParam String username, @RequestParam String password, HttpServletResponse res) {
+        try {
+            System.out.println("login method called");
+            Authentication authentication = authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(username, password)
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            System.out.println("login success");
+
+            String jwtToken = jwtUtil.generateToken(username);
+            res.setHeader("Authorization", "Bearer " + jwtToken);
+            System.out.println("login success. JwtToken stored: " + jwtToken);
+            return "redirect:/";
+        } catch (AuthenticationException e) {
+            return "redirect:/guest/Login";
+        }
     }
 
     @Bean(name = "userPasswordEncoder")

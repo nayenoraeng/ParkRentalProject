@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<html xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,8 +46,11 @@
             </ul>
             <!-- 오른쪽에 위치할 메뉴 -->
             <ul class="right-menu">
-                <li><a th:href="@{/guest/Login}">로그인</a></li>
-                <li><a th:href="@{/guest/Signup}">회원가입</a></li>
+                <li sec:authorize="!isAuthenticated()"><a th:href="@{/guest/Login}">로그인</a></li>
+                <li sec:authorize="!isAuthenticated()"><a th:href="@{/guest/Signup}">회원가입</a></li>
+                <!-- 로그인 시 메뉴 변경 -->
+                <li sec:authorize="isAuthenticated()"><a th:href="@{/Logout}">로그아웃</a></li>
+                <li sec:authorize="isAuthenticated()"><a th:href="@{/user/userpage}">마이페이지</a></li>
             </ul>
         </nav>
         <div class="container">
