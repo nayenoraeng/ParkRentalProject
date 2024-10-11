@@ -1,6 +1,6 @@
-package com.project.parkrental.repository;
+package com.project.parkrental.parkList.repository;
 
-import com.project.parkrental.model.ParkList;
+import com.project.parkrental.parkList.model.ParkList;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,10 +1,10 @@
-package com.project.parkrental.controller;
+package com.project.parkrental.parkList.controller;
 
-import com.project.parkrental.model.ParkList;
-import com.project.parkrental.model.Product;
-import com.project.parkrental.service.CartService;
-import com.project.parkrental.service.ParkListService;
-import com.project.parkrental.service.ProductService;
+import com.project.parkrental.parkList.model.ParkList;
+import com.project.parkrental.parkList.model.Product;
+import com.project.parkrental.parkList.service.CartService;
+import com.project.parkrental.parkList.service.ParkListService;
+import com.project.parkrental.parkList.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

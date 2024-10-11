@@ -1,10 +1,10 @@
-package com.project.parkrental.service;
+package com.project.parkrental.parkList.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.project.parkrental.model.ParkList;
-import com.project.parkrental.repository.ParkListRepository;
+import com.project.parkrental.parkList.model.ParkList;
+import com.project.parkrental.parkList.repository.ParkListRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;

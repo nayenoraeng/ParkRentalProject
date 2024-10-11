@@ -1,7 +1,7 @@
-package com.project.parkrental.repository;
+package com.project.parkrental.parkList.repository;
 
-import com.project.parkrental.model.ParkList;
-import com.project.parkrental.model.Product;
+import com.project.parkrental.parkList.model.ParkList;
+import com.project.parkrental.parkList.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

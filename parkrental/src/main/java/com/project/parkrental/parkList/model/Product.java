@@ -1,4 +1,4 @@
-package com.project.parkrental.model;
+package com.project.parkrental.parkList.model;
 
 import jakarta.persistence.*;
 import lombok.Data;

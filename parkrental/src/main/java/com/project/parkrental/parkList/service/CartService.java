@@ -1,7 +1,7 @@
-package com.project.parkrental.service;
+package com.project.parkrental.parkList.service;
 
-import com.project.parkrental.model.Product;
-import com.project.parkrental.repository.ProductRepository;
+import com.project.parkrental.parkList.model.Product;
+import com.project.parkrental.parkList.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

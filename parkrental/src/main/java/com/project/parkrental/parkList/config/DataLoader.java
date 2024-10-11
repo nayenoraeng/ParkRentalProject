@@ -1,6 +1,6 @@
-package com.project.parkrental.config;
+package com.project.parkrental.parkList.config;
 
-import com.project.parkrental.service.ParkListService;
+import com.project.parkrental.parkList.service.ParkListService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 

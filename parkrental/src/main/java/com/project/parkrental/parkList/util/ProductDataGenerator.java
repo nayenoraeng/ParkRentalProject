@@ -1,9 +1,9 @@
-package com.project.parkrental.util;
+package com.project.parkrental.parkList.util;
 
-import com.project.parkrental.model.ParkList;
-import com.project.parkrental.model.Product;
-import com.project.parkrental.repository.ParkListRepository;
-import com.project.parkrental.repository.ProductRepository;
+import com.project.parkrental.parkList.model.ParkList;
+import com.project.parkrental.parkList.model.Product;
+import com.project.parkrental.parkList.repository.ParkListRepository;
+import com.project.parkrental.parkList.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
