@@ -57,36 +57,43 @@
         </div>
     </header>
     <br/><br/><br/>
-    <div class="container">
-        <h1>게시판 글쓰기</h1>
+    <form th:action="@{/user/inquiryWritePro}" method="post" enctype="multipart/form-data" onsubmit="return saveContent();">
+        <div class="container">
+            <h1>게시판 글쓰기</h1>
 
-        <!-- 게시판 선택 -->
-        <div class="form-group">
-            <label for="board-select">작성자</label>
-            <input type="text" id="name" placeholder="작성자.">
-      
-        </div>
+            <!-- 게시판 선택 -->
+            <div class="form-group">
+                <label for="board-select">작성자</label>
+                <input type="text" id="name" placeholder="작성자.">
 
-        <!-- 제목 입력 -->
-        <div class="form-group">
-            <label for="title">제목을 입력해 주세요.</label>
-            <input type="text" id="title" placeholder="제목을 입력해 주세요.">
-        </div>
+            </div>
 
-        <!-- 내용 입력 -->
-        <div id="editor-container" style="height: 300px;"></div>
+            <!-- 제목 입력 -->
+            <div class="form-group">
+                <label for="title">제목을 입력해 주세요.</label>
+                <input type="text" id="title" placeholder="제목을 입력해 주세요.">
+            </div>
 
-        <!-- 버튼 -->
-        <br/>
-        <div class="form-group">
-            <input type="file" class="form-control-file" id="inquiry_ofile" name="inquiry_ofile"/>
-            <img id="imagePreview" class="img-preview" src="" alt="이미지 미리보기" style="display:none;"/>
+            <!-- 내용 입력 -->
+            <div class="form-group">
+                <label for="editor-container">내용을 입력해 주세요.</label>
+                <div id="editor-container" style="height: 300px;"></div>
+                <!-- 숨겨진 필드 추가 -->
+                <input type="hidden" th:field="*{content}" name="content" required>
+            </div>
+
+            <!-- 버튼 -->
+            <br/>
+            <div class="form-group">
+                <input type="file" class="form-control-file"  th:field="*{ofile}" id="ofile" name="ofile"/>
+                <img id="imagePreview" class="img-preview" src="" alt="이미지 미리보기" style="display:none;"/>
+            </div>
+            <div class="form-group btn-group">
+                <button type="submit" class="btn btn-primary btn-custom">등록</button>
+                <button type="button" class="btn btn-secondary btn-custom">목록 바로가기</button>
+            </div>
         </div>
-        <div class="form-group btn-group">
-            <button type="submit" class="btn btn-primary btn-custom">등록</button>
-            <button type="button" class="btn btn-secondary btn-custom">목록 바로가기</button>
-        </div>
-    </div>
+    </form>
     <br/><br/><br/>
 
 
@@ -120,5 +127,12 @@
             ]
         }
     });
+
+    function saveContent() {
+        // Quill 에디터의 내용을 가져와서 숨겨진 필드에 설정
+        var content = quill.root.innerHTML;  // HTML 형식으로 가져오기
+        document.getElementById('content').value = content; // 숨겨진 input 필드에 저장
+        return true; // 폼 제출 계속 진행
+    }
 </script>
 </html>

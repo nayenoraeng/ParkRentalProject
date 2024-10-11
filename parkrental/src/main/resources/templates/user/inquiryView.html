@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시글 상세보기</title>
+    <link rel="stylesheet" th:href="@{/css/board.css}" />
+    <link rel="stylesheet" th:href="@{/css/inquiryboard.css}" />
+    <link rel="stylesheet" th:href="@{/css/inquirywrite.css}" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function deletePost(idx) {
+            if (confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
+                $.ajax({
+                    url: '/user/inquiryDelete/' + idx,
+                    type: 'GET',
+                    success: function(response) {
+                        // 서버로부터의 응답 처리
+                        // 예: 메시지와 URL을 alert로 표시하고, 이동할 수 있음
+                        alert(response.message); // 모델에 담긴 메시지를 표시
+                        window.location.href = response.searchUrl; // 이동할 URL로 리다이렉트
+                    },
+                    error: function() {
+                        alert("게시글 삭제 중 오류가 발생했습니다.");
+                    }
+                });
+            }
+        }
+    </script>
+</head>
+
+<body>
+<!-- 헤더 섹션 -->
+<header>
+    <nav>
+        <div class="logo">NATIONAL PARK</div>
+        <ul class="center-menu">
+            <li><a href="#">소개</a></li>
+            <li>
+                <a href="#">공원 검색</a>
+                <ul class="dropdown">
+                    <li><a href="#">국립공원</a></li>
+                    <li><a href="#">자연공원</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">물품 대여</a>
+                <ul class="dropdown">
+                    <li><a href="#">텐트</a></li>
+                    <li><a href="#">자전거</a></li>
+                    <li><a href="#">배낭</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">게시판</a>
+                <ul class="dropdown">
+                    <li><a href="#">공지사항</a></li>
+                    <li><a href="#">문의사항</a></li>
+                    <li><a href="#">커뮤니티</a></li>
+                </ul>
+            </li>
+        </ul>
+        <ul class="right-menu">
+            <li><a href="#">로그인</a></li>
+            <li><a href="#">회원가입</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <div class="container">
+        <h1>게시글 상세보기</h1>
+
+        <input type="hidden" name="idx" th:value="${inquiries.idx}"> <!-- 게시글 ID 히든 필드 -->
+
+        <table class="table">
+            <tbody>
+            <tr>
+                <th scope="row">작성자</th>
+                <td><span th:text="${inquiries.username}"></span></td>
+            </tr>
+            <tr>
+                <th scope="row">제목</th>
+                <td><span th:text="${inquiries.title}"></span></td>
+            </tr>
+            <tr>
+                <th scope="row">작성일</th>
+                <td><span th:text="${#temporals.format(inquiries.postdate, 'yyyy.MM.dd HH:mm:ss')}"></span></td>
+            </tr>
+            <tr>
+                <th scope="row">조회수</th>
+                <td><span th:text="${inquiries.viewCount}"></span></td>
+            </tr>
+            <tr>
+                <th scope="row">내용</th>
+                <td>
+                    <div th:utext="${inquiries.content}"></div>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">첨부파일</th>
+                <td>
+                    <a th:href="@{${inquiries.sfile}}" th:if="${inquiries.sfile != null}" th:text="${inquiries.sfile}">첨부파일 다운로드</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="navigation">
+            <button onclick="location.href='/guest/inquiryList'" class="btn btn-secondary">목록으로 돌아가기</button>
+            <button th:onclick="|location.href='@{/user/inquiryEdit/{idx}(idx=${inquiries.idx})}'|">수정하기</button>
+            <button th:onclick="'deletePost(' + ${inquiries.idx} + ')'">게시글 삭제</button>
+        </div>
+    </div>
+<!--    <script th:inline="javascript">-->
+<!--        /*<![CDATA[*/-->
+<!--          function replyDelete(idx) {-->
+<!--            var message = [[${message}]]-->
+<!--            alert(message);-->
+<!--            location.replace([[${searchUrl}]]);-->
+<!--          }-->
+<!--        /*]]>*/-->
+<!--    </script>-->
+</main>
+
+<!-- 풋터 섹션 -->
+<footer>
+    <p>풋터입니다. 추가 사항을 입력하세요.</p>
+    <ul>
+        <li>항목 1</li>
+        <li>항목 2</li>
+        <li>항목 3</li>
+        <li>항목 4</li>
+    </ul>
+    <p>Copyright © 2023 한화시스템(주). 모든 권리는 보유됩니다.</p>
+</footer>
+
+</body>
+</html>

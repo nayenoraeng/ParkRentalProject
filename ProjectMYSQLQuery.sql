@@ -195,8 +195,39 @@ CREATE TABLE inquiry (
   	ofile varchar(200),
   	sfile varchar(100),
   	inquiryPassword varchar(20) not null,
-  	FOREIGN KEY (username) REFERENCES user (username),
-  	FOREIGN KEY (username) REFERENCES admin (username)
+  	FOREIGN KEY (username) REFERENCES user (username)
   	ON DELETE CASCADE
 	ON UPDATE CASCADE
 );
+
+SHOW CREATE TABLE inquiry;
+
+INSERT INTO user (username, password, name, email, postcode, address, detailAddress, authority, enabled) VALUES
+('user1', 'password123', '홍길동', 'user1@example.com', '12345', '서울특별시 강남구', '1층 101호', 'ROLE_USER', 1),
+('user2', 'password123', '김철수', 'user2@example.com', '23456', '부산광역시 해운대구', '2층 202호', 'ROLE_USER', 1),
+('admin', 'adminpassword', '관리자', 'admin@example.com', '34567', '대구광역시 중구', '3층 303호', 'ROLE_ADMIN', 1),
+('user3', 'password123', '이영희', 'user3@example.com', '45678', '인천광역시 남동구', '4층 404호', 'ROLE_USER', 1),
+('user4', 'password123', '박영수', 'user4@example.com', '56789', '광주광역시 북구', '5층 505호', 'ROLE_USER', 1);
+
+INSERT INTO admin (username, password) VALUES ('admin', 'adminpassword');
+
+INSERT INTO inquiry (parentIdx, username, parentUsername, title, content, postdate, viewCount, responses, ofile, sfile, inquiryPassword) VALUES
+(NULL, 'admin', '관리자', '슬기로운 카페 생활 Update [260]', '이것은 카페 생활에 관한 업데이트입니다.', '2023-04-06 10:00:00', 3589, 0, NULL, NULL, 'password123'),
+(NULL, 'admin', '관리자', '카페 필독 공지 (2024년 1월 Update) [3957]', '2024년 업데이트에 대한 필독 공지입니다.', '2024-01-16 12:00:00', 999, 0, NULL, NULL, 'password123'),
+(NULL, 'admin', '관리자', '미리부끄의 비밀번호 - 보안등급 안내... [36]', '비밀번호 및 보안 등급에 대한 안내입니다.', '2024-06-02 15:30:00', 647, 0, NULL, NULL, 'password123'),
+(NULL, 'admin', '관리자', '10차 기부 아동 학업비 지원 기부 [80]', '기부에 대한 안내입니다.', '2024-05-20 14:00:00', 1554, 0, NULL, NULL, 'password123'),
+(NULL, 'admin', '관리자', '미리부끄에게 전해줄 세상 따뜻한 이야기 [73]', '따뜻한 이야기에 대한 안내입니다.', '2024-02-16 09:00:00', 1441, 0, NULL, NULL, 'password123'),
+(NULL, 'admin', '관리자', '공학박물관에서 10월 31일 특강진행 예정 [1]', '특강에 대한 안내입니다.', '2024-10-31 15:15:00', 9, 0, NULL, NULL, 'password123'),
+(NULL, 'admin', '관리자', '[EC #7] Community Service (Volunteer) [8]', '자원봉사 기회에 대한 안내입니다.', '2024-10-31 15:09:00', 51, 0, NULL, NULL, 'password123'),
+(NULL, 'admin', '관리자', 'Yale 대학교 에세이에서 강조하는 "틴턴랩" [61]', '에세이 관련 안내입니다.', '2024-10-31 10:38:00', 323, 0, NULL, NULL, 'password123');
+
+UPDATE inquiry SET
+    title = '슬기로운 카페 생활 Update [260]', 
+    content = '이것은 카페 생활에 관한 업데이트입니다.', 
+    postdate = '2023-04-06 10:00', 
+    viewCount = 3589, 
+    response = 0, 
+    ofile = NULL, 
+    sfile = NULL, 
+    inquiryPassword = 'password123' 
+WHERE username = 'admin' AND title = '슬기로운 카페 생활 Update [260]';

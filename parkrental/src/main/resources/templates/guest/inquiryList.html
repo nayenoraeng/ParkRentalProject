@@ -53,12 +53,9 @@
             <p>공기 좋고 물 좋은 공원에서 데이트해요!!!</p>
         </div>
     </header>
-
-    
             <table>
                 <thead>
                     <tr>
-                        <th>카테고리</th>
                         <th>제목</th>
                         <th>작성자</th>
                         <th>작성일</th>
@@ -66,73 +63,45 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="category">필독</td>
-                        <td class="title">슬기로운 카페 생활 Update [260]</td>
-                        <td>게시삼</td>
-                        <td>2023.04.06</td>
-                        <td class="views">3,589</td>
-                    </tr>
-                    <tr>
-                        <td class="category">공지</td>
-                        <td class="title">카페 필독 공지 (2024년 1월 Update) [3957]</td>
-                        <td>게시삼</td>
-                        <td>2024.01.16</td>
-                        <td class="views">999</td>
-                    </tr>
-                    <tr>
-                        <td class="category">공지</td>
-                        <td class="title">미리부끄의 비밀번호 - 보안등급 안내... [36]</td>
-                        <td>게시삼</td>
-                        <td>2024.06.02</td>
-                        <td class="views">647</td>
-                    </tr>
-                    <tr>
-                        <td class="category">공지</td>
-                        <td class="title">10차 기부 아동 학업비 지원 기부 [80]</td>
-                        <td>게시삼</td>
-                        <td>2024.05.20</td>
-                        <td class="views">1,554</td>
-                    </tr>
-                    <tr>
-                        <td class="category">공지</td>
-                        <td class="title">미리부끄에게 전해줄 세상 따뜻한 이야기 [73]</td>
-                        <td>게시삼</td>
-                        <td>2024.02.16</td>
-                        <td class="views">1,441</td>
-                    </tr>
-                    <tr>
-                        <td class="category notice">일반</td>
-                        <td>공학박물관에서 10월 31일 특강진행 예정 [1]</td>
-                        <td>은하수</td>
-                        <td>15:15</td>
-                        <td class="views">9</td>
-                    </tr>
-                    <tr>
-                        <td class="category notice">일반</td>
-                        <td>[EC #7] Community Service (Volunteer) [8]</td>
-                        <td>게시삼</td>
-                        <td>15:09</td>
-                        <td class="views">51</td>
-                    </tr>
-                    <tr>
-                        <td class="category notice">일반</td>
-                        <td>Yale 대학교 에세이에서 강조하는 '틴턴랩' [61]</td>
-                        <td>게시삼</td>
-                        <td>10:38</td>
-                        <td class="views">323</td>
-                    </tr>
+                <tr th:each="inquiry : ${inquiries}">
+                    <td>
+                        <a th:href="@{/user/inquiryView(idx=${inquiry.idx})}" th:text="${inquiry.title}"></a>
+                    </td>
+                    <td th:text="${inquiry.username}"></td>
+                    <td th:text="${#temporals.format(inquiry.postdate, 'yyyy.MM.dd HH:mm:ss')}"></td>
+                    <td th:text="${inquiry.viewCount}"></td>
+                </tr>
                 </tbody>
             </table>
             <!-- 페이징 처리 -->
-            <ul class="pagination">
-                <li class="active"><a href="#">1</a></li>
-                <li><a href="#">2</a></li>
-                <li><a href="#">3</a></li>
-                <li><a href="#">4</a></li>
-                <li><a href="#">5</a></li>
-                <li><a href="#">다음</a></li>
-            </ul>
+    <ul class="pagination">
+        <!-- 첫 페이지 버튼 -->
+        <li th:class="${inquiries.hasPrevious() ? '' : 'disabled'}">
+            <a th:href="@{/guest/inquiryList(page=0, size=${inquiries.size})}" class="page-link">첫 페이지</a>
+        </li>
+
+        <li th:class="${inquiries.hasPrevious() ? 'page-item' : 'page-item disabled'}">
+            <a th:href="@{/guest/inquiryList(page=${inquiries.number - 1}, size=${inquiries.size})}" class="page-link">이전</a>
+        </li>
+
+        <li th:each="i : ${#numbers.sequence(0, inquiries.totalPages - 1)}" class="page-item"
+            th:class="${inquiries.number == i ? 'active' : ''}">
+            <a th:href="@{/guest/inquiryList(page=${i}, size=${inquiries.size})}" class="page-link" th:text="${i + 1}"></a>
+        </li>
+
+        <li th:class="${inquiries.hasNext() ? 'page-item' : 'page-item disabled'}">
+            <a th:href="@{/guest/inquiryList(page=${inquiries.number + 1}, size=${inquiries.size})}" class="page-link">다음</a>
+        </li>
+
+        <!-- 마지막 페이지 버튼 -->
+        <li th:class="${inquiries.hasNext() ? '' : 'disabled'}">
+            <a th:href="@{/guest/inquiryList(page=${inquiries.totalPages - 1}, size=${inquiries.size})}" class="page-link">마지막 페이지</a>
+        </li>
+    </ul>
+
+    <div>
+        <span>총 게시글 수: <span th:text="${inquiries.totalElements}"></span></span>
+    </div>
         
             <!-- 검색 바 -->
             <div class="search-container">
@@ -151,7 +120,7 @@
                 <button>검색</button>
             </div>
             <div class="button-container">
-                <button class="write-button">글쓰기</button>
+                <button class="write-button" onclick="location.href='/user/inquiryWrite'">글쓰기</button>
                 <button class="edit-button">수정</button>
             </div>
 
