@@ -120,13 +120,13 @@ public class AnnouncementController {
         return "redirect:/guest/noticeList"; // 목록으로 리다이렉트
     }
     // 공지사항 삭제 처리
-    @GetMapping("/notice/delete/{id}")
+    @GetMapping("/admin/notice/delete/{id}")
     public String deleteAnnouncement(@PathVariable("id") Long id) {
         announcementService.deleteAnnouncement(id);
         return "redirect:/guest/noticeList";
     }
 
-    @GetMapping("/files/{filename}")
+    @GetMapping("/admin/files/{filename}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String filename) {
         try {
             // Set the upload path

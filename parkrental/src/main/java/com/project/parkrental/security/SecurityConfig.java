@@ -48,9 +48,7 @@ public class SecurityConfig {
                 .securityContext(securityContext -> securityContext
                         .securityContextRepository(new HttpSessionSecurityContextRepository()))
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/", "/css/**", "/js/**", "/image/**","/guest/**").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/user/**").hasRole("USER")
+                        .requestMatchers("/", "/css/**", "/js/**", "/image/**","/guest/**","/admin/**","/user/**").permitAll()
                         .requestMatchers("/seller/**").hasRole("SELLER")
                         .anyRequest().authenticated()
                 )

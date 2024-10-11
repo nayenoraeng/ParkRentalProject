@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,7 +33,7 @@
                 </ul>
             </li>
             <li>
-                <a href="/guest/rantal">물품 대여</a>
+                <a href="/guest/rental">물품 대여</a>
                 <ul class="dropdown">
                     <li><a href="#">텐트</a></li>
                     <li><a href="#">자전거</a></li>
@@ -51,14 +51,15 @@
         </ul>
         <!-- 오른쪽에 위치할 메뉴 -->
         <ul class="right-menu">
-            <!-- Translation buttons for the whole page -->
-            <div class="language-buttons">
-                <button id="translate-en">English</button>
-                <button id="translate-ja">Japanese</button> <!-- 일본어 버튼으로 변경 -->
-                <button id="translate-ko">Korean</button>
-            </div>
-            <li><a href="#">로그인</a></li>
-            <li><a href="#">회원가입</a></li>
+            <li sec:authorize="isAnonymous()"><a th:href="@{/guest/Login}">로그인</a></li>
+            <li sec:authorize="isAnonymous()"><a th:href="@{/guest/Signup}">회원가입</a></li>
+            <!-- 로그인 시 메뉴 변경 -->
+            <li sec:authorize="isAuthenticated()">
+                <a th:href="@{/guest/Logout}" onclick="deleteJWTCookie(); return confirm('로그아웃하시겠습니까?')">로그아웃</a>
+            </li>
+            <li sec:authorize="isAuthenticated()"><a th:href="@{/user/userpage}">마이페이지</a></li>
+            <li sec:authorize="hasRole('ROLE_SELLER')"><a th:href="@{/seller/sellerpage}">판매자페이지</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/user/membermnger}">회원관리</a></li>
         </ul>
     </nav>
 
