@@ -6,6 +6,7 @@
     <title>공지게시판</title>
     <link rel="stylesheet" th:href="@{/css/board.css}" />
     <link rel="stylesheet" th:href="@{/css/noticeboar.css}" />
+    <link rel="stylesheet" th:href="@{/css/language.css}"/>
 </head>
 <body>
 
@@ -42,6 +43,11 @@
                 </li>
             </ul>
             <!-- 오른쪽에 위치할 메뉴 -->
+            <div class="language-buttons">
+                <button id="translate-en">English</button>
+                <button id="translate-ja">Japanese</button> <!-- 일본어 버튼으로 변경 -->
+                <button id="translate-ko">Korean</button>
+            </div>
             <ul class="right-menu">
                 <li><a href="#">로그인</a></li>
                 <li><a href="#">회원가입</a></li>
@@ -58,70 +64,26 @@
             <table>
                 <thead>
                     <tr>
-                        <th>카테고리</th>
                         <th>제목</th>
                         <th>작성자</th>
                         <th>작성일</th>
                         <th>조회수</th>
+                        <th>액션</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="category">필독</td>
-                        <td class="title">슬기로운 카페 생활 Update [260]</td>
-                        <td>게시삼</td>
-                        <td>2023.04.06</td>
-                        <td class="views">3,589</td>
-                    </tr>
-                    <tr>
-                        <td class="category">공지</td>
-                        <td class="title">카페 필독 공지 (2024년 1월 Update) [3957]</td>
-                        <td>게시삼</td>
-                        <td>2024.01.16</td>
-                        <td class="views">999</td>
-                    </tr>
-                    <tr>
-                        <td class="category">공지</td>
-                        <td class="title">미리부끄의 비밀번호 - 보안등급 안내... [36]</td>
-                        <td>게시삼</td>
-                        <td>2024.06.02</td>
-                        <td class="views">647</td>
-                    </tr>
-                    <tr>
-                        <td class="category">공지</td>
-                        <td class="title">10차 기부 아동 학업비 지원 기부 [80]</td>
-                        <td>게시삼</td>
-                        <td>2024.05.20</td>
-                        <td class="views">1,554</td>
-                    </tr>
-                    <tr>
-                        <td class="category">공지</td>
-                        <td class="title">미리부끄에게 전해줄 세상 따뜻한 이야기 [73]</td>
-                        <td>게시삼</td>
-                        <td>2024.02.16</td>
-                        <td class="views">1,441</td>
-                    </tr>
-                    <tr>
-                        <td class="category">공지</td>
-                        <td class="title">미리부끄에게 전해줄 세상 따뜻한 이야기 [73]</td>
-                        <td>게시삼</td>
-                        <td>2024.02.16</td>
-                        <td class="views">1,441</td>
-                    </tr>
-                    <tr>
-                        <td class="category">공지</td>
-                        <td class="title">미리부끄에게 전해줄 세상 따뜻한 이야기 [73]</td>
-                        <td>게시삼</td>
-                        <td>2024.02.16</td>
-                        <td class="views">1,441</td>
-                    </tr>
-                    <tr>
-                        <td class="category">공지</td>
-                        <td class="title">미리부끄에게 전해줄 세상 따뜻한 이야기 [73]</td>
-                        <td>게시삼</td>
-                        <td>2024.02.16</td>
-                        <td class="views">1,441</td>
-                    </tr>
+                <tr th:each="announcement : ${announcements}">
+                    <td th:text="${announcement.title}"></td>
+                    <td th:text="${announcement.username}"></td>
+                    <td th:text="${announcement.postdate}"></td>
+                    <td th:text="${announcement.viewCount}"></td>
+                    <td>
+                        <a th:href="@{/user/noticeDetail/{id}(id=${announcement.idx})}">보기</a>
+                        <a th:href="@{/admin/noticeEdit/{id}(id=${announcement.idx})}">수정</a> |
+                        <a th:href="@{/notice/delete/{id}(id=${announcement.idx})}">삭제</a>
+                    </td>
+                </tr>
+
                 </tbody>
             </table>
             <!-- 페이징 처리 -->
@@ -151,7 +113,7 @@
                 <button>검색</button>
             </div>
             <div class="button-container">
-                <button class="write-button">글쓰기</button>
+                <a href="/admin/noticeWrite" class="write-button">글쓰기</a>
                 <button class="edit-button">수정</button>
             </div>
 
@@ -167,6 +129,122 @@
         </ul>
         <p>Copyright © 2023 한화시스템(주). 모든 권리는 보유됩니다.</p>
     </footer>
+    <script th:src="@{/js/jQuery.js}"></script>
+    <script>
+        jQuery(document).ready(function ($) {
+        var originalTexts = {}; // 원본 텍스트를 저장할 객체
 
+        // HTML 엔티티를 디코딩하는 함수
+        function decodeHTMLEntities(text) {
+            var textarea = document.createElement("textarea");
+            textarea.innerHTML = text;
+            return textarea.value;
+        }
+
+        // 텍스트를 번역하는 함수
+        function translateText(text, targetLang, callback) {
+            if (text.trim() === "") {
+                callback(text); // 텍스트가 비어있다면 그대로 반환
+                return;
+            }
+
+            $.ajax({
+                url: '/translate', // 번역 API 요청 URL
+                type: 'GET',       // HTTP 요청 방식 (GET)
+                data: { text: text, targetLang: targetLang }, // 번역할 텍스트와 대상 언어
+                success: function (data) {
+                    if (data && data.trim() !== "") {
+                        callback(decodeHTMLEntities(data)); // HTML 엔티티 디코딩 후 콜백 함수로 전달
+                    } else {
+                        callback(text); // 번역이 실패했을 경우 원본 텍스트를 그대로 사용
+                    }
+                },
+                error: function () {
+                    console.error("번역 오류 발생:", text); // 콘솔에 오류 표시
+                    callback(text); // 오류 시 원본 텍스트 사용
+                }
+            });
+        }
+
+        // 페이지의 모든 텍스트를 번역하는 함수
+        function translatePage(targetLang) {
+            console.log("번역 대상 언어:", targetLang); // 로그로 번역할 언어 표시
+
+            // body 내 모든 텍스트 노드를 선택 (입력 요소 제외)
+            $('body *').contents().filter(function() {
+                return this.nodeType === Node.TEXT_NODE && this.nodeValue.trim() !== '';
+            }).each(function (index, element) {
+                var textNode = $(element);
+                var originalText = textNode.text().trim(); // 텍스트의 공백 제거
+
+                if (originalText.length > 0) {
+                    // 처음 번역할 때 원본 텍스트 저장
+                    if (!originalTexts[index]) {
+                        originalTexts[index] = originalText;
+                    }
+
+                    // 번역 요청을 수행
+                    translateText(originalTexts[index], targetLang, function (translatedText) {
+                        textNode[0].nodeValue = translatedText; // 번역된 텍스트로 변경
+                    });
+                }
+            });
+        }
+        // 텍스트를 번역하는 함수
+    function translateText(text, targetLang, callback) {
+        if (text.trim() === "") {
+            callback(text); // 텍스트가 비어있다면 그대로 반환
+            return;
+        }
+
+        console.log("번역할 텍스트:", text);  // 번역 전 텍스트를 콘솔에 출력
+
+        $.ajax({
+            url: '/translate', // 번역 API 요청 URL
+            type: 'GET',       // HTTP 요청 방식 (GET)
+            data: { text: text, targetLang: targetLang }, // 번역할 텍스트와 대상 언어
+            success: function (data) {
+                console.log("번역된 텍스트:", data);  // 번역된 텍스트를 콘솔에 출력
+                if (data && data.trim() !== "") {
+                    callback(decodeHTMLEntities(data)); // HTML 엔티티 디코딩 후 콜백 함수로 전달
+                } else {
+                    callback(text); // 번역이 실패했을 경우 원본 텍스트를 그대로 사용
+                }
+            },
+            error: function () {
+                console.error("번역 오류 발생:", text); // 콘솔에 오류 표시
+                callback(text); // 오류 시 원본 텍스트 사용
+            }
+        });
+    }
+
+        // 페이지를 한국어 원본으로 복원하는 함수
+        function resetPage() {
+            $('body *').contents().filter(function() {
+                return this.nodeType === Node.TEXT_NODE && this.nodeValue.trim() !== '';
+            }).each(function (index, element) {
+                var textNode = $(element);
+                if (originalTexts[index]) {
+                    textNode[0].nodeValue = originalTexts[index]; // 원본 텍스트로 복원
+                }
+            });
+        }
+
+        // 영어로 번역 버튼 클릭 시
+        $('#translate-en').on('click', function () {
+            translatePage('en');
+        });
+
+        // 일본어로 번역 버튼 클릭 시
+        $('#translate-ja').on('click', function () {
+            translatePage('ja');
+        });
+
+        // 한국어로 복원 버튼 클릭 시
+        $('#translate-ko').on('click', function () {
+            resetPage();
+        });
+    });
+    </script>
 </body>
 </html>

@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>문의게시판</title>
+    <title>공지사항 작성</title>
     <link rel="stylesheet" th:href="@{/css/board.css}" />
-    <link rel="stylesheet" th:href="@{/css/communityboard.css}" />
-    <link rel="stylesheet" th:href="@{/css/communitywrite.css}" />
+    <link rel="stylesheet" th:href="@{/css/noticeboar.css}" />
+    <link rel="stylesheet" th:href="@{/css/noticewrite.css}" />
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 </head>
 <body>
 
-<!-- 헤더랑 네비바 섹션 -->
+<!-- 헤더와 네비게이션 바 섹션 -->
 <header>
     <nav>
         <div class="logo">NATIONAL PARK</div>
@@ -54,35 +54,49 @@
 </header>
 <br/><br/><br/>
 <div class="container">
-    <h1>게시판 글쓰기</h1>
 
-    <!-- 게시판 선택 -->
-    <form action="#" method="POST" enctype="multipart/form-data" th:action="@{/guest/noticeList}" th:object="${announcement}">
+
+    <form action="#" th:action="@{/guest/notice}" method="post" enctype="multipart/form-data">
+        <!-- 게시판 선택 -->
         <div class="form-group">
-            <label for="name">작성자</label>
-            <input type="text" id="name" th:field="*{username}" placeholder="작성자." required>
+            <label for="username">작성자:</label>
+            <span id="username" th:text="${announcement.username}">admin</span>
         </div>
 
         <!-- 제목 입력 -->
         <div class="form-group">
-            <label for="title">제목을 입력해 주세요.</label>
-            <input type="text" id="title" th:field="*{title}" placeholder="제목을 입력해 주세요." required>
+            <label for="title">제목:</label>
+            <span id="title" th:text="${announcement.title}">공지사항 제목</span>
         </div>
 
         <!-- 내용 입력 -->
-        <div id="editor-container" style="height: 300px;"></div>
-        <!-- Quill 에디터의 내용은 아래의 숨겨진 input 필드에 저장됨 -->
-        <input type="hidden" name="content" id="content" th:field="*{content}"/>
+        <label for="content">내용:</label>
+        <div id="content"  th:utext="${announcement.content}">
+            <!-- Quill 에디터로 작성된 HTML 내용이 여기 표시됩니다 -->
+        </div>
+        <br/>
+
+        <!-- 첨부 파일 -->
+        <div class="form-group">
+            <label for="file">첨부 파일:</label>
+            <a href="#" id="file" th:if="${announcement.sfile != null}" th:href="@{/files/{filename}(filename=${announcement.sfile})}" th:text="${announcement.ofile}">첨부 파일 없음</a>
+        </div>
+
+        <!-- 조회수 -->
+        <div class="form-group">
+            <label for="viewCount">조회수:</label>
+            <span id="viewCount" th:text="${announcement.viewCount}">10</span>
+        </div>
 
         <!-- 버튼 -->
         <br/>
-        <div>
-            <label for="inquiry_ofile">파일 첨부:</label>
-            <input type="file" id="inquiry_ofile" name="inquiry_ofile" />
+        <div class="form-group">
+            <input type="file" class="form-control-file" id="inquiry_ofile" name="inquiry_ofile"/>
+            <img id="imagePreview" class="img-preview" src="" alt="이미지 미리보기" style="display:none;"/>
         </div>
         <div class="form-group btn-group">
             <button type="submit" class="btn btn-primary btn-custom">등록</button>
-            <button type="button" class="btn btn-secondary btn-custom" onclick="location.href='@{/guest/noticeList}'">목록 바로가기</button>
+            <button type="button" class="btn btn-secondary btn-custom" onclick="location.href='/guest/noticeList'">목록 바로가기</button>
         </div>
     </form>
 </div>
@@ -100,6 +114,7 @@
     <p>Copyright © 2023 한화시스템(주). 모든 권리는 보유됩니다.</p>
 </footer>
 
+</body>
 <script>
     // Quill 에디터 초기화
     var quill = new Quill('#editor-container', {
@@ -111,17 +126,38 @@
                 ['bold', 'italic', 'underline', 'strike'],  // 텍스트 스타일
                 ['link', 'blockquote', 'code-block'],  // 링크, 인용 및 코드 블록
                 [{ 'list': 'ordered'}, { 'list': 'bullet' }],  // 목록
+                ['image'],  // 이미지 업로드 버튼 추가
                 [{ 'align': [] }],  // 정렬
                 ['clean']  // 포맷 초기화 버튼
             ]
         }
     });
 
-    // 폼 제출 시 Quill 에디터의 내용을 숨겨진 input에 저장
+    // 이미지 업로드 핸들러
+    quill.getModule('toolbar').addHandler('image', function() {
+        var fileInput = document.createElement('input');
+        fileInput.setAttribute('type', 'file');
+        fileInput.setAttribute('accept', 'image/*');
+
+        fileInput.onchange = function() {
+            var file = fileInput.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var range = quill.getSelection();
+                    quill.insertEmbed(range.index, 'image', e.target.result, Quill.sources.USER);
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        fileInput.click(); // 파일 선택 다이얼로그 열기
+    });
+
+    // Quill 에디터의 내용을 폼 전송 시 content 필드에 넣기
     document.querySelector('form').onsubmit = function() {
-        var content = quill.root.innerHTML; // Quill 에디터에서 HTML 내용 가져오기
-        document.querySelector('#content').value = content; // 숨겨진 input에 설정
+        var content = document.querySelector('input[name="content"]');
+        content.value = quill.root.innerHTML; // Quill 에디터의 내용을 hidden input에 설정
     };
 </script>
-</body>
 </html>

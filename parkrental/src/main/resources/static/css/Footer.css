@@ -29,8 +29,9 @@ nav {
 nav .logo {
     font-size: 1.5rem;
     font-weight: bold;
+    position: relative; /* 명시적으로 position 설정 */
+        z-index: 200; /* 로그인과 회원가입이 center-menu 위로 올라오도록 높은 값 설정 */
 }
-
 /* 중앙 메뉴와 오른쪽 메뉴 스타일 */
 nav .center-menu,
 nav .right-menu {
@@ -39,15 +40,13 @@ nav .right-menu {
     gap: 30px;
     position: relative; /* 명시적으로 position 설정 */
     z-index: 200; /* 로그인과 회원가입이 center-menu 위로 올라오도록 높은 값 설정 */
-}
 
+}
 /* 중앙 메뉴 여백 조정 */
 nav .center-menu {
     margin-left: auto;
     margin-right: auto;
 }
-
-
 
 /* 네비게이션 링크 스타일 */
 nav ul li a {
@@ -81,7 +80,7 @@ header {
     left: 0;
     right: 0;
     bottom: 0;
-
+  
     filter: blur(8px); /* 블러 효과 */
     z-index: 1; /* 블러 배경이 텍스트 뒤에 있도록 설정 */
 }
@@ -177,3 +176,4 @@ footer ul li {
 .center-menu li {
     text-align: center; /* 드롭다운을 가운데 정렬 */
 }
+

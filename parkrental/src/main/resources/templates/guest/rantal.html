@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대여페이지</title>
+    <link rel="stylesheet" href="/css/rantal.css">
+    <link rel="stylesheet" href="/css/rantalhead.css" />
+    <link rel="stylesheet" href="/css/rantalhead2.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<!-- 헤더랑 네비바 섹션 -->
+<header>
+    <nav>
+        <div class="logo">NATIONAL PARK</div>
+        <ul class="center-menu">
+            <li><a href="#">소개</a></li>
+            <li>
+                <a href="#">공원 검색</a>
+                <ul class="dropdown">
+                    <li><a href="#">국립공원</a></li>
+                    <li><a href="#">자연공원</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">물품 대여</a>
+                <ul class="dropdown">
+                    <li><a href="#">텐트</a></li>
+                    <li><a href="#">자전거</a></li>
+                    <li><a href="#">배낭</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">게시판</a>
+                <ul class="dropdown">
+                    <li><a href="#">공지사항</a></li>
+                    <li><a href="#">문의사항</a></li>
+                    <li><a href="#">커뮤니티</a></li>
+                </ul>
+            </li>
+        </ul>
+        <ul class="right-menu">
+            <li><a href="#">로그인</a></li>
+            <li><a href="#">회원가입</a></li>
+        </ul>
+    </nav>
+    <div class="background-text-wrapper">
+        <h1 style="all: unset; font-size: 50px; color: white;">A NATIONAL PARK</h1>
+        <p>공기 좋고 물 좋은 공원에서 데이트해요!!!</p>
+    </div>
+</header>
+
+<div class="container">
+    <div class="store-header">
+        <div class="store-info">
+            <h1>대여점 이름</h1>
+            <p>★ 5.0 - 리뷰 182개</p>
+            <button class="more-info-btn">가게정보·</button>
+        </div>
+    </div>
+
+    <section class="delivery-info">
+        <div class="min-order">
+            <p>최소선택</p>
+            <p>1~3개</p>
+        </div>
+        <div class="membership">
+            <p>대충 글 작성</p>
+            <p>~~~~~~ㄴㅇㅁㅇㅁㄴㅇ~~~~</p>
+        </div>
+    </section>
+
+    <section class="recommend-menu">
+        <h2>추천 메뉴</h2>
+        <!-- 자전거 상품 A1 -->
+        <div class="menu-item" data-product-name="상품 A1" data-product-price="15000" data-product-num="P001">
+            <input type="checkbox" class="menu-checkbox">
+            <img src="/image/자건거.jpeg" alt="자전거 대여">
+            <div class="menu-info">
+                <p><strong>인기</strong> 상품 A1</p>
+                <p>L: 15,000원</p>
+                <p>리뷰 31개</p>
+            </div>
+            <button class="cart-btn" onclick="addToCart('P001', '상품 A1', 15000)">장바구니 담기</button>
+        </div>
+
+        <!-- 상품 A2 -->
+        <div class="menu-item" data-product-name="상품 A2" data-product-price="25000" data-product-num="P002">
+            <input type="checkbox" class="menu-checkbox">
+            <img src="/image/자건거.jpeg" alt="자전거 대여">
+            <div class="menu-info">
+                <p><strong>인기</strong> 상품 A2</p>
+                <p>가격: 25,000원</p>
+                <p>리뷰 15개</p>
+            </div>
+            <button class="cart-btn" onclick="addToCart('P002', '상품 A2', 25000)">장바구니 담기</button>
+        </div>
+        <!-- Repeat for other products -->
+    </section>
+</div>
+
+<!-- 풋터 섹션 -->
+<footer>
+    <p>풋터입니다. 추가 사항을 입력하세요.</p>
+    <ul>
+        <li>항목 1</li>
+        <li>항목 2</li>
+        <li>항목 3</li>
+        <li>항목 4</li>
+    </ul>
+    <p>Copyright © 2023 한화시스템(주). 모든 권리는 보유됩니다.</p>
+</footer>
+
+<script>
+    function addToCart(productNum, productName, productPrice) {
+    const username = 'user1';  // 로그인 후 동적으로 변경 필요
+
+    // productNum 값이 유효한지 검증
+    if (!productNum || productNum.trim() === "") {
+        alert("Invalid product number! Please provide a valid product number.");
+        return;
+    }
+
+    const cartData = {
+        username: username,
+        productNum: productNum,      // 서버로 보낼 값
+        productName: productName,
+        productPrice: productPrice,
+        quantity: 1,
+        addedAt: new Date().toISOString() // ISO 포맷의 현재 날짜 추가
+    };
+
+    console.log(cartData); // 데이터를 확인
+
+    fetch('/cart/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(cartData),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert('장바구니에 추가되었습니다! 🛒');
+            // cart.html로 리다이렉트
+            window.location.href = '/guest/cart'; // 장바구니 페이지로 리다이렉트
+        } else {
+            alert('장바구니 추가 실패 😢');
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+</script>
+</body>
+</html>

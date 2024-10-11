@@ -32,6 +32,11 @@ CREATE table user (
   	failCount INT default 0,
   	lockTimes TIMESTAMP
 );
+-- user 테이블에 더미 데이터 추가
+INSERT INTO user (username, password, email, name) VALUES
+('user1', 'password1', 'user1@example.com', '사용자 1'),
+('user2', 'password2', 'user2@example.com', '사용자 2'),
+('user3', 'password3', 'user3@example.com', '사용자 3');
 
 SELECT * FROM user;
 
@@ -55,6 +60,10 @@ CREATE table seller (
   	failCount INT default 0,
   	lockTimes TIMESTAMP
 );
+INSERT INTO seller (businessNum,username,name,password,businessName) VALUES
+('B001', 'user1','password1','사용자1','Business A'),
+('B002', 'user2','password2','사용자2','Business B'),
+('B003', 'user3','password3','사용자3','Business C');
 
 select * from seller;
 
@@ -67,6 +76,8 @@ CREATE table admin (
 	email varchar(100),
 	authority varchar(20) default 'ROLE_ADMIN'
 );
+
+
 # 테이블에 초기 관리자 넣기
 INSERT into admin (idx, username, password, email, authority)
 	values (1, 'admin', 'qwer1234!', '', 'ROLE_ADMIN');
@@ -88,6 +99,14 @@ CREATE TABLE product (
 	ON DELETE CASCADE
 	ON UPDATE CASCADE
 );
+-- product 테이블에 더미 데이터 추가
+INSERT INTO product (productNum, businessName, productName, quantity, cost) VALUES
+('P001', 'Business A', '상품 A1', 10, 15000),
+('P002', 'Business A', '상품 A2', 20, 25000),
+('P003', 'Business B', '상품 B1', 15, 30000),
+('P004', 'Business B', '상품 B2', 5, 40000),
+('P005', 'Business C', '상품 C1', 12, 20000),
+('P006', 'Business C', '상품 C2', 18, 35000);
 
 # 예약 테이블 생성 
 DROP TABLE reservation;
@@ -167,18 +186,26 @@ CREATE TABLE commuLike (
 ######## 공지사항 게시판 테이블 ########
 DROP TABLE announcement;
 CREATE TABLE announcement (
-	idx bigint(10) PRIMARY KEY AUTO_INCREMENT,
-	username varchar(100) not null,
-	title varchar(50) not null,
-	content varchar(1000) not null,
-  	postdate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  	viewCount int(10) DEFAULT 0 NOT NULL,
-  	ofile varchar(200),
-  	sfile varchar(100),
-  	FOREIGN KEY (username) REFERENCES admin (username)
-  	ON DELETE CASCADE
-	ON UPDATE CASCADE
+    idx BIGINT(10) PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(100) NOT NULL,
+    title VARCHAR(50) NOT NULL,
+    content VARCHAR(1000) NOT NULL,
+    postdate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    viewCount INT(10) NOT NULL DEFAULT 0,
+    ofile VARCHAR(200),
+    sfile VARCHAR(100),
+    FOREIGN KEY (username) REFERENCES admin (username)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
 );
+DESCRIBE announcement;
+ALTER TABLE announcement 
+MODIFY COLUMN viewCount int(10) NOT NULL DEFAULT 0;
+INSERT INTO announcement (username, title, content, postdate, ofile, sfile) VALUES
+('user1', '공지사항 1', '첫 번째 공지사항 내용입니다.', '2024-10-01 10:00:00', 'original_file_1.pdf', 'stored_file_1.pdf'),
+('user2', '공지사항 2', '두 번째 공지사항 내용입니다.', '2024-10-02 11:00:00', 'original_file_2.pdf', 'stored_file_2.pdf'),
+('user3', '공지사항 3', '세 번째 공지사항 내용입니다.', '2024-10-03 12:30:00', 'original_file_3.pdf', 'stored_file_3.pdf');
+
 
 ######## 1대1 문의 게시판 ##########
 DROP TABLE inquiry;
@@ -200,3 +227,25 @@ CREATE TABLE inquiry (
   	ON DELETE CASCADE
 	ON UPDATE CASCADE
 );
+######## 장바구 ##########
+DROP TABLE cart;
+CREATE TABLE cart (
+    idx BIGINT(10) PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL,
+    product_num VARCHAR(10) NOT NULL,
+    product_name VARCHAR(50) NOT NULL,
+    product_price BIGINT(20) NOT NULL,
+    quantity INT(10) NOT NULL DEFAULT 1,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (username) REFERENCES user(username) 
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (product_num) REFERENCES product(productNum) 
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+ALTER TABLE cart DROP FOREIGN KEY cart_ibfk_2;
+ALTER TABLE cart MODIFY username VARCHAR(100) NOT NULL;
+
+ALTER TABLE product ADD CONSTRAINT unique_productNum UNIQUE (productNum);
+SHOW CREATE TABLE cart;

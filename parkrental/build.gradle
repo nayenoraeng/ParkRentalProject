@@ -34,10 +34,14 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	implementation 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
+
+	// Google Cloud Translation API 의존성 추가
+	implementation 'com.google.cloud:google-cloud-translate:2.0.4'
 
 	implementation 'jakarta.servlet:jakarta.servlet-api'
+
+	// JSON 파싱을 위한 Jackson 라이브러리
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
 }
 
 tasks.named('test') {
