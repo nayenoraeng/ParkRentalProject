@@ -195,7 +195,6 @@
         }
         
     </style>
-
 </head>
 <body>
     <div class="container mt-5">
@@ -203,19 +202,19 @@
             <h2 class="example-text brand-font-700 centered-text">
 		        <a href="/" style="color: #4e4f4e; text-decoration: none;">NATIONAL PARK</a>
 		    </h2>
-            <form class="login-form" id="login-form" method="post" th:action="@{/Login}">
+            <form class="login-form" id="loginForm" method="post" th:action="@{/guest/Login}">
                 <div class="form-group mb-3">
                     <div class="input-wrapper">
-                        <input type="text" id="login-id" name="userName" required placeholder=" ">
-                        <label for="login-id">아이디</label>
+                        <input type="text" id="username" name="username" required placeholder=" ">
+                        <label for="username">아이디</label>
                         <button type="button" class="clear-btn" onclick="clearInput('login-id')">✖</button>
                     </div>
                 </div>
                 <br />
                 <div class="form-group mb-3">
                     <div class="input-wrapper">
-                        <input type="password" id="login-pwd" name="userPwd" required placeholder=" ">
-                        <label for="login-pwd">비밀번호</label>
+                        <input type="password" id="password" name="password" required placeholder=" ">
+                        <label for="password">비밀번호</label>
                         <button type="button" class="clear-btn" onclick="clearInput('login-pwd')">✖</button>
                     </div>
                 </div>
@@ -244,9 +243,10 @@
             
             <div class="text-center mt-3 links">
                 <a th:href="@{/FindIdPw}">아이디 / 비밀번호 찾기</a>
-                <a th:href="@{/register_form}">회원가입</a>
+                <a th:href="@{/guest/Signup}">회원가입</a>
             </div>
-    </div>  
+        </div>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -259,6 +259,28 @@
                 if (input.value === '') {
                     input.classList.remove('focused');
                 }
+            });
+        });
+    </script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // 기본 제출 막기
+
+            const form = event.target;
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    // 로그인 성공 시 메인 페이지로 이동 및 새로고침
+                    window.location.href = '/'; // 메인 페이지 경로로 리디렉션
+                } else {
+                    alert('로그인 실패');
+                }
+            }).catch(error => {
+                console.error('Error during login:', error);
             });
         });
     </script>
