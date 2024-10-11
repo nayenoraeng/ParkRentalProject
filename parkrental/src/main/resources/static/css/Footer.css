@@ -29,25 +29,23 @@ nav {
 nav .logo {
     font-size: 1.5rem;
     font-weight: bold;
+    position: relative; /* 명시적으로 position 설정 */
+        z-index: 200; /* 로그인과 회원가입이 center-menu 위로 올라오도록 높은 값 설정 */
 }
-
 /* 중앙 메뉴와 오른쪽 메뉴 스타일 */
 nav .center-menu,
 nav .right-menu {
     display: flex;
     list-style: none;
     gap: 30px;
-}
+    position: relative; /* 명시적으로 position 설정 */
+    z-index: 200; /* 로그인과 회원가입이 center-menu 위로 올라오도록 높은 값 설정 */
 
+}
 /* 중앙 메뉴 여백 조정 */
 nav .center-menu {
     margin-left: auto;
     margin-right: auto;
-}
-
-/* 오른쪽 메뉴 여백 조정 */
-nav .right-menu {
-    margin-left: 30px;
 }
 
 /* 네비게이션 링크 스타일 */

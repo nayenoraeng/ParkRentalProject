@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/cart.css}" />
+    <link rel="stylesheet" th:href="@{/css/carthead.css}" />
+    <link rel="stylesheet" th:href="@{/css/carthead2.css}" />
+
+    <title>장바구니</title>
+</head>
+<body>
+<!-- 헤더랑 네비바 섹션 -->
+<header>
+    <nav>
+        <div class="logo">NATIONAL PARK</div>
+        <ul class="center-menu">
+            <li><a href="#">소개</a></li>
+            <li>
+                <a href="#">공원 검색</a>
+                <ul class="dropdown">
+                    <li><a href="#">국립공원</a></li>
+                    <li><a href="#">자연공원</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">물품 대여</a>
+                <ul class="dropdown">
+                    <li><a href="#">텐트</a></li>
+                    <li><a href="#">자전거</a></li>
+                    <li><a href="#">배낭</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">게시판</a>
+                <ul class="dropdown">
+                    <li><a href="#">공지사항</a></li>
+                    <li><a href="#">문의사항</a></li>
+                    <li><a href="#">커뮤니티</a></li>
+                </ul>
+            </li>
+        </ul>
+        <ul class="right-menu">
+            <li><a href="#">로그인</a></li>
+            <li><a href="#">회원가입</a></li>
+        </ul>
+    </nav>
+    <div class="background-text-wrapper">
+        <h1 style="all: unset; font-size: 50px; color: white;">A NATIONAL PARK</h1>
+        <p>공기 좋고 물 좋은 공원에서 데이트해요!!!</p>
+    </div>
+</header>
+<br/><br/>
+<div class="search-bar">
+    <input type="text" placeholder="제품 검색">
+    <button>🔍</button>
+</div>
+
+<main>
+    <section class="cart">
+        <h2 style="text-align: center; margin: 20px 0;">장바구니</h2>
+        <div class="cart-layout">
+            <div class="cart-items">
+                <div class="cart-item" th:each="item : ${cartItems}">
+                    <!-- 상품 이미지 -->
+                    <img th:src="@{/image/{item.productNum}(item.productNum=${item.productNum})}" alt="Product Image">
+
+                    <!-- 상품명 -->
+                    <h3 th:text="${item.productName}">상품명</h3>
+
+                    <!-- 가격 -->
+                    <p th:text="'가격: ' + ${item.productPrice} + '원'">가격</p>
+
+                    <!-- 수량 -->
+                    <p th:text="'수량: ' + ${item.quantity}">수량</p>
+                </div>
+            </div>
+
+            <div class="summary">
+                <h3>최종 결제 금액</h3>
+                <!-- 상품 금액 -->
+                <p th:text="'상품 금액: ' + ${totalPrice} + '원'">상품 금액: 0원</p>
+                <!-- 최종 결제 금액 -->
+                <p><strong th:text="'총 결제 금액: ' + ${finalPrice} + '원'">총 결제 금액: 0원</strong></p>
+            </div>
+        </div>
+    </section>
+
+    <section class="recommendations">
+        <h3>함께 보면 좋은 상품</h3>
+        <div class="recommendation-items">
+            <div class="recommendation-item" th:each="recommendation : ${recommendations}">
+                <img th:src="@{/image/{recommendation.image}(recommendation.image=${recommendation.image})}" alt="추천 상품">
+                <p th:text="${recommendation.productName}">추천 상품명</p>
+                <p th:text="'가격: ' + ${recommendation.productPrice} + '원'">가격</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 풋터 섹션 -->
+    <footer>
+        <p>풋터입니다. 추가 사항을 입력하세요.</p>
+        <ul>
+            <li>항목 1</li>
+            <li>항목 2</li>
+            <li>항목 3</li>
+            <li>항목 4</li>
+        </ul>
+        <p>Copyright © 2023 한화시스템(주). 모든 권리는 보유됩니다.</p>
+    </footer>
+</main>
+</body>
+</html>

@@ -12,113 +12,140 @@
 </head>
 <body>
 
-    <!-- 헤더랑 네비바 섹션 -->
-    <header>
-        <nav>
-            <div class="logo">NATIONAL PARK</div>
+<!-- 헤더랑 네비바 섹션 -->
+<header>
+    <nav>
+        <div class="logo">NATIONAL PARK</div>
+        <ul class="center-menu">
+            <li><a href="#">소개</a></li>
+            <li>
+                <a href="#">공원 검색</a>
+                <ul class="dropdown">
+                    <li><a href="#">국립공원</a></li>
+                    <li><a href="#">자연공원</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">물품 대여</a>
+                <ul class="dropdown">
+                    <li><a href="#">텐트</a></li>
+                    <li><a href="#">자전거</a></li>
+                    <li><a href="#">배낭</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">게시판</a>
+                <ul class="dropdown">
+                    <li><a href="#">공지사항</a></li>
+                    <li><a href="#">문의사항</a></li>
+                    <li><a href="#">커뮤니티</a></li>
+                </ul>
+            </li>
+        </ul>
+        <ul class="right-menu">
+            <li><a href="#">로그인</a></li>
+            <li><a href="#">회원가입</a></li>
+        </ul>
+    </nav>
+    <div class="background-text-wrapper">
+        <h1 style="all: unset; font-size: 50px; color: white;">A NATIONAL PARK</h1>
+        <p>공기 좋고 물 좋은 공원에서 데이트해요!!!</p>
+    </div>
+</header>
+<br/><br/><br/>
+<div class="container">
+    <h1>게시판 글쓰기</h1>
 
-            <!-- 중앙에 위치할 메뉴 -->
-            <ul class="center-menu">
-                <li><a href="#">소개</a></li>
-                <li>
-                    <a href="#">공원 검색</a>
-                    <ul class="dropdown">
-                        <li><a href="#">국립공원</a></li>
-                        <li><a href="#">자연공원</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#">물품 대여</a>
-                    <ul class="dropdown">
-                        <li><a href="#">텐트</a></li>
-                        <li><a href="#">자전거</a></li>
-                        <li><a href="#">배낭</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#">게시판</a>
-                    <ul class="dropdown">
-                        <li><a href="#">공지사항</a></li>
-                        <li><a href="#">문의사항</a></li>
-                        <li><a href="#">커뮤니티</a></li>
-                    </ul>
-                </li>
-            </ul>
-            <!-- 오른쪽에 위치할 메뉴 -->
-            <ul class="right-menu">
-                <li><a href="#">로그인</a></li>
-                <li><a href="#">회원가입</a></li>
-            </ul>
-        </nav>
-        <!-- 배경 이미지 위의 텍스트 -->
-        <div class="background-text-wrapper">
-            <h1 style="all: unset; font-size: 50px; color: white;">A NATIONAL PARK</h1>
-            <p>공기 좋고 물 좋은 공원에서 데이트해요!!!</p>
-        </div>
-    </header>
-    <br/><br/><br/>
-    <div class="container">
-        <h1>게시판 글쓰기</h1>
-
+    <!-- 게시판 선택 -->
+    <form action="#" method="POST" enctype="multipart/form-data" th:action="@{/guest/noticeList}" th:object="${announcement}">
         <!-- 게시판 선택 -->
         <div class="form-group">
-            <label for="board-select">작성자</label>
-            <input type="text" id="name" placeholder="작성자.">
-      
+            <label for="author">작성자</label>
+            <input type="text" id="author" name="username" value="admin" readonly>
         </div>
 
         <!-- 제목 입력 -->
         <div class="form-group">
             <label for="title">제목을 입력해 주세요.</label>
-            <input type="text" id="title" placeholder="제목을 입력해 주세요.">
+            <input type="text" id="title" th:field="*{title}" placeholder="제목을 입력해 주세요." required>
         </div>
 
         <!-- 내용 입력 -->
         <div id="editor-container" style="height: 300px;"></div>
+        <!-- Quill 에디터의 내용은 아래의 숨겨진 input 필드에 저장됨 -->
+        <input type="hidden" name="content" id="content" th:field="*{content}"/>
 
         <!-- 버튼 -->
         <br/>
-        <div class="form-group">
-            <input type="file" class="form-control-file" id="inquiry_ofile" name="inquiry_ofile"/>
-            <img id="imagePreview" class="img-preview" src="" alt="이미지 미리보기" style="display:none;"/>
+        <div>
+            <label for="inquiry_ofile">파일 첨부:</label>
+            <input type="file" id="inquiry_ofile" name="inquiry_ofile" />
         </div>
+
         <div class="form-group btn-group">
             <button type="submit" class="btn btn-primary btn-custom">등록</button>
-            <button type="button" class="btn btn-secondary btn-custom">목록 바로가기</button>
+            <button type="button" class="btn btn-secondary btn-custom" data-url="@{/guest/noticeList}" onclick="redirectToUrl(this)">목록 바로가기</button>
         </div>
-    </div>
-    <br/><br/><br/>
+    </form>
+</div>
+<br/><br/><br/>
 
+<!-- 풋터 섹션 -->
+<footer>
+    <p>풋터입니다. 추가 사항을 입력하세요.</p>
+    <ul>
+        <li>항목 1</li>
+        <li>항목 2</li>
+        <li>항목 3</li>
+        <li>항목 4</li>
+    </ul>
+    <p>Copyright © 2023 한화시스템(주). 모든 권리는 보유됩니다.</p>
+</footer>
 
-
-    <!-- 풋터 섹션 -->
-    <footer>
-        <p>풋터입니다. 추가 사항을 입력하세요.</p>
-        <ul>
-            <li>항목 1</li>
-            <li>항목 2</li>
-            <li>항목 3</li>
-            <li>항목 4</li>
-        </ul>
-        <p>Copyright © 2023 한화시스템(주). 모든 권리는 보유됩니다.</p>
-    </footer>
-
-</body>
 <script>
     // Quill 에디터 초기화
     var quill = new Quill('#editor-container', {
-        theme: 'snow',  // 'bubble' 스타일도 가능
-        placeholder: '내용을 입력해 주세요...',
+        theme: 'snow',  // Quill의 테마 설정
+        placeholder: '내용을 입력해 주세요...',  // 플레이스홀더 텍스트
         modules: {
             toolbar: [
-                [{ 'header': [1, 2, 3, false] }],
-                ['bold', 'italic', 'underline', 'strike'], // 굵게, 기울임, 밑줄, 취소선
-                ['link', 'blockquote', 'code-block'],
-                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                [{ 'align': [] }],
-                ['clean'] // 포맷 초기화 버튼
+                [{ 'header': [1, 2, 3, false] }],  // 제목 스타일
+                ['bold', 'italic', 'underline', 'strike'],  // 텍스트 스타일
+                ['link', 'blockquote', 'code-block'],  // 링크, 인용 및 코드 블록
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],  // 목록
+                ['image'],  // 이미지 업로드 버튼 추가
+                [{ 'align': [] }],  // 정렬
+                ['clean']  // 포맷 초기화 버튼
             ]
         }
     });
+
+    // 이미지 업로드 핸들러
+    quill.getModule('toolbar').addHandler('image', function() {
+        var fileInput = document.createElement('input');
+        fileInput.setAttribute('type', 'file');
+        fileInput.setAttribute('accept', 'image/*');
+
+        fileInput.onchange = function() {
+            var file = fileInput.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var range = quill.getSelection();
+                    quill.insertEmbed(range.index, 'image', e.target.result, Quill.sources.USER);
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        fileInput.click(); // 파일 선택 다이얼로그 열기
+    });
+
+    // 폼 제출 시 Quill 에디터의 내용을 숨겨진 input에 저장
+    document.querySelector('form').onsubmit = function() {
+        var content = quill.root.innerHTML; // Quill 에디터에서 HTML 내용 가져오기
+        document.querySelector('#content').value = content; // 숨겨진 input에 설정
+    };
 </script>
+</body>
 </html>

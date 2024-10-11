@@ -6,10 +6,10 @@
   box-sizing: border-box;
   font-family: "Jost", sans-serif;
 }
-.slider-container{
+
+.slider-container {
   width: 100%;
   height: 100vh;
-  background-image: url('Images/bg-img.png');
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
@@ -32,12 +32,13 @@
   margin-top: auto; /* 자동 마진으로 아래로 밀기 */
   overflow: hidden;  /* 텍스트가 밖으로 나가는 것을 방지 */
 }
+
 .central-text p {
   font-size: 24px;
   font-weight: 400;
 }
 
-.slider-images{
+.slider-images {
   display: flex;
   align-items: center;
   gap: 21px;
@@ -45,14 +46,16 @@
   z-index: 0; /* 중앙 텍스트보다 아래에 배치 */
   overflow: hidden; /* 슬라이더 이미지가 밖으로 넘치지 않도록 함 */
 }
-.slider-images img{
+
+.slider-images img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: 6px;
 }
-.slider-img{
-  width: 110px;
+
+.slider-img {
+  width: 90px; /* 기본 이미지 너비를 줄임 */
   border-radius: 6px;
   cursor: pointer;
   position: relative;
@@ -60,65 +63,89 @@
   max-width: 100%; /* 화면 크기에 맞게 이미지 크기 조정 */
   height: auto; /* 비율 유지 */
 }
-.slider-images .slider-img:first-child, .slider-images .slider-img:last-child{
-  height: 480px;
-}
-.slider-images .slider-img:nth-child(2), .slider-images .slider-img:nth-child(6){
-  height: 560px;
-}
-.slider-images .slider-img:nth-child(3), .slider-images .slider-img:nth-child(4), .slider-images .slider-img:nth-child(5){
-  height: 665px;
+
+.slider-images .slider-img:first-child,
+.slider-images .slider-img:last-child {
+  height: 380px; /* 높이를 줄임 */
 }
 
-h1{
+.slider-images .slider-img:nth-child(2),
+.slider-images .slider-img:nth-child(6) {
+  height: 460px; /* 높이를 줄임 */
+}
+
+.slider-images .slider-img:nth-child(3),
+.slider-images .slider-img:nth-child(4),
+.slider-images .slider-img:nth-child(5) {
+  height: 565px; /* 높이를 줄임 */
+}
+
+.background-text-wrapper {
+  position: relative;
+  width: 100%;
+  height: auto; /* 자동 높이 조정 */
+  padding-top: 100px; /* 상단에 여유 공간 추가 */
+}
+
+h1 {
   font-family: "Jost", sans-serif;
-  font-size: 40px;
+  font-size: 50px;
   font-weight: 700;
-  text-align: left;
   text-transform: uppercase;
   color: #fff;
-  position: absolute;
-  top: 50%;
-  left: -10%;
-  transform: rotate(270deg);
+
+  position: relative;
+  display: inline-block; /* 가로 중앙 정렬을 위해 추가 */
+
+  /* 텍스트가 가로로 쭉 나오도록 */
+  white-space: nowrap;
+  margin: 0 auto; /* 중앙 정렬 */
+
+  /* 추가 스타일 */
+  margin-bottom: 20px; /* 아래 요소와의 여백 */
   transition: 0.7s ease;
 }
-.details{
+
+.details {
   position: absolute;
   bottom: 43px;
   left: 43px;
 }
-.details h2{
+
+.details h2 {
   font-family: "Jost", sans-serif;
   font-size: 26px;
   font-weight: 700;
   text-align: left;
   line-height: 44px;
-  text-align: left;
   color: #fff;
   text-transform: uppercase;
   transition: 0.7s ease;
   display: none;
 }
-.details p{
+
+.details p {
   font-family: "Jost", sans-serif;
   font-size: 20px;
   font-weight: 700;
   text-align: left;
   line-height: 33px;
-  text-align: left;
   color: #fff;
   text-transform: uppercase;
   transition: 0.7s ease;
   display: none;
 }
-.slider-img.active{
-  width: 766px !important;
-  height: 750px !important;
+
+.slider-img.active {
+  width: 666px !important; /* 커지는 이미지의 너비를 줄임 */
+  height: 650px !important; /* 커지는 이미지의 높이를 줄임 */
 }
-.slider-img.active h1{
-   display: none;
+
+.slider-img.active h1 {
+  display: none;
 }
-.slider-img.active .details p, .slider-img.active .details h2{
+
+.slider-img.active .details p,
+.slider-img.active .details h2 {
   display: block;
 }
