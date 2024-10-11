@@ -46,11 +46,15 @@
             </ul>
             <!-- 오른쪽에 위치할 메뉴 -->
             <ul class="right-menu">
-                <li sec:authorize="!isAuthenticated()"><a th:href="@{/guest/Login}">로그인</a></li>
-                <li sec:authorize="!isAuthenticated()"><a th:href="@{/guest/Signup}">회원가입</a></li>
+                <li sec:authorize="isAnonymous()"><a th:href="@{/guest/Login}">로그인</a></li>
+                <li sec:authorize="isAnonymous()"><a th:href="@{/guest/Signup}">회원가입</a></li>
                 <!-- 로그인 시 메뉴 변경 -->
-                <li sec:authorize="isAuthenticated()"><a th:href="@{/Logout}">로그아웃</a></li>
+                <li sec:authorize="isAuthenticated()">
+                    <a th:href="@{/guest/Logout}" onclick="deleteJWTCookie(); return confirm('로그아웃하시겠습니까?')">로그아웃</a>
+                </li>
                 <li sec:authorize="isAuthenticated()"><a th:href="@{/user/userpage}">마이페이지</a></li>
+                <li sec:authorize="hasRole('ROLE_SELLER')"><a th:href="@{/seller/sellerpage}">판매자페이지</a></li>
+                <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/user/membermnger}">회원관리</a></li>
             </ul>
         </nav>
         <div class="container">
@@ -182,4 +186,10 @@
     </footer>
 
 </body>
+<script th:inline="javascript">
+    function deleteJWTCookie() {
+        document.cookie = "JWT; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    }
+    window.onload = deleteJWTCookie;
+</script>
 </html>

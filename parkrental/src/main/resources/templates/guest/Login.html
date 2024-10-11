@@ -195,7 +195,6 @@
         }
         
     </style>
-    <script src="auth.js" defer></script>
 </head>
 <body>
     <div class="container mt-5">
@@ -264,17 +263,25 @@
         });
     </script>
     <script>
-        document.getElementById('login-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            login(username, password)
-                .then(() => {
-                    window.location.herf = '/';
-                })
-                .catch(error => {
-                    console.error('로그인 에러:', error);
-                });
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // 기본 제출 막기
+
+            const form = event.target;
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    // 로그인 성공 시 메인 페이지로 이동 및 새로고침
+                    window.location.href = '/'; // 메인 페이지 경로로 리디렉션
+                } else {
+                    alert('로그인 실패');
+                }
+            }).catch(error => {
+                console.error('Error during login:', error);
+            });
         });
     </script>
 </body>

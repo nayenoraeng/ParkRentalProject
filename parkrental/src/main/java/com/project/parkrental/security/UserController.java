@@ -1,5 +1,6 @@
 package com.project.parkrental.security;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -14,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -92,12 +94,33 @@ public class UserController {
             System.out.println("login success");
 
             String jwtToken = jwtUtil.generateToken(username);
-            res.setHeader("Authorization", "Bearer " + jwtToken);
-            System.out.println("login success. JwtToken stored: " + jwtToken);
+            Cookie cookie = new Cookie("JWT", jwtToken);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true);
+            cookie.setPath("/");
+            cookie.setMaxAge(60*30); // 쿠키 만료시간 30분
+            res.addCookie(cookie);
+
+            System.out.println("Auth success. JwtToken stored to cookie: " + jwtToken);
+            System.out.println("cookie: " + cookie);
+
             return "redirect:/";
         } catch (AuthenticationException e) {
             return "redirect:/guest/Login";
         }
+    }
+
+    @GetMapping("/Logout")
+    public String logout (HttpServletRequest req, HttpServletResponse res) {
+        SecurityContextHolder.clearContext();
+        Cookie cookie = new Cookie("JWT", null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        res.addCookie(cookie);
+
+        return "redirect:/";
     }
 
     @Bean(name = "userPasswordEncoder")

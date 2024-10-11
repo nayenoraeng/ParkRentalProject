@@ -16,6 +16,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -44,6 +45,8 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .securityContext(securityContext -> securityContext
+                        .securityContextRepository(new HttpSessionSecurityContextRepository()))
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/", "/css/**", "/js/**", "/image/**","/guest/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -52,8 +55,10 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/guest/Main")
+                        .logoutUrl("/guest/Logout")
+                        .logoutSuccessUrl("/")
+                        .deleteCookies("JWT")
+                        .clearAuthentication(true)
                         .permitAll()
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
