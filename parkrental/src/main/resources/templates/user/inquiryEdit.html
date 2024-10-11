@@ -56,41 +56,54 @@
         </div>
     </header>
     <br/><br/><br/>
-    <div class="container">
-        <h1>수정</h1>
+    <form th:action="@{/user/inquiryEditPro}" method="post" enctype="multipart/form-data">
+        <div class="container">
+            <h1>수정</h1>
+            <input type="hidden" name="idx" th:value="${inquiryRequest.idx}">
+            <!-- 게시판 선택 -->
+            <div class="form-group">
+                <label for="username">작성자</label>
+                <input type="text" id="username" th:field="${inquiryRequest.username}" placeholder="작성자." readonly/>
 
-        <!-- 게시판 선택 -->
-        <div class="form-group">
-            <label for="board-select">작성자</label>
-            <input type="text" id="name" placeholder="작성자.">
-      
-        </div>
+            </div>
 
-        <!-- 제목 입력 -->
-        <div class="form-group">
-            <label for="title">제목을 입력해 주세요.</label>
-            <input type="text" id="title" placeholder="제목을 입력해 주세요.">
-        </div>
+            <!-- 제목 입력 -->
+            <div class="form-group">
+                <label for="title">제목을 입력해 주세요.</label>
+                <input type="text" th:field="${inquiryRequest.title}" id="title" placeholder="제목을 입력해 주세요.">
+            </div>
 
-        <!-- 내용 입력 -->
-        <div class="form-group">
-            <label for="content">내용을 입력해 주세요.</label>
-            <textarea id="content" rows="10" placeholder="내용을 입력해 주세요."></textarea>
-        </div>
+            <!-- 내용 입력 -->
+            <div class="form-group">
+                <label for="content">내용을 입력해 주세요.</label>
+                <textarea id="content" th:field="${inquiryRequest.content}" rows="10" placeholder="내용을 입력해 주세요." required>${updatePost.content}</textarea>
+            </div>
 
-        <!-- 버튼 -->
-        <div class="form-group">
-            <label for="inquiry_ofile">첨부 파일</label>
-            <input type="file" class="form-control-file" id="inquiry_ofile" name="inquiry_ofile"/>
-            <img id="imagePreview" class="img-preview" src="" alt="이미지 미리보기" style="display:none;"/>
+            <!-- 버튼 -->
+            <div class="form-group">
+                <label for="file">첨부 파일</label>
+                <input type="file" class="form-control-file" id="file" name="file"/>
+                <img id="imagePreview" class="img-preview" src="" alt="이미지 미리보기" style="display:none;"/>
+            </div>
+
+            <div class="form-group">
+                <label for="inquiryPassword">비밀번호를 입력해 주세요.</label>
+                <input type="password" th:field="${inquiryRequest.inquiryPassword}" id="inquiryPassword" placeholder="비밀번호를 입력해 주세요." required>
+                <button type="button" class="btn btn-secondary btn-custom" onclick="#">비밀번호 변경</button>
+            </div>
+
+            <div class="form-group btn-group">
+                <button type="submit" class="btn btn-primary btn-custom">등록</button>
+                <button type="button" class="btn btn-secondary btn-custom" onclick="location.href='/guest/inquiryList'">목록 바로가기</button>
+            </div>
         </div>
-        <div class="form-group btn-group">
-            <button type="submit" class="btn btn-primary btn-custom">등록</button>
-            <button type="button" class="btn btn-secondary btn-custom">목록 바로가기</button>
-        </div>
-    </div>
+    </form>
     <br/><br/><br/>
-
+    <div th:if="${errors}" class="error">
+        <ul>
+            <li th:each="error : ${errors}" th:text="${error.defaultMessage}"></li>
+        </ul>
+    </div>
 
 
     <!-- 풋터 섹션 -->

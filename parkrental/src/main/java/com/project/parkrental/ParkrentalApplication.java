@@ -2,9 +2,11 @@ package com.project.parkrental;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
-public class  ParkrentalApplication {
+@EnableJpaAuditing
+public class ParkrentalApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ParkrentalApplication.class, args);
