@@ -20,14 +20,15 @@
             <ul class="center-menu">
                 <li><a href="#">소개</a></li>
                 <li>
-                    <a href="#">공원 검색</a>
+                    <a th:href="@{/ParkList}">공원 검색</a>
                     <ul class="dropdown">
-                        <li><a href="#">국립공원</a></li>
-                        <li><a href="#">자연공원</a></li>
+                        <li><a th:href="@{/ParkList?category=natural}">자연/휴양 공원</a></li>
+                        <li><a th:href="@{/ParkList?category=urban}">도시 생활 공원</a></li>
+                        <li><a th:href="@{/ParkList?category=special}">특수 목적 공원</a></li>
                     </ul>
                 </li>
                 <li>
-                    <a href="#">물품 대여</a>
+                    <a th:href="@{/Rental}">물품 대여</a>
                     <ul class="dropdown">
                         <li><a href="#">텐트</a></li>
                         <li><a href="#">자전거</a></li>
@@ -45,7 +46,7 @@
             </ul>
             <!-- 오른쪽에 위치할 메뉴 -->
             <ul class="right-menu">
-                <li><a href="#">로그인</a></li>
+                <li><a th:href="@{/guest/Login}">로그인</a></li>
                 <li><a href="#">회원가입</a></li>
             </ul>
         </nav>
