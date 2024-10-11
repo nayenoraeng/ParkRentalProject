@@ -2,7 +2,6 @@ package com.project.parkrental.parkList.controller;
 
 import com.project.parkrental.parkList.model.ParkList;
 import com.project.parkrental.parkList.model.Product;
-import com.project.parkrental.parkList.service.CartService;
 import com.project.parkrental.parkList.service.ParkListService;
 import com.project.parkrental.parkList.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +23,6 @@ public class ParkListController {
 
     @Autowired
     private ProductService productService;
-
-    @Autowired
-    private CartService cartService;
 
     // 공원 목록 페이지
     @GetMapping("/ParkList")

@@ -60,6 +60,7 @@ CREATE table seller (
   	failCount INT default 0,
   	lockTimes TIMESTAMP
 );
+
 INSERT INTO seller (businessNum,username,name,password,businessName) VALUES
 ('B001', 'user1','password1','사용자1','Business A'),
 ('B002', 'user2','password2','사용자2','Business B'),
@@ -87,26 +88,25 @@ SELECT * FROM admin;
 
 
 ######## 제품 테이블 ########
-
+DROP TABLE product;
 CREATE TABLE product (
-	idx bigint(10) PRIMARY KEY AUTO_INCREMENT,
-	productNum varchar(10) not null,
-	businessName varchar(100) not null,
-	productName varchar(50) UNIQUE KEY not null,
-	quantity int(10) not null,
-	cost bigint(100),
-	FOREIGN KEY (businessName) REFERENCES seller (businessName)
-	ON DELETE CASCADE
-	ON UPDATE CASCADE
+    idx bigint(10) PRIMARY KEY AUTO_INCREMENT,
+    productNum varchar(10) not null,
+    businessName varchar(100) not null,
+    productName varchar(50) not null,
+    quantity int(10) not null,
+    cost bigint(100),
+    parkId BIGINT(100),
+    FOREIGN KEY (businessName) REFERENCES seller (businessName)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+    FOREIGN KEY (parkId) REFERENCES parkList(parkId)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+    CONSTRAINT uniqueProduct UNIQUE (productName, parkId)  -- 상품 이름과 공원 ID로 복합 UNIQUE 키 설정
 );
--- product 테이블에 더미 데이터 추가
-INSERT INTO product (productNum, businessName, productName, quantity, cost) VALUES
-('P001', 'Business A', '상품 A1', 10, 15000),
-('P002', 'Business A', '상품 A2', 20, 25000),
-('P003', 'Business B', '상품 B1', 15, 30000),
-('P004', 'Business B', '상품 B2', 5, 40000),
-('P005', 'Business C', '상품 C1', 12, 20000),
-('P006', 'Business C', '상품 C2', 18, 35000);
+SELECT * FROM product;
+
 
 # 예약 테이블 생성 
 DROP TABLE reservation;
@@ -222,11 +222,11 @@ CREATE TABLE inquiry (
   	ofile varchar(200),
   	sfile varchar(100),
   	inquiryPassword varchar(20) not null,
-  	FOREIGN KEY (username) REFERENCES user (username),
-  	FOREIGN KEY (username) REFERENCES admin (username)
+  	FOREIGN KEY (username) REFERENCES user (username)  	
   	ON DELETE CASCADE
 	ON UPDATE CASCADE
 );
+
 ######## 장바구 ##########
 DROP TABLE cart;
 CREATE TABLE cart (
@@ -249,3 +249,15 @@ ALTER TABLE cart MODIFY username VARCHAR(100) NOT NULL;
 
 ALTER TABLE product ADD CONSTRAINT unique_productNum UNIQUE (productNum);
 SHOW CREATE TABLE cart;
+
+drop table parkList;
+CREATE TABLE parkList (
+    parkId BIGINT(100) PRIMARY KEY AUTO_INCREMENT,
+    parkNm VARCHAR(100) NOT NULL,
+    parkSe VARCHAR(30),
+    lnmadr VARCHAR(200),
+    parkAr VARCHAR(30),
+    latitude DOUBLE,
+    longitude DOUBLE
+);
+select * from parkList;
