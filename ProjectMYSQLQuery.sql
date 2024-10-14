@@ -25,13 +25,15 @@ CREATE table user (
   	detailAddress varchar(200),
   	regidate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   	authority varchar(20) default 'ROLE_USER',
-  	enabled TINYINT(1) default 1,
+  	enabled int(1) default 1,
   	provider varchar(20) default 'LOCAL',
   	providerId varchar(100),
-  	isLocked TINYINT(1) default 0,
+  	isLocked int(1) default 0,
   	failCount INT default 0,
   	lockTimes TIMESTAMP
 );
+
+
 -- user 테이블에 더미 데이터 추가
 INSERT INTO user (username, password, email, name) VALUES
 ('user1', 'password1', 'user1@example.com', '사용자 1'),

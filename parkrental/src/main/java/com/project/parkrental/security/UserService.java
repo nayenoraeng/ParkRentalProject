@@ -2,7 +2,10 @@ package com.project.parkrental.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,7 +13,10 @@ import java.util.List;
 @Service
 public class UserService {
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
+
+    @Autowired
+    private AuthenticationFacade authenticationFacade;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -46,5 +52,12 @@ public class UserService {
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("사용자가 존재하지 않습니다."));
+    }
+
+    public UserDto getUserDetails() {
+        String username = authenticationFacade.getAuthenticatedUsername();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(()-> new UsernameNotFoundException("사용자가 존재하지 않습니다."));
+        return new UserDto(user);
     }
 }

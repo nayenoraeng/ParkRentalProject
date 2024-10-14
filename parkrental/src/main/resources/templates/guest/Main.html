@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -52,13 +53,20 @@
         <!-- 오른쪽에 위치할 메뉴 -->
         <ul class="right-menu">
             <!-- Translation buttons for the whole page -->
-            <div class="language-buttons">
+            <li class="language-buttons">
                 <button id="translate-en">English</button>
                 <button id="translate-ja">Japanese</button> <!-- 일본어 버튼으로 변경 -->
                 <button id="translate-ko">Korean</button>
-            </div>
-            <li><a href="#">로그인</a></li>
-            <li><a href="#">회원가입</a></li>
+            </li>
+            <li sec:authorize="isAnonymous()"><a th:href="@{/guest/Login}">로그인</a></li>
+            <li sec:authorize="isAnonymous()"><a th:href="@{/guest/Signup}">회원가입</a></li>
+            <!-- 로그인 시 메뉴 변경 -->
+            <li sec:authorize="isAuthenticated()">
+                <a th:href="@{/guest/Logout}" onclick="deleteJWTCookie(); return confirm('로그아웃하시겠습니까?')">로그아웃</a>
+            </li>
+            <li sec:authorize="isAuthenticated()"><a th:href="@{/user/userpage}">마이페이지</a></li>
+            <li sec:authorize="hasRole('ROLE_SELLER')"><a th:href="@{/seller/sellerpage}">판매자페이지</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/user/membermnger}">회원관리</a></li>
         </ul>
     </nav>
 
@@ -625,6 +633,11 @@ function translateText(text, targetLang, callback) {
     });
 });
 </script>
-
+<script th:inline="javascript">
+    function deleteJWTCookie() {
+        document.cookie = "JWT; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    }
+    window.onload = deleteJWTCookie;
+</script>
 </body>
 </html>
