@@ -63,11 +63,8 @@ public class UserService {
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        System.out.println("username in getUserdetailmethod: " + username);
-
         User user = userRepository.findByUsername(username)
                 .orElseThrow(()-> new UsernameNotFoundException("사용자가 존재하지 않습니다."));
-        System.out.println("User found: " + user);  // 추가된 로그
         return new UserDto(user);
     }
 

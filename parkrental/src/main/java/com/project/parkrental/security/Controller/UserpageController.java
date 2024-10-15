@@ -41,8 +41,6 @@ public class UserpageController {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-        System.out.println("User authenticated: " + SecurityContextHolder.getContext().getAuthentication().getName());
-
 
         if (principal == null) {
             System.out.println("principal is null");
@@ -51,7 +49,6 @@ public class UserpageController {
             return "user/userpageEdit";
         }
 
-        System.out.println("username?: " + username);
         User existingUser = userService.findByUsername(username);
         if (existingUser == null) {
             throw new RuntimeException("로그인된 사용자를 찾을 수 없습니다.");

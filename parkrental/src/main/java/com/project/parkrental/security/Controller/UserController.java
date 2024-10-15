@@ -91,7 +91,6 @@ public class UserController {
                     new UsernamePasswordAuthenticationToken(username, password)
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            System.out.println("login success");
 
             String jwtToken = jwtUtil.generateToken(username);
             Cookie cookie = new Cookie("JWT", jwtToken);
@@ -99,9 +98,6 @@ public class UserController {
             cookie.setSecure(true);
             cookie.setPath("/");
             res.addCookie(cookie);
-
-            System.out.println("Auth success. JwtToken stored to cookie: " + jwtToken);
-            System.out.println("cookie: " + cookie);
 
             return "redirect:/";
         } catch (AuthenticationException e) {
