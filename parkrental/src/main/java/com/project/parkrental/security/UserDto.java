@@ -13,6 +13,7 @@ public class UserDto {
     private String address;
     private String detailAddress;
 
+    public UserDto() {}
     public UserDto(User user) {
         this.name = user.getName();
         this.username = user.getUsername();

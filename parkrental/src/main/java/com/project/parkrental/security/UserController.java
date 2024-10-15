@@ -98,7 +98,6 @@ public class UserController {
             cookie.setHttpOnly(true);
             cookie.setSecure(true);
             cookie.setPath("/");
-            cookie.setMaxAge(60*30); // 쿠키 만료시간 30분
             res.addCookie(cookie);
 
             System.out.println("Auth success. JwtToken stored to cookie: " + jwtToken);

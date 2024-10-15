@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>공원</title>
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=485549cb66c6d13697d4b008125bc810"></script>
+    <script th:src="@{/js/jwtHander.js}"></script>
 </head>
     <link rel="stylesheet" th:href="@{/css/Footer.css}" />
     <link rel="stylesheet" th:href="@{/css/MainImages.css}" />
@@ -633,11 +634,6 @@ function translateText(text, targetLang, callback) {
     });
 });
 </script>
-<script th:inline="javascript">
-    function deleteJWTCookie() {
-        document.cookie = "JWT; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    }
-    window.onload = deleteJWTCookie;
-</script>
+
 </body>
 </html>

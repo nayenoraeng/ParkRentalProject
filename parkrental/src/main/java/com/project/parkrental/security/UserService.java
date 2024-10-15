@@ -1,12 +1,13 @@
 package com.project.parkrental.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -16,20 +17,20 @@ public class UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private AuthenticationFacade authenticationFacade;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
     public ResponseEntity<?> registerNewUser (User user) {
         if (userRepository.existsByUsername(user.getUsername())) {
-            throw new RuntimeException("이미 동일한 이름의 사용자가 있습니다. 로그인 해 주세요");
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("이미 동일한 이름의 사용자가 있습니다. 로그인 해 주세요.");
         }
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new RuntimeException("이미 동일한 이메일의 사용자가 존재합니다. 로그인 해 주세요.");
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("이미 동일한 이름의 사용자가 있습니다. 로그인 해 주세요.");
         }
         if (userRepository.existsByPhoneNum(user.getPhoneNum())) {
-            throw new RuntimeException("이미 동일한 전화번호의 사용자가 존재합니다. 로그인 해 주세요.");
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("이미 동일한 이름의 사용자가 있습니다. 로그인 해 주세요.");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setAuthority("ROLE_USER");
@@ -55,9 +56,22 @@ public class UserService {
     }
 
     public UserDto getUserDetails() {
-        String username = authenticationFacade.getAuthenticatedUsername();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("사용자가 인증되지 않았습니다.");
+        }
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        System.out.println("username in getUserdetailmethod: " + username);
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(()-> new UsernameNotFoundException("사용자가 존재하지 않습니다."));
+        System.out.println("User found: " + user);  // 추가된 로그
         return new UserDto(user);
+    }
+
+    public void updateUser(User user) {
+        userRepository.save(user);
     }
 }

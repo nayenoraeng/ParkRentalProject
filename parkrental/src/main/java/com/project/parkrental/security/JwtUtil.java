@@ -16,6 +16,8 @@ import java.security.Key;
 @Component
 public class JwtUtil {
     private final String SECRET_KEY = "cdd25add35d284a7ef5f06ace359bfe5241dd3b2151dae03e9487155c9c8ada7";
+    private final long EXPIRATION_TIME = 1000*60*15; //15분
+    private final long REFRESH_TIME = 1000*60*30; //30분
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -48,8 +50,13 @@ public class JwtUtil {
 
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
-        String token = createToken(claims, username);
-        System.out.println("JWT generated:" + token);
+        String token = createToken(claims, username, EXPIRATION_TIME);
+        return token;
+    }
+
+    public String generateRefreshToken (String username) {
+        Map<String, Object> claims = new HashMap<>();
+        String token = createToken(claims, username, REFRESH_TIME);
         return token;
     }
 
@@ -57,7 +64,7 @@ public class JwtUtil {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    private String createToken(Map<String, Object> claims, String subject) {
+    private String createToken(Map<String, Object> claims, String subject, long expirationTime) {
         byte[] keyBytes = SECRET_KEY.getBytes(StandardCharsets.UTF_8);
         Key key = Keys.hmacShaKeyFor(keyBytes);
 
@@ -65,7 +72,7 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis()+ 1000*60*30)) // 만료시간: 30분
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME)) // 만료시간: 15분
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -73,6 +80,10 @@ public class JwtUtil {
     public Boolean validateToken(String token, String username) {
         final String extractedUsername = extractUsername(token);
         return (extractedUsername.equals(username) && !isTokenExpired(token));
+    }
+
+    public Boolean validateRefreshToken(String token) {
+        return !isTokenExpired(token);
     }
 }
 
