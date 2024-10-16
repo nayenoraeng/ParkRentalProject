@@ -1,5 +1,6 @@
 package com.project.parkrental.security;
 
+import com.project.parkrental.security.Service.MyUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -46,7 +47,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (jwt != null) {
             try {
                 username = jwtUtil.extractUsername(jwt);
-                System.out.println("extracted username: " + username);
             } catch (ExpiredJwtException e) {
                 System.out.println("JWT Expired. Removing cookie");
                 Cookie cookie = new Cookie("JWT", null);

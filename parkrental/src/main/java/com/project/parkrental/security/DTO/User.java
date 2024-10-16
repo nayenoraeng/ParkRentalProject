@@ -1,4 +1,4 @@
-package com.project.parkrental.security;
+package com.project.parkrental.security.DTO;
 
 
 import jakarta.persistence.*;

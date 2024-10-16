@@ -1,15 +1,15 @@
-package com.project.parkrental.security;
+package com.project.parkrental.security.Service;
 
+import com.project.parkrental.security.DTO.User;
+import com.project.parkrental.security.DTO.UserDto;
+import com.project.parkrental.security.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
-
-import java.util.List;
 
 @Service
 public class UserService {
@@ -52,7 +52,7 @@ public class UserService {
     }
 
     public User findByUsername(String username) {
-        return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("사용자가 존재하지 않습니다."));
+        return userRepository.findByUsername(username);
     }
 
     public UserDto getUserDetails() {
@@ -62,9 +62,8 @@ public class UserService {
         }
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username);
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(()-> new UsernameNotFoundException("사용자가 존재하지 않습니다."));
         return new UserDto(user);
     }
 

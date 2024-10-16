@@ -1,5 +1,6 @@
 package com.project.parkrental.security;
 
+import com.project.parkrental.security.Service.MyUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

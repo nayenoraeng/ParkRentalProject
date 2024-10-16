@@ -1,5 +1,8 @@
-package com.project.parkrental.security;
+package com.project.parkrental.security.Controller;
 
+import com.project.parkrental.security.Service.UserService;
+import com.project.parkrental.security.DTO.User;
+import com.project.parkrental.security.DTO.UserDto;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;

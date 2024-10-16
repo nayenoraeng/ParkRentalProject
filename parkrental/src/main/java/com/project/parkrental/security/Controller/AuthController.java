@@ -1,5 +1,6 @@
-package com.project.parkrental.security;
+package com.project.parkrental.security.Controller;
 
+import com.project.parkrental.security.JwtUtil;
 import com.project.parkrental.security.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
