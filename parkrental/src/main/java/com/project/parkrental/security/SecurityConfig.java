@@ -1,5 +1,6 @@
 package com.project.parkrental.security;
 
+import com.project.parkrental.security.Service.MyUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -48,7 +49,8 @@ public class SecurityConfig {
                 .securityContext(securityContext -> securityContext
                         .securityContextRepository(new HttpSessionSecurityContextRepository()))
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/", "/css/**", "/js/**", "/image/**","/guest/**").permitAll()
+                        .requestMatchers("/", "/css/**", "/files/**", "/js/**", "/image/**","/guest/**",
+                                "/ParkList/**", "/ParkDetail/**", "/Product/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/seller/**").hasRole("SELLER")

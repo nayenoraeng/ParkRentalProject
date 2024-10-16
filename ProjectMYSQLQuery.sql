@@ -13,8 +13,8 @@ GRANT ALL PRIVILEGES ON project.* TO 'project'@'localhost';
 
 
 # 유저(소비자) 테이블
-DROP TABLE user;
-CREATE table user (
+DROP TABLE User;
+CREATE table User (
 	idx BIGINT(10) primary key AUTO_INCREMENT,
 	username VARCHAR(50) UNIQUE KEY not null,
 	password varchar(100) not null,
@@ -25,15 +25,17 @@ CREATE table user (
   	detailAddress varchar(200),
   	regidate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   	authority varchar(20) default 'ROLE_USER',
-  	enabled TINYINT(1) default 1,
+  	enabled int(1) default 1,
   	provider varchar(20) default 'LOCAL',
   	providerId varchar(100),
-  	isLocked TINYINT(1) default 0,
+  	isLocked int(1) default 0,
   	failCount INT default 0,
   	lockTimes TIMESTAMP
 );
+
+
 -- user 테이블에 더미 데이터 추가
-INSERT INTO user (username, password, email, name) VALUES
+INSERT INTO User (username, password, email, name) VALUES
 ('user1', 'password1', 'user1@example.com', '사용자 1'),
 ('user2', 'password2', 'user2@example.com', '사용자 2'),
 ('user3', 'password3', 'user3@example.com', '사용자 3');
@@ -49,14 +51,17 @@ CREATE table seller (
 	password varchar(100) not null,
 	name varchar(50) not null,
 	businessName varchar(100) UNIQUE KEY not null,
+	phoneNum varchar(15) not null,
 	email varchar(50),
 	postcode varchar(10),
   	address varchar(200),
   	detailAddress varchar(200),
   	regidate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   	authority varchar(20) default 'ROLE_SELLER',
-  	enabled TINYINT(1) default 1,
-  	isLocked TINYINT(1) default 0,
+  	enabled INT(1) default 1,
+  	provider varchar(20) default 'LOCAL',
+  	providerId varchar(100),
+  	isLocked INT(1) default 0,
   	failCount INT default 0,
   	lockTimes TIMESTAMP
 );
@@ -105,7 +110,7 @@ CREATE TABLE product (
     ON UPDATE CASCADE,
     CONSTRAINT uniqueProduct UNIQUE (productName, parkId)  -- 상품 이름과 공원 ID로 복합 UNIQUE 키 설정
 );
-SELECT * FROM product;
+SELECT * FROM Product;
 
 
 # 예약 테이블 생성 
@@ -129,7 +134,7 @@ CREATE TABLE reservation (
 
 ######## 결제 ########
 
-CREATE TABLE transaction (
+CREATE TABLE Transaction (
 	idx bigint(10) PRIMARY KEY AUTO_INCREMENT,
 	reserveNum int not null,
 	costAll BIGINT(100),

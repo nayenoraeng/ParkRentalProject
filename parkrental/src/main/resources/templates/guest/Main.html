@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>공원</title>
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=485549cb66c6d13697d4b008125bc810"></script>
+    <script th:src="@{/js/jwtHander.js}"></script>
 </head>
     <link rel="stylesheet" th:href="@{/css/Footer.css}" />
     <link rel="stylesheet" th:href="@{/css/MainImages.css}" />
@@ -52,6 +53,12 @@
         </ul>
         <!-- 오른쪽에 위치할 메뉴 -->
         <ul class="right-menu">
+            <!-- Translation buttons for the whole page -->
+            <li class="language-buttons">
+                <button id="translate-en">English</button>
+                <button id="translate-ja">Japanese</button> <!-- 일본어 버튼으로 변경 -->
+                <button id="translate-ko">Korean</button>
+            </li>
             <li sec:authorize="isAnonymous()"><a th:href="@{/guest/Login}">로그인</a></li>
             <li sec:authorize="isAnonymous()"><a th:href="@{/guest/Signup}">회원가입</a></li>
             <!-- 로그인 시 메뉴 변경 -->

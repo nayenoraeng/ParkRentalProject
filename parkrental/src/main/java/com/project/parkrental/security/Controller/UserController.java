@@ -1,5 +1,8 @@
-package com.project.parkrental.security;
+package com.project.parkrental.security.Controller;
 
+import com.project.parkrental.security.JwtUtil;
+import com.project.parkrental.security.Service.UserService;
+import com.project.parkrental.security.DTO.User;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,11 +14,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -26,9 +26,6 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
 
     @Autowired
     private AuthenticationManager authManager;
@@ -45,7 +42,6 @@ public class UserController {
     @PostMapping("/checkUsername")
     @ResponseBody
     public String checkUsername(@RequestParam("username") String username) {
-        System.out.println("AJAX 요청 수신 - Username: " + username);
         boolean exist = userService.isUsernameTaken(username);
         return exist? "이미 사용중인 아이디입니다.":"사용가능한 아이디입니다.";
     }
@@ -83,30 +79,24 @@ public class UserController {
         return "redirect:/guest/Login";
     }
 
-    @PostMapping("Login")
-    public String authUser(@RequestParam String username, @RequestParam String password, HttpServletResponse res) {
+    @PostMapping("/Login")
+    public String authUser(@RequestParam("username") String username, @RequestParam("password") String password, HttpServletResponse res) {
         try {
-            System.out.println("login method called");
             Authentication authentication = authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(username, password)
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            System.out.println("login success");
 
             String jwtToken = jwtUtil.generateToken(username);
             Cookie cookie = new Cookie("JWT", jwtToken);
             cookie.setHttpOnly(true);
             cookie.setSecure(true);
             cookie.setPath("/");
-            cookie.setMaxAge(60*30); // 쿠키 만료시간 30분
             res.addCookie(cookie);
-
-            System.out.println("Auth success. JwtToken stored to cookie: " + jwtToken);
-            System.out.println("cookie: " + cookie);
 
             return "redirect:/";
         } catch (AuthenticationException e) {
-            return "redirect:/guest/Login";
+            return "redirect:/guest/Login?error=true";
         }
     }
 
@@ -127,4 +117,5 @@ public class UserController {
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
+
 }
