@@ -5,7 +5,9 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "product")
+@Table(name = "product", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"productName", "parkId"})
+})
 public class Product {
 
     @Id
@@ -28,8 +30,8 @@ public class Product {
     @Column(name = "cost")
     private Long cost;
 
-    @ManyToOne
-    @JoinColumn(name = "parkId", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "parkId", referencedColumnName = "parkId")
     private ParkList parkList;
 
     // 기본 생성자
@@ -44,5 +46,10 @@ public class Product {
         this.quantity = quantity;
         this.cost = cost;
         this.parkList = parkList;
+    }
+
+    // parkId 값을 반환하는 getter
+    public Long getParkId() {
+        return this.parkList.getParkId();
     }
 }

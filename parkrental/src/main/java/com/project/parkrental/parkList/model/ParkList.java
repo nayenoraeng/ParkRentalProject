@@ -1,17 +1,12 @@
 package com.project.parkrental.parkList.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Data
@@ -52,6 +47,10 @@ public class ParkList {
     // 사용자와의 거리 저장 (DB에 저장하지 않으므로 @Transient 적용)
     @Transient
     private double distanceFromUser;
+
+    // Product와의 양방향 연관관계 설정 (Product는 ParkList를 참조)
+    @OneToMany(mappedBy = "parkList", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Product> products;
 
     public ParkList(String parkNm, String parkSe, String lnmadr, String parkAr, Double latitude, Double longitude) {
         this.parkNm = parkNm;

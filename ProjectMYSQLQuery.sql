@@ -20,15 +20,16 @@ CREATE table user (
 	password varchar(100) not null,
 	name varchar(50) not null,
 	email varchar(50),
+	phoneNum varchar(15) not null,
 	postcode varchar(10),
   	address varchar(200),
   	detailAddress varchar(200),
   	regidate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   	authority varchar(20) default 'ROLE_USER',
-  	enabled TINYINT(1) default 1,
+  	enabled INT(1) default 1,
   	provider varchar(20) default 'LOCAL',
   	providerId varchar(100),
-  	isLocked TINYINT(1) default 0,
+  	isLocked INT(1) default 0,
   	failCount INT default 0,
   	lockTimes TIMESTAMP
 );
@@ -86,6 +87,18 @@ INSERT into admin (idx, username, password, email, authority)
 # 관리자 테이블 확인
 SELECT * FROM admin;
 
+###### 공원 목록 ######
+drop table parkList;
+CREATE TABLE parkList (
+    parkId BIGINT(100) PRIMARY KEY AUTO_INCREMENT,
+    parkNm VARCHAR(100) NOT NULL,
+    parkSe VARCHAR(30),
+    lnmadr VARCHAR(200),
+    parkAr VARCHAR(30),
+    latitude DOUBLE,
+    longitude DOUBLE
+);
+select * from parkList;
 
 ######## 제품 테이블 ########
 DROP TABLE product;
@@ -128,7 +141,7 @@ CREATE TABLE reservation (
 
 
 ######## 결제 ########
-
+drop table transaction;
 CREATE TABLE transaction (
 	idx bigint(10) PRIMARY KEY AUTO_INCREMENT,
 	reserveNum int not null,
@@ -172,6 +185,7 @@ create table commuComment (
 );
 
 # 커뮤니티 게시판 좋아요 테이블
+drop table commuLike;
 CREATE TABLE commuLike (
 	likeCount INT(10) default 0,
 	username VARCHAR(50) NOT NULL,
@@ -227,37 +241,26 @@ CREATE TABLE inquiry (
 	ON UPDATE CASCADE
 );
 
-######## 장바구 ##########
-DROP TABLE cart;
+######## 장바구니 ##########
+DROP table cart;
 CREATE TABLE cart (
     idx BIGINT(10) PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(50) NOT NULL,
-    product_num VARCHAR(10) NOT NULL,
-    product_name VARCHAR(50) NOT NULL,
-    product_price BIGINT(20) NOT NULL,
+    username VARCHAR(50) NOT NULL,  
+    productNum VARCHAR(10) NOT NULL, 
+    productName VARCHAR(50) NOT NULL,
+    productPrice BIGINT(20) NOT NULL,
     quantity INT(10) NOT NULL DEFAULT 1,
-    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    parkId BIGINT(100) NOT NULL,
     FOREIGN KEY (username) REFERENCES user(username) 
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    FOREIGN KEY (product_num) REFERENCES product(productNum) 
+    FOREIGN KEY (productNum, parkId) REFERENCES product(productNum, parkId) 
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
-ALTER TABLE cart DROP FOREIGN KEY cart_ibfk_2;
-ALTER TABLE cart MODIFY username VARCHAR(100) NOT NULL;
+## 이거 추가해야 카트 테이블 생성됨;; ##
+ALTER TABLE product ADD INDEX (productNum);
+CREATE INDEX idxProductNumParkId ON product (productNum, parkId);
 
-ALTER TABLE product ADD CONSTRAINT unique_productNum UNIQUE (productNum);
-SHOW CREATE TABLE cart;
 
-drop table parkList;
-CREATE TABLE parkList (
-    parkId BIGINT(100) PRIMARY KEY AUTO_INCREMENT,
-    parkNm VARCHAR(100) NOT NULL,
-    parkSe VARCHAR(30),
-    lnmadr VARCHAR(200),
-    parkAr VARCHAR(30),
-    latitude DOUBLE,
-    longitude DOUBLE
-);
-select * from parkList;
+SELECT productNum FROM cart;
