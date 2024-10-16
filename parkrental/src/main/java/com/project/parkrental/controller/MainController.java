@@ -21,7 +21,7 @@ public class MainController {
         // 물품 목록 등의 데이터를 추가할 수 있음
         // 예시: model.addAttribute("rentalItems", rentalService.getAllItems());
 
-        return "guest/rantal"; // guest/rantal.html 템플릿을 렌더링
+        return "guest/rantal"; // guest/rental.html 템플릿을 렌더링
     }
     @GetMapping("/guest/cart") // "/guest/cart" 요청을 처리
     public String cartPage(Model model) {

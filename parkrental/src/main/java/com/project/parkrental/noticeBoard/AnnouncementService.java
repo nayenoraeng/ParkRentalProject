@@ -1,6 +1,9 @@
 package com.project.parkrental.noticeBoard;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,6 +51,32 @@ public class AnnouncementService {
             return null; // 존재하지 않는 경우 null 반환
         }
     }
+    // 페이징된 공지사항 목록을 가져오는 메서드
+    public Page<Announcement> getAnnouncementsPaged(int page, int size, String search) {
+        Pageable pageable = PageRequest.of(page, size);  // 페이지 번호와 페이지 크기를 설정
+        if (search != null && !search.isEmpty()) {
+            return searchAnnouncements(search, pageable); // 검색어가 있을 경우 검색 수행
+        } else {
+            return announcementRepository.findAll(pageable); // 검색어가 없으면 전체 목록 반환
+        }
+    }
+
+    // 검색 기능: 제목 또는 내용에서 검색
+    public Page<Announcement> searchAnnouncements(String keyword, Pageable pageable) {
+        return announcementRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
+    }
+
+    // 제목으로 검색
+    public Page<Announcement> searchAnnouncementsByTitle(String title, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return announcementRepository.findByTitleContaining(title, pageable);
+    }
+
+    // 내용으로 검색
+    public Page<Announcement> searchAnnouncementsByContent(String content, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return announcementRepository.findByContentContaining(content, pageable);
+    }
 
     // 공지사항 삭제
     public void deleteAnnouncement(Long id) {
@@ -59,4 +88,19 @@ public class AnnouncementService {
         announcementRepository.save(announcement);
     }
 
+    public Announcement findById(Long idx) {
+        return null;
+    }
+
+    public void saveAnnouncement(Announcement announcement) {
+    }
+
+
+    // 검색 기능: 제목 또는 내용에서 검색
+    public Page<Announcement> searchAnnouncements(String search, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);  // Pageable 객체 생성
+
+        // 제목 또는 내용에 검색어가 포함된 공지사항을 찾는 메서드 호출
+        return announcementRepository.findByTitleContainingOrContentContaining(search, search, pageable);
+    }
 }

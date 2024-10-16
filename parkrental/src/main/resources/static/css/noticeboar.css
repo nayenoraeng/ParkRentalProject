@@ -32,11 +32,12 @@ header p {
     font-size: 1.2rem;
 }
     table {
-        width: 100%;
+        width: 80%;
         max-width: 1200px; /* 테이블의 최대 너비 설정 */
         margin: 20px auto; /* 상하로 20px, 좌우는 자동으로 정렬 */
         border-collapse: collapse;
     }
+
 
     th, td {
         padding: 15px; /* 패딩을 증가시켜 셀 크기 증가 */
@@ -113,14 +114,15 @@ header p {
     }
 
     .pagination li {
-        margin: 0 5px;
-        font-size: 1.2rem;
+        margin: 0 3px; /* 페이징 버튼 간 간격 줄이기 */
+        font-size: 0.9rem; /* 폰트 크기 줄이기 */
     }
+
 
     .pagination a {
         color: #f26D3D;
         text-decoration: none;
-        padding: 5px 10px;
+        padding: 5px 8px;
         border: 1px solid #f26D3D;
         border-radius: 5px;
     }
@@ -142,7 +144,7 @@ header p {
     }
 
     .search-container select, .search-container input, .search-container button {
-        font-size: 1rem;
+        font-size: 0.9rem;
         padding: 10px;
         margin: 0 5px;
         border: 1px solid #f26D3D;

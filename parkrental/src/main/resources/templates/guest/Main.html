@@ -1,6 +1,9 @@
 <!DOCTYPE html>
+
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
+
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -35,7 +38,7 @@
                 </ul>
             </li>
             <li>
-                <a href="/guest/rantal">물품 대여</a>
+                <a href="/guest/rental">물품 대여</a>
                 <ul class="dropdown">
                     <li><a href="#">텐트</a></li>
                     <li><a href="#">자전거</a></li>
@@ -59,6 +62,7 @@
                 <button id="translate-ja">Japanese</button> <!-- 일본어 버튼으로 변경 -->
                 <button id="translate-ko">Korean</button>
             </li>
+
             <li sec:authorize="isAnonymous()"><a th:href="@{/guest/Login}">로그인</a></li>
             <li sec:authorize="isAnonymous()"><a th:href="@{/guest/Signup}">회원가입</a></li>
             <!-- 로그인 시 메뉴 변경 -->
