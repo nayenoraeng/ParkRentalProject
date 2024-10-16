@@ -19,16 +19,17 @@ CREATE table user (
 	username VARCHAR(50) UNIQUE KEY not null,
 	password varchar(100) not null,
 	name varchar(50) not null,
+	phoneNum varchar(15) not null,
 	email varchar(50),
 	postcode varchar(10),
   	address varchar(200),
   	detailAddress varchar(200),
   	regidate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   	authority varchar(20) default 'ROLE_USER',
-  	enabled TINYINT(1) default 1,
+  	enabled INT(1) default 1,
   	provider varchar(20) default 'LOCAL',
   	providerId varchar(100),
-  	isLocked TINYINT(1) default 0,
+  	isLocked INT(1) default 0,
   	failCount INT default 0,
   	lockTimes TIMESTAMP
 );
@@ -55,8 +56,8 @@ CREATE table seller (
   	detailAddress varchar(200),
   	regidate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   	authority varchar(20) default 'ROLE_SELLER',
-  	enabled TINYINT(1) default 1,
-  	isLocked TINYINT(1) default 0,
+  	enabled INT(1) default 1,
+  	isLocked INT(1) default 0,
   	failCount INT default 0,
   	lockTimes TIMESTAMP
 );
@@ -106,9 +107,7 @@ CREATE TABLE product (
     CONSTRAINT uniqueProduct UNIQUE (productName, parkId)  -- 상품 이름과 공원 ID로 복합 UNIQUE 키 설정
 );
 SELECT * FROM product;
-
-
-# 예약 테이블 생성 
+# 예약 테이블 생성
 DROP TABLE reservation;
 CREATE TABLE reservation (
 	idx BIGINT(10) PRIMARY KEY AUTO_INCREMENT,
@@ -125,10 +124,21 @@ CREATE TABLE reservation (
 	ON DELETE CASCADE
 	ON UPDATE CASCADE
 );
-
-
+ALTER TABLE reservation DROP FOREIGN KEY reservation_ibfk_2;
+# API 정보 가져와서 공원 리스트로 저장하기
+drop table parkList;
+CREATE TABLE parkList (
+    parkId BIGINT(100) PRIMARY KEY AUTO_INCREMENT,
+    parkNm VARCHAR(100) NOT NULL,
+    parkSe VARCHAR(30),
+    lnmadr VARCHAR(200),
+    parkAr VARCHAR(30),
+    latitude DOUBLE,
+    longitude DOUBLE
+);
+select * from parkList;
 ######## 결제 ########
-
+DROP TABLE transaction;
 CREATE TABLE transaction (
 	idx bigint(10) PRIMARY KEY AUTO_INCREMENT,
 	reserveNum int not null,
@@ -172,6 +182,7 @@ create table commuComment (
 );
 
 # 커뮤니티 게시판 좋아요 테이블
+DROP TABLE commuLike;
 CREATE TABLE commuLike (
 	likeCount INT(10) default 0,
 	username VARCHAR(50) NOT NULL,
@@ -211,9 +222,10 @@ INSERT INTO announcement (username, title, content, postdate, ofile, sfile) VALU
 DROP TABLE inquiry;
 CREATE TABLE inquiry (
 	idx bigint(10) PRIMARY KEY AUTO_INCREMENT,
-	parentIdx int(10) default 0,
+	inquiryReRef bigint(10) default 0,
+	inquiryReLev int(10) DEFAULT 0 NOT NULL,
+	inquiryReSeq int(10) DEFAULT 0 NOT NULL,
 	username varchar(100) not null,
- 	parentUsername varchar(100),
  	title varchar(50) not null,
 	content varchar(1000) not null,
 	postdate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -222,6 +234,8 @@ CREATE TABLE inquiry (
   	ofile varchar(200),
   	sfile varchar(100),
   	inquiryPassword varchar(20) not null,
+  	parentId bigint,
+  	FOREIGN KEY (parentId) REFERENCES inquiry(idx), 
   	FOREIGN KEY (username) REFERENCES user (username)  	
   	ON DELETE CASCADE
 	ON UPDATE CASCADE

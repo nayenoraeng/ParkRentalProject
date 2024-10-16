@@ -17,6 +17,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static org.checkerframework.checker.nullness.Opt.orElseThrow;
 
 @Service
 public class InquiryService {
@@ -31,20 +34,29 @@ public class InquiryService {
 
         // Inquiry 객체를 InquiryResponseDTO로 변환
         Page<InquiryResponseDTO> inquiryResponseDTOs = inquiryPage.map(
-                inquiry -> new InquiryResponseDTO(
-                        inquiry.getIdx(),          // 필요한 필드로 변경
-                        inquiry.getTitle(),        // 제목 필드 예시
-                        inquiry.getContent(),      // 내용 필드 예시
-                        inquiry.getPostdate(),
-                        inquiry.getViewCount()// 생성일 필드 예시
-                )
+                inquiry -> {
+                    List<ReplyResponseDTO> replies = inquiry.getReplies().stream()
+                            .map(reply -> new ReplyResponseDTO(
+                                    reply.getIdx(),          // 답글 ID
+                                    reply.getUsername(),     // 작성자
+                                    reply.getContent(),      // 내용
+                                    reply.getPostdate()      // 작성일
+                            ))
+                            .collect(Collectors.toList());
+
+                    return new InquiryResponseDTO(
+                            inquiry.getIdx(),
+                            inquiry.getTitle(),
+                            inquiry.getContent(),
+                            inquiry.getPostdate(),
+                            inquiry.getViewCount(),
+                            replies // 답글 목록 추가
+                    );
+                }
         );
 
         return inquiryResponseDTOs;
     }
-
-    //전체리스트 띄우기 (검색기능)
-
 
     //상세 보기
     public Inquiry inquiryView(Long idx){
@@ -63,9 +75,10 @@ public class InquiryService {
     {
 
         Inquiry inquiry = Inquiry.builder()
-                .parentIdx(inquiryCreate.getParentIdx())
+                .inquiryReRef(inquiryCreate.getInquiryReRef())
+                .inquiryReLev(inquiryCreate.getInquiryReLev() != null ? inquiryCreate.getViewCount() : 0)
+                .inquiryReSeq(inquiryCreate.getInquiryReSeq() != null ? inquiryCreate.getViewCount() : 0)
                 .username(inquiryCreate.getUsername())
-                .parentUsername(inquiryCreate.getParentUsername() != null ? inquiryCreate.getParentUsername() : null)
                 .title(inquiryCreate.getTitle())
                 .content(inquiryCreate.getContent())
                 .postdate(inquiryCreate.getPostdate())
@@ -118,9 +131,7 @@ public class InquiryService {
 
             Inquiry updatePost = Inquiry.builder()
                     .idx(inquiry.getIdx())
-                    .parentIdx(inquiryRequest.getParentIdx())
                     .username(inquiry.getUsername())
-                    .parentUsername(inquiry.getParentUsername())
                     .title(inquiryRequest.getTitle())
                     .content(inquiryRequest.getContent())
                     .postdate(inquiry.getPostdate())
@@ -137,4 +148,24 @@ public class InquiryService {
             throw new EntityNotFoundException("해당 ID의 게시글을 찾을 수 없습니다: " + idx);
         }
     }
+
+    //답글 쓰기
+//    @Transactional
+//    public Inquiry inquiryReply (Long parentId, InquiryRequestDTO requestDto){
+//        Inquiry parentInquiry = inquiryRepository.findByParentId(parentId);
+//
+//        Inquiry reply = Inquiry.builder()
+//                .username(requestDto.getUsername())
+//                .title(requestDto.getTitle())
+//                .content(requestDto.getContent())
+//                .inquiryReRef(parentInquiry.getInquiryReRef()) // 부모의 참조 ID 설정
+//                .inquiryReLev(parentInquiry.getInquiryReLev() + 1) // 부모의 레벨 + 1
+//                .inquiryReSeq(parentInquiry.getReplies().size() + 1) // 현재 답글 개수 + 1
+//                .ofile(requestDto.getOfile())
+//                .sfile(requestDto.getSfile())
+//                .parent(parentInquiry) // 부모 게시글 설정
+//                .build();
+//
+//        return inquiryRepository.save(reply);
+//    }
 }

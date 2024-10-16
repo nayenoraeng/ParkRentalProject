@@ -83,8 +83,8 @@ public class UserController {
         return "redirect:/guest/Login";
     }
 
-    @PostMapping("Login")
-    public String authUser(@RequestParam String username, @RequestParam String password, HttpServletResponse res) {
+    @PostMapping("/Login")
+    public String authUser(@RequestParam("username") String username, @RequestParam("password") String password, HttpServletResponse res) {
         try {
             System.out.println("login method called");
             Authentication authentication = authManager.authenticate(
