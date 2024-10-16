@@ -1,9 +1,12 @@
 package com.project.parkrental.noticeBoard;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -11,19 +14,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-
+import java.awt.print.Pageable;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Controller
 public class AnnouncementController {
@@ -31,13 +32,35 @@ public class AnnouncementController {
     @Autowired
     private AnnouncementService announcementService;
 
-    // 공지사항 목록 페이지
+    // 공지사항 목록 페이지 (페이징 기능 추가)
     @GetMapping("/guest/noticeList")
-    public String listAnnouncements(Model model) {
-        List<Announcement> announcements = announcementService.getAllAnnouncements();
-        model.addAttribute("announcements", announcements);
-        return "guest/noticeList";
+    public String listAnnouncements(Model model,
+                                    @RequestParam(defaultValue = "0") int page,  // 기본 페이지 0
+                                    @RequestParam(defaultValue = "10") int size,  // 기본 페이지 크기 10
+                                    @RequestParam(required = false) String search, // 검색어 추가
+                                    @RequestParam(required = false) String filter) { // 필터 추가
+        // 검색어가 있을 경우 페이징 처리된 공지사항 목록을 가져옴
+        Page<Announcement> announcementsPage;
+        if (search != null && !search.isEmpty()) {
+            if ("title".equals(filter)) {
+                announcementsPage = announcementService.searchAnnouncementsByTitle(search, page, size); // 제목으로 검색
+            } else if ("content".equals(filter)) {
+                announcementsPage = announcementService.searchAnnouncementsByContent(search, page, size); // 내용으로 검색
+            } else {
+                announcementsPage = announcementService.searchAnnouncements(search, page, size); // 제목 및 내용으로 검색
+            }
+        } else {
+            announcementsPage = announcementService.getAnnouncementsPaged(page, size, null); // 전체 목록 가져오기
+        }
+
+        // 페이징된 공지사항 목록을 모델에 추가
+        model.addAttribute("announcementsPage", announcementsPage);
+        model.addAttribute("search", search); // 검색어 모델에 추가
+        model.addAttribute("filter", filter); // 필터 모델에 추가
+
+        return "guest/noticeList";  // Thymeleaf 템플릿
     }
+
 
     // 공지사항 상세 페이지
     @GetMapping("/user/noticeDetail/{id}")
@@ -60,20 +83,18 @@ public class AnnouncementController {
     }
 
     @PostMapping("/guest/noticeList")
-    public String createAnnouncement(@ModelAttribute Announcement announcement,
-                                     @RequestParam("inquiry_ofile") MultipartFile file) throws IOException {
-
+    public String createAnnouncement1(@ModelAttribute Announcement announcement,
+                                      @RequestParam("inquiry_ofile") MultipartFile file) throws IOException {
         // 파일 업로드 처리
         if (!file.isEmpty()) {
             String originalFileName = file.getOriginalFilename(); // 원본 파일명
             String fileExtension = getFileExtension(originalFileName); // 파일 확장자 추출
 
             // 허용된 확장자 목록
-            List<String> allowedExtensions = Arrays.asList("pdf", "zip", "rar", "ppt", "pptx");
+            List<String> allowedExtensions = Arrays.asList("pdf", "zip", "rar", "ppt", "pptx", "png", "jpg", "jpeg", "gif");
 
             // 파일 확장자가 허용된 형식인지 확인
             if (!allowedExtensions.contains(fileExtension.toLowerCase())) {
-                // 허용되지 않는 파일 형식일 경우 예외 처리
                 throw new IOException("허용되지 않는 파일 형식입니다. PDF, ZIP, RAR, PPT 파일만 업로드 가능합니다.");
             }
 
@@ -86,10 +107,14 @@ public class AnnouncementController {
             // 파일 정보 저장
             announcement.setOfile(originalFileName); // 원본 파일명 저장
             announcement.setSfile(storedFileName);   // 서버에 저장된 파일명 저장
+
+            // 서버의 URL을 설정
+            String fileUrl = "http://localhost:8081/admin/files/" + storedFileName;
+            announcement.setFileUrl(fileUrl); // 새로운 필드에 URL 저장 (필드 추가 필요)
         }
 
         announcement.setUsername("admin"); // 작성자 설정
-        announcement.setPostdate(LocalDateTime.now()); // Set current date and time
+        announcement.setPostdate(LocalDateTime.now()); // 현재 날짜 및 시간 설정
         announcementService.createAnnouncement(announcement); // 공지사항 저장
         return "redirect:/guest/noticeList"; // 목록 페이지로 리다이렉트
     }
@@ -102,7 +127,6 @@ public class AnnouncementController {
         return "";
     }
 
-
     // 공지사항 수정 페이지
     @GetMapping("/admin/noticeEdit/{id}")
     public String showEditForm(@PathVariable("id") Long id, Model model) {
@@ -111,14 +135,56 @@ public class AnnouncementController {
         return "admin/noticeEdit"; // 수정된 경로 및 파일명
     }
 
-
     // 공지사항 수정 처리
-    @PostMapping("/notice/update/{idx}")
-    public String updateAnnouncement(@PathVariable("idx") Long idx, @ModelAttribute Announcement updatedAnnouncement) {
-        System.out.println("Updating announcement with IDX: " + idx); // 로그 추가
-        announcementService.updateAnnouncement(idx, updatedAnnouncement);
-        return "redirect:/guest/noticeList"; // 목록으로 리다이렉트
+    @PostMapping("/admin/notice/update/{idx}")
+    public String updateNotice(@PathVariable Long idx,
+                               @RequestParam String title,
+                               @RequestParam String content,
+                               @RequestParam(required = false) MultipartFile inquiry_ofile,
+                               @RequestParam(required = false) boolean deleteFile,
+                               RedirectAttributes redirectAttributes) {
+
+        Announcement announcement = announcementService.findById(idx);
+        if (announcement != null) {
+            announcement.setTitle(title);
+            announcement.setContent(content);
+
+            // Handle file deletion
+            if (deleteFile) {
+                // Add logic to delete the file from the server if necessary
+                File existingFile = new File(System.getProperty("user.home") + "/uploads/" + announcement.getSfile());
+                if (existingFile.exists()) {
+                    existingFile.delete(); // Delete the file from the filesystem
+                }
+                announcement.setOfile(null); // Assuming you store the original file name in 'ofile'
+                announcement.setSfile(null); // Assuming you store the secure file name in 'sfile'
+            }
+
+            // Handle file upload
+            if (!inquiry_ofile.isEmpty()) {
+                String fileName = inquiry_ofile.getOriginalFilename();
+                String uploadPath = System.getProperty("user.home") + "/uploads/"; // Define the upload path
+                File uploadFile = new File(uploadPath + fileName);
+
+                try {
+                    // Create directory if it does not exist
+                    new File(uploadPath).mkdirs();
+                    inquiry_ofile.transferTo(uploadFile); // Save the uploaded file
+                    announcement.setOfile(fileName); // Save the uploaded file name
+                    announcement.setSfile(fileName); // Store the filename for future reference
+                } catch (IOException e) {
+                    // Handle the exception
+                    redirectAttributes.addFlashAttribute("error", "파일 업로드 중 오류가 발생했습니다.");
+                }
+            }
+
+            announcementService.saveAnnouncement(announcement);
+            redirectAttributes.addFlashAttribute("message", "게시물이 수정되었습니다.");
+        }
+
+        return "redirect:/guest/noticeList";
     }
+
     // 공지사항 삭제 처리
     @GetMapping("/admin/notice/delete/{id}")
     public String deleteAnnouncement(@PathVariable("id") Long id) {

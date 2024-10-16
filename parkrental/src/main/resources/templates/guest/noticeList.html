@@ -72,7 +72,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                <tr th:each="announcement : ${announcements}">
+                <tr th:each="announcement : ${announcementsPage.content}">
                     <td th:text="${announcement.title}"></td>
                     <td th:text="${announcement.username}"></td>
                     <td th:text="${announcement.postdate}"></td>
@@ -86,35 +86,52 @@
 
                 </tbody>
             </table>
-            <!-- 페이징 처리 -->
-            <ul class="pagination">
-                <li class="active"><a href="#">1</a></li>
-                <li><a href="#">2</a></li>
-                <li><a href="#">3</a></li>
-                <li><a href="#">4</a></li>
-                <li><a href="#">5</a></li>
-                <li><a href="#">다음</a></li>
-            </ul>
-        
-            <!-- 검색 바 -->
-            <div class="search-container">
-                <select>
-                    <option value="전체기간">전체기간</option>
-                    <!-- 기간 선택 옵션 추가 가능 -->
-                </select>
-        
-                <select>
-                    <option value="제목만">제목만</option>
-                    <!-- 필터링 옵션 추가 가능 -->
-                </select>
-        
-                <input type="text" placeholder="검색어를 입력해 주세요" />
-        
-                <button>검색</button>
-            </div>
+    <!-- 페이징 네비게이션 -->
+    <ul class="pagination">
+        <!-- 이전 페이지 링크 -->
+        <li th:class="${announcementsPage.hasPrevious() ? '' : 'disabled'}">
+            <a th:href="@{/guest/noticeList(page=${announcementsPage.number - 1}, size=${announcementsPage.size})}"
+               th:text="'이전'">이전</a>
+        </li>
+
+        <!-- 페이지 번호 링크 -->
+        <li th:each="i : ${#numbers.sequence(1, announcementsPage.totalPages)}"
+            th:class="${announcementsPage.number + 1 == i ? 'active' : ''}">
+            <a th:href="@{/guest/noticeList(page=${i - 1}, size=${announcementsPage.size})}"
+               th:text="${i}">1</a>
+        </li>
+
+        <!-- 다음 페이지 링크 -->
+        <li th:class="${announcementsPage.hasNext() ? '' : 'disabled'}">
+            <a th:href="@{/guest/noticeList(page=${announcementsPage.number + 1}, size=${announcementsPage.size})}"
+               th:text="'다음'">다음</a>
+        </li>
+    </ul>
+
+    <!-- 검색 바 -->
+    <div class="search-container">
+        <form action="/guest/noticeList" method="get">
+            <select name="period">
+                <option value="전체기간">전체기간</option>
+                <!-- 기간 선택 옵션 추가 가능 -->
+            </select>
+
+            <select name="filter">
+                <option value="title">제목</option> <!-- 제목 검색 옵션 -->
+                <option value="content">내용</option> <!-- 내용 검색 옵션 -->
+                <option value="both">제목 및 내용</option> <!-- 제목 및 내용 검색 옵션 -->
+            </select>
+
+            <input type="text" name="search" placeholder="검색어를 입력해 주세요"/>
+
+            <button type="submit">검색</button>
+        </form>
+    </div>
+
+
             <div class="button-container">
                 <a href="/admin/noticeWrite" class="write-button">글쓰기</a>
-                <button class="edit-button">수정</button>
+                <a href="/guest/noticeList" class="write-button">목록으로</a>
             </div>
 
 

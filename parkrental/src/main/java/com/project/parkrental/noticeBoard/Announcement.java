@@ -99,5 +99,9 @@ public class Announcement {
     public void setSfile(String sfile) {
         this.sfile = sfile;
     }
+
+    public void setFileUrl(String fileUrl) {
+
+    }
 }
 
