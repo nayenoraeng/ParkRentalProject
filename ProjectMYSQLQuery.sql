@@ -19,6 +19,7 @@ CREATE table User (
 	username VARCHAR(50) UNIQUE KEY not null,
 	password varchar(100) not null,
 	name varchar(50) not null,
+	phoneNum varchar(15) not null,
 	email varchar(50),
 	phoneNum varchar(15) not null,
 	postcode varchar(10),
@@ -60,8 +61,11 @@ CREATE table seller (
   	regidate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   	authority varchar(20) default 'ROLE_SELLER',
   	enabled INT(1) default 1,
+<<<<<<< HEAD
   	provider varchar(20) default 'LOCAL',
   	providerId varchar(100),
+=======
+>>>>>>> yerim2
   	isLocked INT(1) default 0,
   	failCount INT default 0,
   	lockTimes TIMESTAMP
@@ -123,6 +127,7 @@ CREATE TABLE product (
     ON UPDATE CASCADE,
     CONSTRAINT uniqueProduct UNIQUE (productName, parkId)  -- 상품 이름과 공원 ID로 복합 UNIQUE 키 설정
 );
+
 SELECT * FROM Product;
 
 
@@ -143,8 +148,19 @@ CREATE TABLE reservation (
 	ON DELETE CASCADE
 	ON UPDATE CASCADE
 );
-
-
+ALTER TABLE reservation DROP FOREIGN KEY reservation_ibfk_2;
+# API 정보 가져와서 공원 리스트로 저장하기
+drop table parkList;
+CREATE TABLE parkList (
+    parkId BIGINT(100) PRIMARY KEY AUTO_INCREMENT,
+    parkNm VARCHAR(100) NOT NULL,
+    parkSe VARCHAR(30),
+    lnmadr VARCHAR(200),
+    parkAr VARCHAR(30),
+    latitude DOUBLE,
+    longitude DOUBLE
+);
+select * from parkList;
 ######## 결제 ########
 drop table transaction;
 CREATE TABLE transaction (
@@ -190,7 +206,9 @@ create table commuComment (
 );
 
 # 커뮤니티 게시판 좋아요 테이블
+ß
 drop table commuLike;
+
 CREATE TABLE commuLike (
 	likeCount INT(10) default 0,
 	username VARCHAR(50) NOT NULL,
@@ -230,9 +248,10 @@ INSERT INTO announcement (username, title, content, postdate, ofile, sfile) VALU
 DROP TABLE inquiry;
 CREATE TABLE inquiry (
 	idx bigint(10) PRIMARY KEY AUTO_INCREMENT,
-	parentIdx int(10) default 0,
+	inquiryReRef bigint(10) default 0,
+	inquiryReLev int(10) DEFAULT 0 NOT NULL,
+	inquiryReSeq int(10) DEFAULT 0 NOT NULL,
 	username varchar(100) not null,
- 	parentUsername varchar(100),
  	title varchar(50) not null,
 	content varchar(1000) not null,
 	postdate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -241,6 +260,8 @@ CREATE TABLE inquiry (
   	ofile varchar(200),
   	sfile varchar(100),
   	inquiryPassword varchar(20) not null,
+  	parentId bigint,
+  	FOREIGN KEY (parentId) REFERENCES inquiry(idx), 
   	FOREIGN KEY (username) REFERENCES user (username)  	
   	ON DELETE CASCADE
 	ON UPDATE CASCADE

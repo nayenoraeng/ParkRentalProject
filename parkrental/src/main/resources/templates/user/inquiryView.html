@@ -108,6 +108,7 @@
 
         <div class="navigation">
             <button onclick="location.href='/guest/inquiryList'" class="btn btn-secondary">목록으로 돌아가기</button>
+            <button th:onclick="|location.href='@{/user/inquiryReply/{idx}(idx=${inquiries.idx})}'|">답글달기</button>
             <button th:onclick="|location.href='@{/user/inquiryEdit/{idx}(idx=${inquiries.idx})}'|">수정하기</button>
             <button th:onclick="'deletePost(' + ${inquiries.idx} + ')'">게시글 삭제</button>
         </div>

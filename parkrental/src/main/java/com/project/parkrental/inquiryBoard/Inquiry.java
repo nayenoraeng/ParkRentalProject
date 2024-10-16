@@ -1,16 +1,12 @@
 package com.project.parkrental.inquiryBoard;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.domain.Persistable;
-import org.yaml.snakeyaml.events.Event;
-
-import java.sql.Timestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,109 +16,17 @@ import java.time.LocalDateTime;
 @Table(name = "inquiry")
 public class Inquiry extends BaseTimeEntity {
 
-    public Long getIdx() {
-        return idx;
-    }
-
-    public void setIdx(Long idx) {
-        this.idx = idx;
-    }
-
-    public Integer getParentIdx() {
-        return parentIdx;
-    }
-
-    public void setParentIdx(Integer parentIdx) {
-        this.parentIdx = parentIdx;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getParentUsername() {
-        return parentUsername;
-    }
-
-    public void setParentUsername(String parentUsername) {
-        this.parentUsername = parentUsername;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public LocalDateTime getPostdate() {
-        return postdate;
-    }
-
-    public void setPostdate(LocalDateTime postdate) {
-        this.postdate = postdate;
-    }
-
-    public Integer getViewCount() {
-        return viewCount;
-    }
-
-    public void setViewCount(Integer viewCount) {
-        this.viewCount = viewCount;
-    }
-
-    public Integer getResponses() {
-        return responses;
-    }
-
-    public void setResponses(Integer responses) {
-        this.responses = responses;
-    }
-
-    public String getOfile() {
-        return ofile;
-    }
-
-    public void setOfile(String ofile) {
-        this.ofile = ofile;
-    }
-
-    public String getSfile() {
-        return sfile;
-    }
-
-    public void setSfile(String sfile) {
-        this.sfile = sfile;
-    }
-
-    public String getInquiryPassword() {
-        return inquiryPassword;
-    }
-
-    public void setInquiryPassword(String inquiryPassword) {
-        this.inquiryPassword = inquiryPassword;
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
-    private Integer parentIdx;
+    @Column(nullable = false)
+    private Long inquiryReRef; // 참조하는 게시글 ID (루트 게시글)
+    @Column(nullable = false)
+    private Integer inquiryReLev; // 답글의 레벨 (몇 단계의 답글인지)
+    @Column(nullable = false)
+    private Integer inquiryReSeq; // 답글 순서
     @Column(nullable = false)
     private String username;
-    private String parentUsername;
     @Column(nullable = false)
     private String title;
     @Column(nullable = false)
@@ -136,6 +40,11 @@ public class Inquiry extends BaseTimeEntity {
     private String sfile;
     @Column(nullable = false)
     private String inquiryPassword;
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Inquiry> replies = new ArrayList<>(); // 자식 게시글 (답글들)
+    @ManyToOne
+    @JoinColumn(name="parentId")
+    private Inquiry parent;
 
    public boolean isNew() {
         return postdate==null;

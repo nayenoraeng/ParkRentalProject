@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 
     Optional<Inquiry> findById(Long idx);
+
+//    Inquiry findByParentId(Long parentId);
 }

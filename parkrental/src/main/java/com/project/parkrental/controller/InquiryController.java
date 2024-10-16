@@ -12,6 +12,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -140,6 +144,7 @@ public class InquiryController {
         return "redirect:/guest/inquiryList"; // 목록 페이지로 리다이렉트
     }
 
+    //글 삭제하기
     @GetMapping("/user/inquiryDelete/{idx}")
     @ResponseBody
     public Map<String, String> inquiryDelete(@PathVariable("idx") Long idx){
@@ -151,4 +156,60 @@ public class InquiryController {
 
         return response; // Map을 JSON으로 변환하여 반환
     }
+
+    //답글 란
+    @GetMapping("/user/inquiryReply/{idx}")
+    public String inquiryReplyForm(Model model, @PathVariable("idx") Long idx){
+        Inquiry replyPost = inquiryService.inquiryView(idx);
+        model.addAttribute("inquiryRequest", replyPost);
+
+        return "user/inquiryReply";
+    }
+
+    //게시판 답글 쓰기
+//    @PostMapping("/user/inquiryReplyPro")
+//    public String inquiryReply (@ModelAttribute InquiryRequestDTO requestDTO,
+//                                @RequestParam("file") MultipartFile file,
+//                                HttpServletRequest request, Model model, Long parentId)
+//    {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String username = authentication.getName();
+//
+//       try {
+//                if(username != null) {
+//                      requestDTO.setUsername(username); // 작성자 필드에 설정
+//                }
+//
+//            if (file != null && !file.isEmpty()) {
+//                String ofile = file.getOriginalFilename();
+//                String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/files";// 이미지 저장 경로 지정
+//                System.out.println(uploadDir);
+//
+//                File dir = new File(uploadDir);
+//                if (!dir.exists()) {
+//                    dir.mkdir();
+//                }
+//
+//                String sfile = UUID.randomUUID().toString() + "_" + ofile;
+//
+//                File destination = new File(dir, sfile);
+//                file.transferTo(destination);
+//
+//                // 파일이 있을 경우에만 DTO에 이미지 설정
+//                requestDTO.setOfile(ofile);
+//                requestDTO.setSfile(sfile);
+//            } else {
+//                // 파일이 없을 때 처리할 내용 (필요한 경우)
+//                System.out.println("No file uploaded.");
+//            }
+//
+//            inquiryService.inquiryReply(parentId, requestDTO); // 서비스에서 답글 생성
+//
+//        } catch (Exception e) {
+//            model.addAttribute("errorMessage", "답글 작성 중 오류가 발생했습니다.");
+//            e.printStackTrace();
+//            return "user/inquiryReply"; // 오류가 발생하면 목록으로 돌아감
+//        }
+//        return "redirect:/guest/inquiryList";
+//    }
 }
