@@ -36,16 +36,16 @@ public class ProductDataGenerator implements CommandLineRunner {
     public void generateProductData() throws InterruptedException {
         List<ParkList> allParks = parkListRepository.findAll(); // 모든 공원 가져오기
         String[][] products = {
-                {"p01", "bus1", "자전거", "8000"},
-                {"p02", "bus1", "카메라", "5000"},
-                {"p03", "bus1", "텐트", "10000"},
-                {"p04", "bus1", "돗자리", "3000"},
-                {"p05", "bus1", "테이블", "3000"},
-                {"p06", "bus1", "파라솔", "5000"},
-                {"p07", "bus1", "배낭", "3000"},
-                {"p08", "bus1", "배드민턴세트", "5000"},
-                {"p09", "bus1", "일회용품세트(판매)", "2000"},
-                {"p10", "bus1", "우산(판매)", "8000"}
+                {"p01", "Business A", "자전거", "8000"},
+                {"p02", "Business B", "카메라", "5000"},
+                {"p03", "Business B", "텐트", "10000"},
+                {"p04", "Business B", "돗자리", "3000"},
+                {"p05", "Business B", "테이블", "3000"},
+                {"p06", "Business B", "파라솔", "5000"},
+                {"p07", "Business B", "배낭", "3000"},
+                {"p08", "Business A", "배드민턴세트", "5000"},
+                {"p09", "Business C", "일회용품세트(판매)", "2000"},
+                {"p10", "Business C", "우산(판매)", "8000"}
         };
 
         Random rand = new Random();
