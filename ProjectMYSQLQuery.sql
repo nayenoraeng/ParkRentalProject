@@ -61,20 +61,18 @@ CREATE table seller (
   	regidate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   	authority varchar(20) default 'ROLE_SELLER',
   	enabled INT(1) default 1,
-<<<<<<< HEAD
   	provider varchar(20) default 'LOCAL',
   	providerId varchar(100),
-=======
->>>>>>> yerim2
   	isLocked INT(1) default 0,
   	failCount INT default 0,
   	lockTimes TIMESTAMP
 );
 
-INSERT INTO seller (businessNum,username,name,password,businessName) VALUES
-('B001', 'user1','password1','사용자1','Business A'),
-('B002', 'user2','password2','사용자2','Business B'),
-('B003', 'user3','password3','사용자3','Business C');
+INSERT INTO seller (businessNum, username, password, name, businessName, phoneNum)
+VALUES
+('B001', 'user1', '1234', '판매자1', 'Business A', '010-1111-1111'),
+('B002', 'user2', '1234', '판매자2', 'Business B', '010-2222-2222'),
+('B003', 'user3', '1234', '판매자3', 'Business C', '010-3333-3333');
 
 select * from seller;
 
@@ -91,7 +89,7 @@ CREATE table admin (
 
 # 테이블에 초기 관리자 넣기
 INSERT into admin (idx, username, password, email, authority)
-	values (1, 'admin', 'qwer1234!', '', 'ROLE_ADMIN');
+	values (2, 'admin1', '{bcrypt}$2a$10$ZLCyTtC1z8v3asrU3U.ccunKgiO3gAzP9bpGDz26GZ0wK9Gv0mQYW', '', 'ROLE_ADMIN');
 	
 # 관리자 테이블 확인
 SELECT * FROM admin;
@@ -189,6 +187,9 @@ CREATE TABLE community (
   	ON DELETE CASCADE
 	ON UPDATE CASCADE
 );
+INSERT INTO community (username, title, content, postdate, ofile, sfile) VALUES
+('qwer', '안녕하세', '첫 번째 공지사항 내용입니다.', '2024-10-01 10:00:00', 'original_file_1.pdf', 'stored_file_1.pdf');
+
 
 # 커뮤니티 댓글 테이블
 DROP TABLE commuComment;
@@ -280,11 +281,13 @@ CREATE TABLE cart (
     FOREIGN KEY (username) REFERENCES user(username) 
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    FOREIGN KEY (productNum, parkId) REFERENCES product(productNum, parkId) 
+    FOREIGN KEY (productName, parkId) REFERENCES product(productName, parkId) 
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
 ## 이거 추가해야 카트 테이블 생성됨;; ##
+ALTER TABLE cart
+ADD CONSTRAINT cart_ibfk_2 FOREIGN KEY (product_id) REFERENCES product(product_id);
 ALTER TABLE product ADD INDEX (productNum);
 CREATE INDEX idxProductNumParkId ON product (productNum, parkId);
 

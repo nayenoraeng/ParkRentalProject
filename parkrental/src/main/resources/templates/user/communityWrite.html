@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>문의게시판</title>
+    <title>커뮤니티 글쓰기</title>
     <link rel="stylesheet" th:href="@{/css/board.css}" />
     <link rel="stylesheet" th:href="@{/css/communityboard.css}" />
     <link rel="stylesheet" th:href="@{/css/communitywrite.css}" />
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 </head>
+
 <body>
 
 <!-- 헤더랑 네비바 섹션 -->
@@ -57,10 +56,11 @@
     <h1>게시판 글쓰기</h1>
 
     <!-- 게시판 선택 -->
-    <form action="#" method="POST" enctype="multipart/form-data" th:action="@{/guest/noticeList}" th:object="${announcement}">
+    <form action="#" method="POST" enctype="multipart/form-data" th:action="@{/guest/communityList}" th:object="${community}">
+        <!-- 작성자 입력 -->
         <div class="form-group">
-            <label for="name">작성자</label>
-            <input type="text" id="name" th:field="*{username}" placeholder="작성자." required>
+            <label for="author">작성자:</label>
+            <input type="text" id="author" name="username" th:value="${username}" readonly>
         </div>
 
         <!-- 제목 입력 -->
@@ -69,20 +69,27 @@
             <input type="text" id="title" th:field="*{title}" placeholder="제목을 입력해 주세요." required>
         </div>
 
-        <!-- 내용 입력 -->
-        <div id="editor-container" style="height: 300px;"></div>
-        <!-- Quill 에디터의 내용은 아래의 숨겨진 input 필드에 저장됨 -->
-        <input type="hidden" name="content" id="content" th:field="*{content}"/>
+        <!-- 내용 입력 및 이미지 미리보기 -->
+        <div class="form-group">
+            <label for="content">내용을 입력해 주세요.</label>
+            <textarea id="content" th:field="*{content}" rows="10" placeholder="내용을 입력해 주세요." required></textarea>
+            <!-- 이미지 미리보기 영역 -->
+            <div class="form-group">
+                <label>이미지 미리보기:</label>
+                <img id="imagePreview" style="max-width: 100%; display: none;" alt="첨부 이미지"/>
+            </div>
+        </div>
+
+        <!-- 파일 첨부 -->
+        <div class="form-group">
+            <label for="inquiry_ofile">파일 첨부:</label>
+            <input type="file" id="inquiry_ofile" name="inquiry_ofile" accept="image/*" />
+        </div>
 
         <!-- 버튼 -->
-        <br/>
-        <div>
-            <label for="inquiry_ofile">파일 첨부:</label>
-            <input type="file" id="inquiry_ofile" name="inquiry_ofile" />
-        </div>
         <div class="form-group btn-group">
             <button type="submit" class="btn btn-primary btn-custom">등록</button>
-            <button type="button" class="btn btn-secondary btn-custom" onclick="location.href='@{/guest/noticeList}'">목록 바로가기</button>
+            <button type="button" class="btn btn-secondary btn-custom" onclick="location.href='/guest/communityList'">목록 바로가기</button>
         </div>
     </form>
 </div>
@@ -101,27 +108,27 @@
 </footer>
 
 <script>
-    // Quill 에디터 초기화
-    var quill = new Quill('#editor-container', {
-        theme: 'snow',  // Quill의 테마 설정
-        placeholder: '내용을 입력해 주세요...',  // 플레이스홀더 텍스트
-        modules: {
-            toolbar: [
-                [{ 'header': [1, 2, 3, false] }],  // 제목 스타일
-                ['bold', 'italic', 'underline', 'strike'],  // 텍스트 스타일
-                ['link', 'blockquote', 'code-block'],  // 링크, 인용 및 코드 블록
-                [{ 'list': 'ordered'}, { 'list': 'bullet' }],  // 목록
-                [{ 'align': [] }],  // 정렬
-                ['clean']  // 포맷 초기화 버튼
-            ]
+    // 이미지 파일이 선택되면 미리보기와 내용에 이미지 태그 삽입
+    document.getElementById('inquiry_ofile').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imagePreview = document.getElementById('imagePreview');
+                const contentField = document.getElementById('content');
+
+                // 이미지 미리보기 설정
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+
+                // 이미지 태그를 내용에 삽입
+                contentField.value += `\n<img src="${e.target.result}" alt="첨부 이미지"/>`;
+            }
+            reader.readAsDataURL(file);
+        } else {
+            document.getElementById('imagePreview').style.display = 'none';
         }
     });
-
-    // 폼 제출 시 Quill 에디터의 내용을 숨겨진 input에 저장
-    document.querySelector('form').onsubmit = function() {
-        var content = quill.root.innerHTML; // Quill 에디터에서 HTML 내용 가져오기
-        document.querySelector('#content').value = content; // 숨겨진 input에 설정
-    };
 </script>
 </body>
 </html>
