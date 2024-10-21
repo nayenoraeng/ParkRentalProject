@@ -3,16 +3,16 @@ package com.project.parkrental.cart;
 import com.project.parkrental.parkList.model.Product;
 import com.project.parkrental.parkList.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/user/Cart")
@@ -24,55 +24,114 @@ public class CartController {
     @Autowired
     private ProductService productService;
 
+    // 장바구니에 상품을 추가하는 메소드
     @PostMapping("/add")
-    public String addProductToCart(@RequestParam("productIds") List<String> productIds,
-                                   @RequestParam("username") String username) {
-        for (String productId : productIds) {
-            try {
-                Long productIdLong = Long.parseLong(productId);
-                Product product = productService.getProductById(productIdLong);
+    public String addProductToCart(
+            @RequestParam("idx[]") List<Long> idxList,
+            @RequestParam("quantity[]") List<Integer> quantities, Model model) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
 
-                // parkList와 parkId가 null인지 확인하는 로그
+            for (int i = 0; i < idxList.size(); i++) {
+                Long productIdx = idxList.get(i);
+                Product product = productService.getProductById(productIdx);
+
                 if (product.getParkList() == null) {
-                    System.out.println("Error: parkList is null for product ID: " + productIdLong);
-                    return "redirect:/errorPage";  // 오류 페이지로 리다이렉트
+                    model.addAttribute("error", "공원 정보가 없습니다.");
+                    return "redirect:/user/Cart";
                 }
 
-                Long parkId = product.getParkList().getParkId();
-                System.out.println("Park ID: " + parkId);  // parkId가 제대로 설정되었는지 로그 확인
+                int quantity = quantities.get(i);  // 수량을 배열에서 가져옴
 
-                String productNum = product.getProductNum();
-                String productName = product.getProductName();
-                Long productPrice = product.getCost();
-                int quantity = 1;
-
-                cartService.addProductToCart(username, productNum, productName, productPrice, parkId, quantity);
-            } catch (NumberFormatException e) {
-                System.out.println("잘못된 productId: " + productId);
-                return "redirect:/errorPage";
+                // 장바구니에 상품을 추가
+                cartService.addProductToCart(username, product, quantity);
             }
-        }
 
-        return "redirect:/user/Cart";
+            // 장바구니 페이지로 리다이렉트
+            return "redirect:/user/Cart";
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", e.getMessage());
+            return "redirect:/user/Cart";  // 에러 발생 시에도 장바구니 페이지로 리다이렉트
+        }
     }
 
+    // 장바구니 상품을 가져오는 메소드
     @GetMapping
     public String getCartProducts(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+        String username = authentication != null ? authentication.getName() : null;
 
         List<Cart> cartProducts = cartService.getCartProducts(username);
-
-        // 로그로 parkList가 제대로 들어오는지 확인
         cartProducts.forEach(cart -> {
-            if (cart.getProduct() != null && cart.getProduct().getParkList() != null) {
-                System.out.println("Park Name: " + cart.getProduct().getParkList().getParkNm());
-            } else {
-                System.out.println("ParkList is null for product: " + cart.getProduct().getProductName());
-            }
+            Product product = productService.getProductByNameAndParkId(cart.getProductName(), cart.getParkId());
+            System.out.println("Product ID: " + cart.getIdx()); // idx 값 확인
+            System.out.println("Product Name: " + product.getProductName());
+            System.out.println("Product Price: " + cart.getProductPrice());
         });
 
+        Long totalPrice = cartProducts.stream()
+                .mapToLong(cart -> cart.getProductPrice() * cart.getQuantity())
+                .sum();
+
         model.addAttribute("cartProducts", cartProducts);
+        model.addAttribute("totalPrice", totalPrice);
+
         return "user/Cart";
+    }
+
+    // 수량 업데이트 메소드
+    @PostMapping("/update")
+    public ResponseEntity<Map<String, String>> updateQuantity(
+            @RequestBody Map<String, Object> payload) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            // 로그 추가: 전달된 payload 값 출력
+            System.out.println("Received payload: " + payload);
+
+            // Handle idx, check if it's String or Number
+            Long idx;
+            Object idxObj = payload.get("idx");
+            System.out.println("전달된 idx 값: " + idxObj);
+
+            if (idxObj instanceof String) {
+                idx = Long.parseLong((String) idxObj); // Convert from String
+            } else if (idxObj instanceof Number) {
+                idx = ((Number) idxObj).longValue(); // Handle as Number
+            } else {
+                throw new IllegalArgumentException("idx 값이 없습니다.");
+            }
+
+            // Handle quantity, check if it's String or Number
+            int quantity;
+            Object quantityObj = payload.get("quantity");
+            if (quantityObj instanceof String) {
+                quantity = Integer.parseInt((String) quantityObj); // Convert from String
+            } else if (quantityObj instanceof Number) {
+                quantity = ((Number) quantityObj).intValue(); // Handle as Number
+            } else {
+                throw new IllegalArgumentException("quantity 값이 없습니다.");
+            }
+
+            // 수량 업데이트 로직 호출
+            cartService.updateQuantity(idx, quantity);
+            Long newTotalPrice = cartService.calculateTotalPrice();  // 전체 가격 계산
+            response.put("newTotalPrice", String.valueOf(newTotalPrice));
+            response.put("success", "수량이 업데이트되었습니다.");
+            return ResponseEntity.ok(response);
+        } catch (ClassCastException | NumberFormatException e) {
+            e.printStackTrace();
+            response.put("error", "잘못된 데이터 타입입니다. 수량은 숫자여야 합니다.");
+            return ResponseEntity.badRequest().body(response);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            response.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 }
