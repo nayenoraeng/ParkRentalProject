@@ -3,8 +3,6 @@ package com.project.parkrental.cart;
 import com.project.parkrental.parkList.model.Product;
 import com.project.parkrental.parkList.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -69,15 +67,39 @@ public class CartService {
         cartRepository.save(cart);
     }
 
-    // 전체 장바구니 가격 계산
-    public Long calculateTotalPrice() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
+    // 전체 장바구니 가격 계산 (username 인자를 받도록 수정)
+    public Long calculateTotalPrice(String username) {
         List<Cart> cartProducts = cartRepository.findByUsername(username);
 
         return cartProducts.stream()
                 .mapToLong(cart -> cart.getProductPrice() * cart.getQuantity())
                 .sum();
+    }
+
+    // 전체 수량 업데이트 후 총 가격 반환
+    public Long updateQuantitiesAndGetTotal(List<Cart> updatedCarts, String username) {
+        for (Cart updatedCart : updatedCarts) {
+            updateQuantity(updatedCart.getIdx(), updatedCart.getQuantity());
+        }
+        // 모든 업데이트가 끝난 후 전체 가격을 계산하여 반환
+        return calculateTotalPrice(username);
+    }
+
+    // 예약 기능 추가 (Cart 항목을 기반으로 예약 생성)
+    public void reserveProducts(String username) {
+        List<Cart> cartProducts = cartRepository.findByUsername(username);
+
+        if (cartProducts.isEmpty()) {
+            throw new RuntimeException("장바구니가 비어 있습니다.");
+        }
+
+        // 예약 로직 예시 (실제 예약 처리 로직 추가 필요)
+        cartProducts.forEach(cart -> {
+            // 여기서 각 장바구니 항목에 대해 예약을 처리할 수 있습니다.
+            System.out.println("예약 처리: " + cart.getProductName());
+        });
+
+        // 장바구니 비우기
+        cartRepository.deleteAll(cartProducts);
     }
 }

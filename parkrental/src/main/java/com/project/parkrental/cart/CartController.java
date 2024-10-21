@@ -24,7 +24,6 @@ public class CartController {
     @Autowired
     private ProductService productService;
 
-    // 장바구니에 상품을 추가하는 메소드
     @PostMapping("/add")
     public String addProductToCart(
             @RequestParam("idx[]") List<Long> idxList,
@@ -42,22 +41,20 @@ public class CartController {
                     return "redirect:/user/Cart";
                 }
 
-                int quantity = quantities.get(i);  // 수량을 배열에서 가져옴
+                int quantity = quantities.get(i);
 
-                // 장바구니에 상품을 추가
                 cartService.addProductToCart(username, product, quantity);
             }
 
-            // 장바구니 페이지로 리다이렉트
             return "redirect:/user/Cart";
+
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("error", e.getMessage());
-            return "redirect:/user/Cart";  // 에러 발생 시에도 장바구니 페이지로 리다이렉트
+            return "redirect:/user/Cart";
         }
     }
 
-    // 장바구니 상품을 가져오는 메소드
     @GetMapping
     public String getCartProducts(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -66,7 +63,6 @@ public class CartController {
         List<Cart> cartProducts = cartService.getCartProducts(username);
         cartProducts.forEach(cart -> {
             Product product = productService.getProductByNameAndParkId(cart.getProductName(), cart.getParkId());
-            System.out.println("Product ID: " + cart.getIdx()); // idx 값 확인
             System.out.println("Product Name: " + product.getProductName());
             System.out.println("Product Price: " + cart.getProductPrice());
         });
@@ -81,57 +77,51 @@ public class CartController {
         return "user/Cart";
     }
 
-    // 수량 업데이트 메소드
     @PostMapping("/update")
     public ResponseEntity<Map<String, String>> updateQuantity(
-            @RequestBody Map<String, Object> payload) {
+            @RequestBody List<Map<String, Object>> payload) {
         Map<String, String> response = new HashMap<>();
         try {
-            // 로그 추가: 전달된 payload 값 출력
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
+
             System.out.println("Received payload: " + payload);
 
-            // Handle idx, check if it's String or Number
-            Long idx;
-            Object idxObj = payload.get("idx");
-            System.out.println("전달된 idx 값: " + idxObj);
+            for (Map<String, Object> item : payload) {
+                Long idx;
+                Object idxObj = item.get("idx");
 
-            if (idxObj instanceof String) {
-                idx = Long.parseLong((String) idxObj); // Convert from String
-            } else if (idxObj instanceof Number) {
-                idx = ((Number) idxObj).longValue(); // Handle as Number
-            } else {
-                throw new IllegalArgumentException("idx 값이 없습니다.");
+                if (idxObj instanceof Number) {
+                    idx = ((Number) idxObj).longValue();
+                } else if (idxObj instanceof String) {
+                    idx = Long.parseLong((String) idxObj);
+                } else {
+                    throw new IllegalArgumentException("idx 값이 유효하지 않습니다: " + idxObj);
+                }
+
+                int quantity;
+                Object quantityObj = item.get("quantity");
+
+                if (quantityObj instanceof Number) {
+                    quantity = ((Number) quantityObj).intValue();
+                } else if (quantityObj instanceof String) {
+                    quantity = Integer.parseInt((String) quantityObj);
+                } else {
+                    throw new IllegalArgumentException("quantity 값이 유효하지 않습니다: " + quantityObj);
+                }
+
+                cartService.updateQuantity(idx, quantity);
             }
 
-            // Handle quantity, check if it's String or Number
-            int quantity;
-            Object quantityObj = payload.get("quantity");
-            if (quantityObj instanceof String) {
-                quantity = Integer.parseInt((String) quantityObj); // Convert from String
-            } else if (quantityObj instanceof Number) {
-                quantity = ((Number) quantityObj).intValue(); // Handle as Number
-            } else {
-                throw new IllegalArgumentException("quantity 값이 없습니다.");
-            }
-
-            // 수량 업데이트 로직 호출
-            cartService.updateQuantity(idx, quantity);
-            Long newTotalPrice = cartService.calculateTotalPrice();  // 전체 가격 계산
+            Long newTotalPrice = cartService.calculateTotalPrice(username);
             response.put("newTotalPrice", String.valueOf(newTotalPrice));
             response.put("success", "수량이 업데이트되었습니다.");
             return ResponseEntity.ok(response);
-        } catch (ClassCastException | NumberFormatException e) {
-            e.printStackTrace();
-            response.put("error", "잘못된 데이터 타입입니다. 수량은 숫자여야 합니다.");
-            return ResponseEntity.badRequest().body(response);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-            response.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             e.printStackTrace();
             response.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
     }
+
 }
