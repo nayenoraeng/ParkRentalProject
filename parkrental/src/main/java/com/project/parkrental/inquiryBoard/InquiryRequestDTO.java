@@ -15,9 +15,9 @@ import java.util.Optional;
 public class InquiryRequestDTO {
 
     private Long idx;
-    private Long inquiryReRef;
-    private Integer inquiryReLev;
-    private Integer inquiryReSeq;
+    private Long originNo;
+    private Integer groupOrd;
+    private Integer groupLayer;
     private String username;
     @NotBlank(message = "제목을 입력해주세요.")
     private String title;
@@ -30,7 +30,6 @@ public class InquiryRequestDTO {
     private String sfile;
     @NotBlank(message = "비밀번호를 입력해주세요.")
     private String inquiryPassword;
-    private List<Inquiry> replies = new ArrayList<>();
-    private Inquiry parent;
+
 
 }

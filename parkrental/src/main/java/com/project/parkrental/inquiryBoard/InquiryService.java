@@ -5,21 +5,17 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-import static org.checkerframework.checker.nullness.Opt.orElseThrow;
 
 @Service
 public class InquiryService {
@@ -34,33 +30,40 @@ public class InquiryService {
 
         // Inquiry 객체를 InquiryResponseDTO로 변환
         Page<InquiryResponseDTO> inquiryResponseDTOs = inquiryPage.map(
-                inquiry -> {
-                    List<ReplyResponseDTO> replies = inquiry.getReplies().stream()
-                            .map(reply -> new ReplyResponseDTO(
-                                    reply.getIdx(),          // 답글 ID
-                                    reply.getUsername(),     // 작성자
-                                    reply.getContent(),      // 내용
-                                    reply.getPostdate()      // 작성일
-                            ))
-                            .collect(Collectors.toList());
-
-                    return new InquiryResponseDTO(
-                            inquiry.getIdx(),
-                            inquiry.getTitle(),
-                            inquiry.getContent(),
-                            inquiry.getPostdate(),
-                            inquiry.getViewCount(),
-                            replies // 답글 목록 추가
-                    );
-                }
+                inquiry -> new InquiryResponseDTO(
+                        inquiry.getIdx(),          // 필요한 필드로 변경
+                        inquiry.getTitle(),        // 제목 필드 예시
+                        inquiry.getUsername(),
+                        inquiry.getContent(),
+                        inquiry.getPostdate(),
+                        inquiry.getViewCount()// 생성일 필드 예시
+                )
         );
 
         return inquiryResponseDTOs;
     }
 
+    // 검색 기능 추가
+    public Page<InquiryResponseDTO> searchInquiries(String keyword, Pageable pageable) {
+        Page<Inquiry> inquiries = (Page<Inquiry>) inquiryRepository.findByTitleContainingOrContentContainingOrUsernameContaining(
+                keyword, keyword, keyword, pageable);
+
+        // Inquiry 객체를 InquiryResponseDTO로 변환
+        return inquiries.map(inquiry -> new InquiryResponseDTO(
+                inquiry.getIdx(),
+                inquiry.getTitle(),
+                inquiry.getUsername(),
+                inquiry.getContent(),
+                inquiry.getPostdate(),
+                inquiry.getViewCount()
+        ));
+    }
+
+
     //상세 보기
     public Inquiry inquiryView(Long idx){
-        return inquiryRepository.findById(idx).get();
+        return inquiryRepository.findById(idx)
+                .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다. ID: " + idx));
     }
 
     //글삭제
@@ -68,17 +71,28 @@ public class InquiryService {
         inquiryRepository.deleteById(idx);
     }
 
+    //조회수 증가
+    @Transactional
+    public void inquiryUpdateViewCount(Long idx){
+        inquiryRepository.findById(idx).ifPresent(inquiry -> {
+            inquiry.incrementViewCount();
+            inquiryRepository.save(inquiry);
+        });
+    }
+
     //글쓰기
     @Transactional
     public void inquiryWrite(InquiryRequestDTO inquiryCreate, HttpServletRequest request)
             throws IOException, ServletException
     {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName(); // 로그인한 사용자 이름
 
         Inquiry inquiry = Inquiry.builder()
-                .inquiryReRef(inquiryCreate.getInquiryReRef())
-                .inquiryReLev(inquiryCreate.getInquiryReLev() != null ? inquiryCreate.getViewCount() : 0)
-                .inquiryReSeq(inquiryCreate.getInquiryReSeq() != null ? inquiryCreate.getViewCount() : 0)
-                .username(inquiryCreate.getUsername())
+                .originNo(inquiryCreate.getOriginNo())
+                .groupOrd(inquiryCreate.getGroupOrd() != null ? inquiryCreate.getGroupOrd() : 0)
+                .groupLayer(inquiryCreate.getGroupLayer() != null ? inquiryCreate.getGroupLayer() : 0)
+                .username(username)
                 .title(inquiryCreate.getTitle())
                 .content(inquiryCreate.getContent())
                 .postdate(inquiryCreate.getPostdate())
@@ -94,78 +108,175 @@ public class InquiryService {
         inquiryRepository.save(inquiry);
     }
 
-    //글 수정
     @Transactional
-    public void inquiryUpdate(Long idx, InquiryRequestDTO inquiryRequest, MultipartFile file,
-                                            HttpServletRequest request)  throws IOException, ServletException{
-        Optional<Inquiry> optionalInquiry =  inquiryRepository.findById(idx);
+    public void inquiryUpdate(Long idx, InquiryRequestDTO inquiryRequest, MultipartFile file) throws IOException {
+        Inquiry inquiry = inquiryRepository.findById(idx)
+                .orElseThrow(() -> new EntityNotFoundException("해당 ID의 게시글을 찾을 수 없습니다: " + idx));
 
-        if (optionalInquiry.isPresent()) {
-            Inquiry inquiry = optionalInquiry.get();
+        // 파일 처리
+        handleFileUpload(file, inquiryRequest);
 
-            String originalOfile = inquiry.getOfile();
-            String originalSfile = inquiry.getSfile();
+        // 게시글 업데이트
+        Inquiry updatedInquiry = Inquiry.builder()
+                .idx(inquiry.getIdx())
+                .originNo(inquiryRequest.getOriginNo())
+                .groupOrd(inquiryRequest.getGroupOrd() != null ? inquiryRequest.getGroupOrd() : 0)
+                .groupLayer(inquiryRequest.getGroupLayer() != null ? inquiryRequest.getGroupLayer() : 0)
+                .username(inquiry.getUsername())
+                .title(inquiryRequest.getTitle())
+                .content(inquiryRequest.getContent())
+                .postdate(inquiry.getPostdate())
+                .viewCount(inquiry.getViewCount()) // 기존 값 유지
+                .responses(inquiry.getResponses())
+                .ofile(inquiryRequest.getOfile())
+                .sfile(inquiryRequest.getSfile())
+                .inquiryPassword(inquiryRequest.getInquiryPassword())
+                .build();
 
-            if (file != null && !file.isEmpty()) {
-                String ofile = file.getOriginalFilename();
-                String uploadDir = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files"; // 이미지 저장 경로 지정
+        inquiryRepository.save(updatedInquiry);
+    }
 
-                File dir = new File(uploadDir);
-                if (!dir.exists()) {
-                    dir.mkdirs(); // mkdirs()를 사용하여 필요한 모든 디렉토리 생성
-                }
+    private void handleFileUpload(MultipartFile file, InquiryRequestDTO inquiryRequest) throws IOException {
+        String originalOfile = inquiryRequest.getOfile();
+        String originalSfile = inquiryRequest.getSfile();
 
-                String sfile = UUID.randomUUID().toString() + "_" + ofile;
+        if (file != null && !file.isEmpty()) {
+            String ofile = file.getOriginalFilename();
+            String uploadDir = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files"; // 이미지 저장 경로 지정
 
-                File destination = new File(dir, sfile);
-                file.transferTo(destination); // 파일 저장
-
-                // 파일 이름 업데이트
-                inquiryRequest.setOfile(ofile);
-                inquiryRequest.setSfile(sfile);
-            } else {
-                // 파일이 없을 경우 기존 파일 이름 유지
-                inquiryRequest.setOfile(originalOfile);
-                inquiryRequest.setSfile(originalSfile);
+            File dir = new File(uploadDir);
+            if (!dir.exists()) {
+                dir.mkdirs(); // mkdirs()를 사용하여 필요한 모든 디렉토리 생성
             }
 
-            Inquiry updatePost = Inquiry.builder()
-                    .idx(inquiry.getIdx())
-                    .username(inquiry.getUsername())
-                    .title(inquiryRequest.getTitle())
-                    .content(inquiryRequest.getContent())
-                    .postdate(inquiry.getPostdate())
-                    .viewCount(inquiry.getViewCount()) // 기존 값 유지
-                    .responses(inquiry.getResponses())
-                    .ofile(inquiryRequest.getOfile())
-                    .sfile(inquiryRequest.getSfile())
-                    .inquiryPassword(inquiryRequest.getInquiryPassword())
-                    .build();// 새로운 파일이 있는 경우 파일 업로드
+            String sfile = UUID.randomUUID().toString() + "_" + ofile;
+            File destination = new File(dir, sfile);
+            file.transferTo(destination); // 파일 저장
 
-            // 게시글 업데이트
-            inquiryRepository.save(updatePost);
+            // 파일 이름 업데이트
+            inquiryRequest.setOfile(ofile);
+            inquiryRequest.setSfile(sfile);
         } else {
-            throw new EntityNotFoundException("해당 ID의 게시글을 찾을 수 없습니다: " + idx);
+            // 파일이 없을 경우 기존 파일 이름 유지
+            inquiryRequest.setOfile(originalOfile);
+            inquiryRequest.setSfile(originalSfile);
         }
     }
 
-    //답글 쓰기
+
+//    //글 수정
 //    @Transactional
-//    public Inquiry inquiryReply (Long parentId, InquiryRequestDTO requestDto){
-//        Inquiry parentInquiry = inquiryRepository.findByParentId(parentId);
+//    public void inquiryUpdate(Long idx, InquiryRequestDTO inquiryRequest, MultipartFile file,
+//                              HttpServletRequest request)  throws IOException, ServletException{
+//        Optional<Inquiry> optionalInquiry =  inquiryRepository.findById(idx);
 //
-//        Inquiry reply = Inquiry.builder()
-//                .username(requestDto.getUsername())
-//                .title(requestDto.getTitle())
-//                .content(requestDto.getContent())
-//                .inquiryReRef(parentInquiry.getInquiryReRef()) // 부모의 참조 ID 설정
-//                .inquiryReLev(parentInquiry.getInquiryReLev() + 1) // 부모의 레벨 + 1
-//                .inquiryReSeq(parentInquiry.getReplies().size() + 1) // 현재 답글 개수 + 1
-//                .ofile(requestDto.getOfile())
-//                .sfile(requestDto.getSfile())
-//                .parent(parentInquiry) // 부모 게시글 설정
-//                .build();
+//        if (optionalInquiry.isPresent()) {
+//            Inquiry inquiry = optionalInquiry.get();
 //
-//        return inquiryRepository.save(reply);
+//            String originalOfile = inquiry.getOfile();
+//            String originalSfile = inquiry.getSfile();
+//
+//            if (file != null && !file.isEmpty()) {
+//                String ofile = file.getOriginalFilename();
+//                String uploadDir = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files"; // 이미지 저장 경로 지정
+//
+//                File dir = new File(uploadDir);
+//                if (!dir.exists()) {
+//                    dir.mkdirs(); // mkdirs()를 사용하여 필요한 모든 디렉토리 생성
+//                }
+//
+//                String sfile = UUID.randomUUID().toString() + "_" + ofile;
+//
+//                File destination = new File(dir, sfile);
+//                file.transferTo(destination); // 파일 저장
+//
+//                // 파일 이름 업데이트
+//                inquiryRequest.setOfile(ofile);
+//                inquiryRequest.setSfile(sfile);
+//            } else {
+//                // 파일이 없을 경우 기존 파일 이름 유지
+//                inquiryRequest.setOfile(originalOfile);
+//                inquiryRequest.setSfile(originalSfile);
+//            }
+//
+//            Inquiry updatePost = Inquiry.builder()
+//                    .idx(inquiry.getIdx())
+//                    .parentId(inquiryRequest.getParentId())
+//                    .inquiryReRef(inquiryRequest.getInquiryReRef())
+//                    .inquiryReLev(inquiryRequest.getInquiryReLev() != null ? inquiryRequest.getInquiryReLev() : 0)
+//                    .inquiryReSeq(inquiryRequest.getInquiryReSeq() != null ? inquiryRequest.getInquiryReSeq() : 0)
+//                    .username(inquiry.getUsername())
+//                    .title(inquiryRequest.getTitle())
+//                    .content(inquiryRequest.getContent())
+//                    .postdate(inquiry.getPostdate())
+//                    .viewCount(inquiry.getViewCount()) // 기존 값 유지
+//                    .responses(inquiry.getResponses())
+//                    .ofile(inquiryRequest.getOfile())
+//                    .sfile(inquiryRequest.getSfile())
+//                    .inquiryPassword(inquiryRequest.getInquiryPassword())
+//                    .build();// 새로운 파일이 있는 경우 파일 업로드
+//
+//            // 게시글 업데이트
+//            inquiryRepository.save(updatePost);
+//        } else {
+//            throw new EntityNotFoundException("해당 ID의 게시글을 찾을 수 없습니다: " + idx);
+//        }
 //    }
+
+//    //글 수정
+//    @Transactional
+//    public void inquiryUpdate(Long idx, InquiryRequestDTO inquiryRequest, MultipartFile file,
+//                                            HttpServletRequest request)  throws IOException, ServletException{
+//        Optional<Inquiry> optionalInquiry =  inquiryRepository.findById(idx);
+//
+//        if (optionalInquiry.isPresent()) {
+//            Inquiry inquiry = optionalInquiry.get();
+//
+//            String originalOfile = inquiry.getOfile();
+//            String originalSfile = inquiry.getSfile();
+//
+//            if (file != null && !file.isEmpty()) {
+//                String ofile = file.getOriginalFilename();
+//                String uploadDir = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files"; // 이미지 저장 경로 지정
+//
+//                File dir = new File(uploadDir);
+//                if (!dir.exists()) {
+//                    dir.mkdirs(); // mkdirs()를 사용하여 필요한 모든 디렉토리 생성
+//                }
+//
+//                String sfile = UUID.randomUUID().toString() + "_" + ofile;
+//
+//                File destination = new File(dir, sfile);
+//                file.transferTo(destination); // 파일 저장
+//
+//                // 파일 이름 업데이트
+//                inquiryRequest.setOfile(ofile);
+//                inquiryRequest.setSfile(sfile);
+//            } else {
+//                // 파일이 없을 경우 기존 파일 이름 유지
+//                inquiryRequest.setOfile(originalOfile);
+//                inquiryRequest.setSfile(originalSfile);
+//            }
+//
+//            Inquiry updatePost = Inquiry.builder()
+//                    .idx(inquiry.getIdx())
+//                    .username(inquiry.getUsername())
+//                    .title(inquiryRequest.getTitle())
+//                    .content(inquiryRequest.getContent())
+//                    .postdate(inquiry.getPostdate())
+//                    .viewCount(inquiry.getViewCount()) // 기존 값 유지
+//                    .responses(inquiry.getResponses())
+//                    .ofile(inquiryRequest.getOfile())
+//                    .sfile(inquiryRequest.getSfile())
+//                    .inquiryPassword(inquiryRequest.getInquiryPassword())
+//                    .build();// 새로운 파일이 있는 경우 파일 업로드
+//
+//            // 게시글 업데이트
+//            inquiryRepository.save(updatePost);
+//        } else {
+//            throw new EntityNotFoundException("해당 ID의 게시글을 찾을 수 없습니다: " + idx);
+//        }
+//    }
+
+
 }

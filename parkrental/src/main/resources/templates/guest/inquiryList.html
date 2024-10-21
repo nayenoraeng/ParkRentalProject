@@ -60,24 +60,16 @@
                         <th>작성자</th>
                         <th>작성일</th>
                         <th>조회수</th>
-                        <th>Replies</th>
                     </tr>
                 </thead>
                 <tbody>
                 <tr th:each="inquiry : ${inquiries}">
                     <td>
-                        <a th:href="@{/user/inquiryView(idx=${inquiry.idx})}" th:text="${inquiry.title}"></a>
+                        <a th:href="@{/user/inquiryPass(idx=${inquiry.idx})}" th:text="${inquiry.title}"></a>
                     </td>
                     <td th:text="${inquiry.username}"></td>
                     <td th:text="${#temporals.format(inquiry.postdate, 'yyyy.MM.dd HH:mm:ss')}"></td>
                     <td th:text="${inquiry.viewCount}"></td>
-                    <td>
-                        <ul>
-                            <li th:each="reply : ${inquiry.replies}">
-                                <strong th:text="${reply.username}"></strong>: <span th:text="${reply.content}"></span>
-                            </li>
-                        </ul>
-                    </td>
                 </tr>
                 </tbody>
             </table>

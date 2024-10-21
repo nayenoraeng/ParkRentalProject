@@ -61,11 +61,8 @@ CREATE table seller (
   	regidate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   	authority varchar(20) default 'ROLE_SELLER',
   	enabled INT(1) default 1,
-<<<<<<< HEAD
   	provider varchar(20) default 'LOCAL',
   	providerId varchar(100),
-=======
->>>>>>> yerim2
   	isLocked INT(1) default 0,
   	failCount INT default 0,
   	lockTimes TIMESTAMP
@@ -261,7 +258,26 @@ CREATE TABLE inquiry (
   	sfile varchar(100),
   	inquiryPassword varchar(20) not null,
   	parentId bigint,
-  	FOREIGN KEY (parentId) REFERENCES inquiry(idx), 
+  	FOREIGN KEY (parentId) REFERENCES inquiry (idx), 
+  	FOREIGN KEY (username) REFERENCES user (username)  	
+  	ON DELETE CASCADE
+	ON UPDATE CASCADE
+);
+
+CREATE TABLE inquiry (
+	idx bigint(10) PRIMARY KEY AUTO_INCREMENT,
+	originNo bigint(10) default 0,
+	groupOrd int(10) DEFAULT 0 NOT NULL,
+	groupLayer int(10) DEFAULT 0 NOT NULL,
+	username varchar(100) not null,
+ 	title varchar(50) not null,
+	content varchar(1000) not null,
+	postdate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	viewCount int(10) DEFAULT 0 NOT NULL,
+	responses int(10) DEFAULT 0 NOT NULL,
+  	ofile varchar(200),
+  	sfile varchar(100),
+  	inquiryPassword varchar(20) not null,
   	FOREIGN KEY (username) REFERENCES user (username)  	
   	ON DELETE CASCADE
 	ON UPDATE CASCADE
@@ -280,7 +296,7 @@ CREATE TABLE cart (
     FOREIGN KEY (username) REFERENCES user(username) 
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    FOREIGN KEY (productNum, parkId) REFERENCES product(productNum, parkId) 
+    FOREIGN KEY (productName, parkId) REFERENCES product(productName, parkId) 
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
