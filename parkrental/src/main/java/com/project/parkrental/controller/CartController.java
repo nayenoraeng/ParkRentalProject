@@ -1,5 +1,7 @@
-package com.project.parkrental.cart;
+package com.project.parkrental.controller;
 
+import com.project.parkrental.cart.Cart;
+import com.project.parkrental.cart.CartService;
 import com.project.parkrental.parkList.model.Product;
 import com.project.parkrental.parkList.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,36 +26,33 @@ public class CartController {
     @Autowired
     private ProductService productService;
 
-    @PostMapping("/add")
-    public String addProductToCart(
-            @RequestParam("idx[]") List<Long> idxList,
-            @RequestParam("quantity[]") List<Integer> quantities, Model model) {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = authentication.getName();
+@PostMapping("/add")
+public String addProductToCart(
+        @RequestParam("idx[]") List<Long> idxList,  
+        Model model) {
+    try {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
 
-            for (int i = 0; i < idxList.size(); i++) {
-                Long productIdx = idxList.get(i);
-                Product product = productService.getProductById(productIdx);
+        for (Long productIdx : idxList) {
+            Product product = productService.getProductById(productIdx);
 
-                if (product.getParkList() == null) {
-                    model.addAttribute("error", "공원 정보가 없습니다.");
-                    return "redirect:/user/Cart";
-                }
-
-                int quantity = quantities.get(i);
-
-                cartService.addProductToCart(username, product, quantity);
+            if (product.getParkList() == null) {
+                model.addAttribute("error", "공원 정보가 없습니다.");
+                return "redirect:/user/Cart";
             }
 
-            return "redirect:/user/Cart";
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            model.addAttribute("error", e.getMessage());
-            return "redirect:/user/Cart";
+            cartService.addProductToCart(username, product, 1);  // 수량을 기본적으로 1로 설정
         }
+
+        return "redirect:/user/Cart";
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        model.addAttribute("error", e.getMessage());
+        return "redirect:/user/Cart";
     }
+}
 
     @GetMapping
     public String getCartProducts(Model model) {
@@ -120,6 +119,30 @@ public class CartController {
         } catch (Exception e) {
             e.printStackTrace();
             response.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    @DeleteMapping("/delete/{idx}")
+    public ResponseEntity<Map<String, String>> deleteProduct(@PathVariable Long idx) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
+
+            // 장바구니에서 해당 사용자의 항목인지 확인 후 삭제
+            Cart cart = cartService.findByIdxAndUsername(idx, username);
+            if (cart != null) {
+                cartService.deleteProductFromCart(idx);
+                response.put("success", "물품이 삭제되었습니다.");
+            } else {
+                response.put("error", "해당 항목을 삭제할 권한이 없습니다.");
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("error", "물품을 삭제하는 도중 오류가 발생했습니다.");
             return ResponseEntity.badRequest().body(response);
         }
     }

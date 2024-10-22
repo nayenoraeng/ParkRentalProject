@@ -29,4 +29,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Optional<Product> findByProductNameAndParkList(@Param("productName") String productName, @Param("parkId") Long parkId);
 
     Optional<Product> findByProductNameAndParkId(String productName, Long parkId);
+
 }

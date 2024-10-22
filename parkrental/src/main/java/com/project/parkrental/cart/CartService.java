@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CartService {
@@ -85,6 +86,13 @@ public class CartService {
         return calculateTotalPrice(username);
     }
 
+    public void deleteProductFromCart(Long idx) {
+        Cart cart = cartRepository.findById(idx)
+                .orElseThrow(() -> new RuntimeException("장바구니 항목을 찾을 수 없습니다. idx: " + idx));
+
+        cartRepository.delete(cart);
+    }
+
     // 예약 기능 추가 (Cart 항목을 기반으로 예약 생성)
     public void reserveProducts(String username) {
         List<Cart> cartProducts = cartRepository.findByUsername(username);
@@ -99,7 +107,15 @@ public class CartService {
             System.out.println("예약 처리: " + cart.getProductName());
         });
 
-        // 장바구니 비우기
         cartRepository.deleteAll(cartProducts);
+    }
+
+    public Cart findByIdxAndUsername(Long idx, String username) {
+        Optional<Cart> cartOptional = cartRepository.findByIdxAndUsername(idx, username);
+        if (cartOptional.isPresent()) {
+            return cartOptional.get();
+        } else {
+            throw new RuntimeException("장바구니 항목을 찾을 수 없습니다. idx: " + idx + ", username: " + username);
+        }
     }
 }
