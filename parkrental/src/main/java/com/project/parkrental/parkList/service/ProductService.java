@@ -46,11 +46,19 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    // 제품 ID로 제품 정보를 가져오는 메서드 (제품 상세 페이지용)
-    public Product getProductById(Long productId) {
-        return productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("해당 제품을 찾을 수 없습니다."));
+    // 제품 idx로 제품 정보를 가져오는 메서드 (제품 상세 페이지용)
+    public Product getProductById(Long idx) {
+        Product product = productRepository.findById(idx)
+                .orElseThrow(() -> new RuntimeException("해당 제품을 찾을 수 없습니다. idx: " + idx));
+
+        // parkList와 parkId가 null인지 확인
+        if (product.getParkList() == null) {
+            throw new RuntimeException("해당 제품에 연결된 공원 정보가 없습니다.");
+        }
+
+        return product;
     }
+
 
     // 대여 불가능한 제품 리스트를 반환하는 메서드
     public List<String> getUnavailableProductsForCategory(String parkCategory) {
@@ -64,9 +72,9 @@ public class ProductService {
         }
     }
 
-    // 특정 물품 ID로 재고 차감
-    public boolean reduceProductQuantity(Long productId, int quantity) {
-        Product product = productRepository.findById(productId).orElse(null);
+    // 특정 물품 idx로 재고 차감
+    public boolean reduceProductQuantity(Long idx, int quantity) {
+        Product product = productRepository.findById(idx).orElse(null);
         if (product != null && product.getQuantity() >= quantity) {
             product.setQuantity(product.getQuantity() - quantity);
             productRepository.save(product);
@@ -74,7 +82,6 @@ public class ProductService {
         }
         return false;
     }
-
     // 특정 카테고리에서 대여 가능한 제품 목록을 반환하는 메서드
     public List<Product> getProductsByCategory(String parkCategory) {
         // 해당 카테고리에 맞는 대여 불가능한 제품 목록을 가져옴
@@ -120,5 +127,36 @@ public class ProductService {
 
         // 각 Cart 객체에서 제품 번호와 수량을 가져옴
         return carts; // Cart 자체를 반환하여 각 장바구니 항목에 접근 가능
+    }
+
+    // 장바구니의 항목에 맞는 제품을 조회하는 메서드
+    public void updateQuantity(Long cartIdx, int newQuantity) {
+        Cart cart = cartRepository.findById(cartIdx)
+                .orElseThrow(() -> new RuntimeException("장바구니 항목을 찾을 수 없습니다."));
+
+        // productName과 parkId로 Product를 조회
+        Product product = productRepository.findByProductNameAndParkId(cart.getProductName(), cart.getParkId())
+                .orElseThrow(() -> new RuntimeException("상품을 찾을 수 없습니다. 상품명: "
+                        + cart.getProductName() + ", 공원 ID: " + cart.getParkId()));
+
+        int availableQuantity = product.getQuantity();
+
+        if (newQuantity > availableQuantity) {
+            throw new RuntimeException("재고가 부족합니다. 최대 " + availableQuantity + "개까지 설정할 수 있습니다.");
+        }
+
+        cart.setQuantity(newQuantity);
+        cartRepository.save(cart);
+    }
+
+    // 추가된 메서드: productName과 parkId로 Product를 조회
+    public Product getProductByNameAndParkId(String productName, Long parkId) {
+        // parkId로 공원을 조회
+        ParkList park = parkListRepository.findById(parkId)
+                .orElseThrow(() -> new RuntimeException("공원을 찾을 수 없습니다."));
+
+        // productName과 parkId로 Product를 조회하여 반환
+        return productRepository.findByProductNameAndParkId(productName, parkId)
+                .orElseThrow(() -> new RuntimeException("해당 공원의 상품을 찾을 수 없습니다: " + productName));
     }
 }

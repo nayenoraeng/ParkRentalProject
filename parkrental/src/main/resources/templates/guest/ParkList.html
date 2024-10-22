@@ -156,6 +156,7 @@
                 </ul>
             </nav>
         </div>
+
         <!-- 메인화면으로 돌아가기 버튼 -->
         <div class="col-12 d-flex justify-content-end mt-2">
             <a th:href="@{/}" class="btn btn-outline-secondary">메인화면</a>
@@ -171,7 +172,7 @@
         const latitude = urlParams.get('latitude');
         const longitude = urlParams.get('longitude');
         const radius = urlParams.get('radius') || 5;
-        const size = urlParams.get('size') || 6; // 기본 페이지 크기
+        const size = urlParams.get('size') || 6;
 
         let fetchUrl = `/ParkList?page=${pageNumber}&size=${size}`;
         if (keyword) {
@@ -191,7 +192,7 @@
         document.getElementById('result').innerHTML = html;  // 검색 결과만 갱신
         })
         .catch(error => {
-        console.error("Error fetching page results:", error);
+        console.error("페이지 결과 에러 발생 :", error);
         });
     }
 
@@ -213,7 +214,7 @@
                 // 키워드는 무시하고 카테고리와 위치 정보만으로 검색
                 window.location.href = url;
             }, function(error) {
-                console.error("Error getting location:", error);
+                console.error("위치 정보 에러 발생 :", error);
                 alert("위치 정보를 가져올 수 없습니다.");
             });
         } else {

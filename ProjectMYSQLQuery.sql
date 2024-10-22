@@ -19,7 +19,6 @@ CREATE table user (
 	username VARCHAR(50) UNIQUE KEY not null,
 	password varchar(100) not null,
 	name varchar(50) not null,
-	phoneNum varchar(15) not null,
 	email varchar(50),
 	postcode varchar(10),
   	address varchar(200),
@@ -67,10 +66,11 @@ CREATE table seller (
   	lockTimes TIMESTAMP
 );
 
-INSERT INTO seller (businessNum,username,name,password,businessName) VALUES
-('B001', 'user1','password1','사용자1','Business A'),
-('B002', 'user2','password2','사용자2','Business B'),
-('B003', 'user3','password3','사용자3','Business C');
+INSERT INTO seller (businessNum, username, password, name, businessName, phoneNum) 
+VALUES
+('B001', 'user1', '1234', '판매자1', 'Business A', '010-1111-1111'),
+('B002', 'user2', '1234', '판매자2', 'Business B', '010-2222-2222'),
+('B003', 'user3', '1234', '판매자3', 'Business C', '010-3333-3333');
 
 select * from seller;
 
@@ -294,8 +294,7 @@ CREATE TABLE cart (
         ON UPDATE CASCADE
 );
 ## 이거 추가해야 카트 테이블 생성됨;; ##
-ALTER TABLE product ADD INDEX (productNum);
-CREATE INDEX idxProductNumParkId ON product (productNum, parkId);
-
+ALTER TABLE product ADD INDEX (productName);
+CREATE INDEX idxProductNameParkId ON product (productName, parkId);
 
 SELECT productNum FROM cart;
