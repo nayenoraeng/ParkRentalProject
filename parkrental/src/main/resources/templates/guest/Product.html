@@ -48,7 +48,7 @@
             <p><strong>제품명:</strong> <span th:text="${product.productName}">제품 이름</span></p>
             <p><strong>
                 <span th:text="${product.productName == '일회용품세트(판매)' || product.productName == '우산(판매)' ? '금액: ' : '대여료: '}"></span>
-            </strong>+
+            </strong>
                 <span th:text="${product.cost + '원'}">가격 정보 없음</span></p>
             <p><strong>재고:</strong>
                 <span th:if="${product.quantity > 0}" th:text="${product.quantity} + ' 개'">0 개</span>

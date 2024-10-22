@@ -60,24 +60,16 @@
                         <th>작성자</th>
                         <th>작성일</th>
                         <th>조회수</th>
-                        <th>Replies</th>
                     </tr>
                 </thead>
                 <tbody>
                 <tr th:each="inquiry : ${inquiries}">
                     <td>
-                        <a th:href="@{/user/inquiryView(idx=${inquiry.idx})}" th:text="${inquiry.title}"></a>
+                        <a th:href="@{/user/inquiryPass(idx=${inquiry.idx})}" th:text="${inquiry.title}"></a>
                     </td>
                     <td th:text="${inquiry.username}"></td>
                     <td th:text="${#temporals.format(inquiry.postdate, 'yyyy.MM.dd HH:mm:ss')}"></td>
                     <td th:text="${inquiry.viewCount}"></td>
-                    <td>
-                        <ul>
-                            <li th:each="reply : ${inquiry.replies}">
-                                <strong th:text="${reply.username}"></strong>: <span th:text="${reply.content}"></span>
-                            </li>
-                        </ul>
-                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -113,19 +105,18 @@
         
             <!-- 검색 바 -->
             <div class="search-container">
-                <select>
-                    <option value="전체기간">전체기간</option>
-                    <!-- 기간 선택 옵션 추가 가능 -->
-                </select>
-        
-                <select>
+                <form action="/guest/inquiryList" method="get">
+                <select name="filter">
                     <option value="제목만">제목만</option>
-                    <!-- 필터링 옵션 추가 가능 -->
+                    <option value="내용만">내용만</option>
+                    <option value="작성자">작성자</option>
+                    <option value="제목과내용">제목과 내용</option>
                 </select>
         
-                <input type="text" placeholder="검색어를 입력해 주세요" />
+                <input type="text" name="keyword" placeholder="검색어를 입력해 주세요" />
         
-                <button>검색</button>
+                <button type="submit">검색</button>
+                </form>
             </div>
             <div class="button-container">
                 <button class="write-button" onclick="location.href='/user/inquiryWrite'">글쓰기</button>

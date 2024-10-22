@@ -11,6 +11,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class UserService {
     @Autowired
@@ -69,5 +72,34 @@ public class UserService {
 
     public void updateUser(User user) {
         userRepository.save(user);
+    }
+
+    public List<UserDto> getAllUsers() {
+        List<User> users = userRepository.findAllByAuthority("ROLE_USER");
+        return users.stream()
+                .map(user -> new UserDto(
+                        user.getIdx(),
+                        user.getUsername(),
+                        user.getName(),
+                        user.getPhoneNum(),
+                        user.getEmail(),
+                        user.getPostcode(),
+                        user.getAddress(),
+                        user.getDetailAddress(),
+                        user.getRegidate(),
+                        user.getAuthority(),
+                        user.getEnabled(),
+                        user.getProvider(),
+                        user.getProviderId(),
+                        user.getIsLocked(),
+                        user.getFailCount(),
+                        user.getLockTimes()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public UserDto findUserById(long idx) {
+        User user = userRepository.findById(idx);
+        return new UserDto(user);
     }
 }

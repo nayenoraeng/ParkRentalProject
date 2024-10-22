@@ -9,30 +9,25 @@
             text-align: center;
             margin-bottom: 30px;
         }
-        .park-info-container img {
-            margin: 0 auto;
-            display: block;
-        }
         .card-img-top {
             width: 100%;
-            height: 150px;
+            height: 200px;
             object-fit: cover;
         }
         .card {
-            margin-bottom: 20px;
-            margin: 10px;
+            margin-bottom: 5px;
+            margin: 5px;
             flex: 1 1 20%;
         }
         .product-row {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 10px;
         }
         .col-md-4 {
             flex: 1 1 20%;
-            max-width: calc(100% / 5 - 20px);
-            margin-bottom: 20px;
+            max-width: calc(100% / 5 - 5px);
+            margin-bottom: 5px;
         }
         .form-check-input {
             border: 2px solid black;
@@ -55,44 +50,32 @@
             <p><strong>구분:</strong> <span th:text="${park.parkSe}">구분 정보 없음</span></p>
             <p><strong>주소:</strong> <span th:text="${park.lnmadr}">주소 정보 없음</span></p>
             <p><strong>면적:</strong> <span th:text="${park.parkAr + ' ㎡'}">면적 정보 없음</span></p>
-            <p th:if="${latitude != null && longitude != null}">
-                <strong>현재 위치에서 거리:</strong> <span th:text="'약 ' + ${#numbers.formatDecimal(park.distanceFromUser, 1, 1)} + ' km'"></span>
-            </p>
         </div>
     </div>
 </div>
 
-<!-- 물품 선택 폼 -->
 <form id="cartForm" action="/user/Cart/add" method="post">
-    <input type="hidden" name="username" th:value="${#authentication.name}" />
     <div class="container my-5">
         <div class="row product-row">
             <div class="col-md-4" th:each="product : ${products}">
                 <div class="card mb-3">
-                    <!-- 클릭 시 물품 상세 페이지로 이동 -->
-                    <a th:href="@{'/Product/' + ${product.id}}">
+                    <a th:href="@{'/Product/' + ${product.idx}}">
                         <img th:src="@{'/image/rental/' + ${product.productName.toLowerCase()} + '.png'}" class="card-img-top" alt="Product Image">
                     </a>
                     <div class="card-body">
-                        <!-- 클릭 시 물품 상세 페이지로 이동 -->
-                        <h5 class="card-title">
-                            <a th:href="@{'/Product/' + ${product.id}}" th:text="${product.productName}">물품 이름</a>
+                        <h5 class="card-title" style="font-size: 16px;">
+                            <a th:href="@{'/Product/' + ${product.idx}}" th:text="${product.productName}">물품 이름</a>
                         </h5>
-
-                        <!-- 금액 또는 대여료 표시 -->
                         <p class="card-text">
-                            <span th:text="'대여료: ' + ${product.cost} + '원'">대여료</span>
+                            <span th:text="${product.productName == '일회용품세트(판매)' || product.productName == '우산(판매)' ? '금액: ' : '대여료: '}"></span>
+                            <span th:text="${product.cost} + '원'"></span>
                         </p>
-
-                        <!-- 필요한 hidden input 필드 추가 -->
-                        <input type="hidden" name="productNum" th:value="${product.productNum}" />
-                        <input type="hidden" name="productName" th:value="${product.productName}" />
-                        <input type="hidden" name="productPrice" th:value="${product.cost}" />
-
-                        <!-- 선택하기 체크박스 -->
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="productIds" th:value="${product.id}" th:disabled="${product.quantity == 0}">
-                            <label class="form-check-label">선택하기</label>
+                        <p class="card-text">
+                            <span th:text="'재고: ' + ${product.quantity}"></span>
+                        </p>
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" name="idx[]" th:value="${product.idx}" th:disabled="${product.quantity == 0}">
+                            <label class="form-check-label">선택</label>
                         </div>
                     </div>
                 </div>
@@ -100,20 +83,17 @@
         </div>
     </div>
 
-    <!-- 버튼 영역 -->
     <div class="text-center mt-4 d-flex justify-content-center">
         <button type="button" class="btn btn-success mx-2" onclick="checkLogin()">장바구니에 추가</button>
         <a th:href="@{/}" class="btn btn-primary mx-2">메인 화면으로 돌아가기</a>
     </div>
 </form>
 
-
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     function checkLogin() {
-        const checkboxes = document.querySelectorAll('input[name="productIds"]:checked');
+        const checkboxes = document.querySelectorAll('input[name="idx[]"]:checked');
         if (checkboxes.length === 0) {
             alert("대여할 물품을 선택하세요.");
             return;
@@ -123,16 +103,21 @@
             .then(response => response.json())
             .then(data => {
                 if (data.loggedIn) {
-                    document.getElementById("cartForm").submit();
+                    submitForm();
                 } else {
                     alert('회원만 이용 가능한 서비스입니다.');
                     window.location.href = '/guest/Login';
                 }
             })
             .catch(error => {
-                console.error('Error checking login status:', error);
-                alert("로그인 상태를 확인할 수 없습니다. 나중에 다시 시도하세요.");
+                console.error('로그인 상태 확인 에러 발생 :', error);
+                alert("로그인 상태를 확인할 수 없습니다.");
             });
+    }
+
+    function submitForm() {
+        const cartForm = document.getElementById('cartForm');
+        cartForm.submit();
     }
 </script>
 </body>

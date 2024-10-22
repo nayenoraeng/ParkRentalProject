@@ -1,8 +1,8 @@
 package com.project.parkrental.security.Controller;
 
 import com.project.parkrental.security.DTO.Seller;
-import com.project.parkrental.security.DTO.User;
 import com.project.parkrental.security.Service.SellerService;
+import com.project.parkrental.security.Service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -23,27 +23,26 @@ public class SellerController {
         return "guest/sellerSignup";
     }
 
-    @PostMapping("/checkSellerName")
+    @PostMapping("/checkSellerEmail")
     @ResponseBody
-    public String checkUsername(@RequestParam("username") String username) {
-        System.out.println("AJAX 요청 수신 - Username: " + username);
-        boolean exist = sellerService.isUsernameTaken(username);
-        return exist? "이미 사용중인 아이디입니다.":"사용가능한 아이디입니다.";
+    public String checkEmail(@RequestParam("email") String email) {
+        boolean exist = sellerService.isSellerEmailTaken(email);
+        return exist? "이미 사용중인 이메일입니다.":"사용가능한 이메일입니다.";
     }
 
-//    @PostMapping("/checkSellerEmail")
-//    @ResponseBody
-//    public String checkEmail(@RequestParam("email") String email) {
-//        boolean exist = sellerService.isEmailTaken(email);
-//        return exist? "이미 사용중인 이메일입니다.":"사용가능한 이메일입니다.";
-//    }
-//
-//    @PostMapping("/checkSellerPhoneNum")
-//    @ResponseBody
-//    public String checkPhoneNum(@RequestParam("phoneNum") String phoneNum) {
-//        boolean exist = sellerService.isPhoneNumTaken(phoneNum);
-//        return exist? "이미 사용중인 전화번호입니다.":"사용가능한 전화번호입니다.";
-//    }
+    @PostMapping("/checkSellerPhoneNum")
+    @ResponseBody
+    public String checkPhoneNum(@RequestParam("phoneNum") String phoneNum) {
+        boolean exist = sellerService.isSellerPhoneNumTaken(phoneNum);
+        return exist? "이미 사용중인 전화번호입니다.":"사용가능한 전화번호입니다.";
+    }
+
+    @PostMapping("/checkBusinessNum")
+    @ResponseBody
+    public String checkBusinessNum(@RequestParam("businessNum") String businessNum) {
+        boolean exist = sellerService.isSellerPhoneNumTaken(businessNum);
+        return exist? "이미 사용중인 사업자번호입니다.":"사용가능한 사업자번호입니다.";
+    }
 
     @PostMapping("/sellerSignup")
     public String registerUser(@Valid @ModelAttribute Seller seller, BindingResult result, Model model) {

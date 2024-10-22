@@ -1,3 +1,4 @@
+//다음 주소 검색창 활용
 function daumPostcode() {
     new daum.Postcode({
         oncomplete: function(data) {

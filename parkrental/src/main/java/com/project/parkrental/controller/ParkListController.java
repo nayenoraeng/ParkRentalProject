@@ -1,4 +1,4 @@
-package com.project.parkrental.parkList.controller;
+package com.project.parkrental.controller;
 
 import com.project.parkrental.parkList.model.ParkList;
 import com.project.parkrental.parkList.model.Product;

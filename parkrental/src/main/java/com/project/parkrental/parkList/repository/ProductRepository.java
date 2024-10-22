@@ -20,12 +20,14 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // ParkList로 Product 리스트 조회
     List<Product> findByParkList(ParkList park);
 
-    // 네이티브 쿼리를 사용하여 특정 parkId의 유니크한 Product 리스트 조회
-    @Query(value = "SELECT DISTINCT p.* FROM product p WHERE p.parkid = :parkId", nativeQuery = true)
+    // 특정 parkId의 유니크한 Product 리스트 조회
+    @Query(value = "SELECT DISTINCT p.productName, p.cost FROM product p WHERE p.parkid = :parkId", nativeQuery = true)
     List<Product> findUniqueProductsByPark(@Param("parkId") Long parkId);
 
-    // productNum과 parkId로 특정 제품과 공원 정보를 조회
-    @Query("SELECT p FROM Product p JOIN FETCH p.parkList WHERE p.productNum = :productNum AND p.parkList.parkId = :parkId")
-    Optional<Product> findProductWithParkList(@Param("productNum") String productNum, @Param("parkId") Long parkId);
+    // productName과 parkId로 특정 제품과 공원 정보를 조회
+    @Query("SELECT p FROM Product p WHERE p.productName = :productName AND p.parkList.parkId = :parkId")
+    Optional<Product> findByProductNameAndParkList(@Param("productName") String productName, @Param("parkId") Long parkId);
+
+    Optional<Product> findByProductNameAndParkId(String productName, Long parkId);
 
 }

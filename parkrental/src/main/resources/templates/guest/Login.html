@@ -193,7 +193,6 @@
             opacity: 0; /* Initially hidden */
             transition: opacity 0.3s; /* Transition for appearance */
         }
-        
     </style>
 </head>
 <body>
@@ -244,6 +243,8 @@
             <div class="text-center mt-3 links">
                 <a th:href="@{/FindIdPw}">아이디 / 비밀번호 찾기</a>
                 <a th:href="@{/guest/Signup}">회원가입</a>
+            </div>
+            <div class="text-center mt-3 links">
                 <a th:href="@{/guest/sellerSignup}">판매자 회원가입</a>
             </div>
         </div>
@@ -263,27 +264,6 @@
             });
         });
     </script>
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // 기본 제출 막기
-
-            const form = event.target;
-            const formData = new FormData(form);
-
-            fetch(form.action, {
-                method: 'POST',
-                body: formData
-            }).then(response => {
-                if (response.ok) {
-                    // 로그인 성공 시 메인 페이지로 이동 및 새로고침
-                    window.location.href = '/'; // 메인 페이지 경로로 리디렉션
-                } else {
-                    alert('로그인 실패');
-                }
-            }).catch(error => {
-                console.error('Error during login:', error);
-            });
-        });
-    </script>
+    <script th:src="@{/js/security/login.js}"></script>
 </body>
 </html>
