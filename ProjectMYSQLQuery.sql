@@ -13,15 +13,14 @@ GRANT ALL PRIVILEGES ON project.* TO 'project'@'localhost';
 
 
 # 유저(소비자) 테이블
-DROP TABLE User;
-CREATE table User (
+DROP TABLE user;
+CREATE table user (
 	idx BIGINT(10) primary key AUTO_INCREMENT,
 	username VARCHAR(50) UNIQUE KEY not null,
 	password varchar(100) not null,
 	name varchar(50) not null,
 	phoneNum varchar(15) not null,
 	email varchar(50),
-	phoneNum varchar(15) not null,
 	postcode varchar(10),
   	address varchar(200),
   	detailAddress varchar(200),
@@ -37,7 +36,7 @@ CREATE table User (
 
 
 -- user 테이블에 더미 데이터 추가
-INSERT INTO User (username, password, email, name) VALUES
+INSERT INTO user (username, password, email, name) VALUES
 ('user1', 'password1', 'user1@example.com', '사용자 1'),
 ('user2', 'password2', 'user2@example.com', '사용자 2'),
 ('user3', 'password3', 'user3@example.com', '사용자 3');
@@ -61,11 +60,8 @@ CREATE table seller (
   	regidate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   	authority varchar(20) default 'ROLE_SELLER',
   	enabled INT(1) default 1,
-<<<<<<< HEAD
   	provider varchar(20) default 'LOCAL',
   	providerId varchar(100),
-=======
->>>>>>> yerim2
   	isLocked INT(1) default 0,
   	failCount INT default 0,
   	lockTimes TIMESTAMP
@@ -142,11 +138,7 @@ CREATE TABLE reservation (
 	isPaid int(1) not null,
 	costAll bigint(10) UNIQUE KEY NOT NULL,
 	businessName varchar(100) not null,
-	productName varchar(30) not null,
-	FOREIGN KEY (businessName) REFERENCES seller (businessName),
-	FOREIGN KEY (productName) REFERENCES product (productName)
-	ON DELETE CASCADE
-	ON UPDATE CASCADE
+	productName varchar(30) not null
 );
 ALTER TABLE reservation DROP FOREIGN KEY reservation_ibfk_2;
 # API 정보 가져와서 공원 리스트로 저장하기
@@ -206,9 +198,7 @@ create table commuComment (
 );
 
 # 커뮤니티 게시판 좋아요 테이블
-ß
 drop table commuLike;
-
 CREATE TABLE commuLike (
 	likeCount INT(10) default 0,
 	username VARCHAR(50) NOT NULL,
@@ -280,7 +270,7 @@ CREATE TABLE cart (
     FOREIGN KEY (username) REFERENCES user(username) 
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    FOREIGN KEY (productNum, parkId) REFERENCES product(productNum, parkId) 
+    FOREIGN KEY (productName, parkId) REFERENCES product(productName, parkId) 
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );

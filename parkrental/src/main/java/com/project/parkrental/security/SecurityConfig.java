@@ -52,8 +52,11 @@ public class SecurityConfig {
                         .requestMatchers("/", "/css/**", "/files/**", "/js/**", "/image/**","/guest/**",
                                 "/ParkList/**", "/ParkDetail/**", "/Product/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/user/**").hasRole("USER")
-                        .requestMatchers("/seller/**").hasRole("SELLER")
+                        .requestMatchers("/user/userpage").hasAnyRole("USER", "SELLER","ADMIN")
+                        .requestMatchers("/user/userpageEdit").hasAnyRole("USER", "SELLER", "ADMIN")
+                        .requestMatchers("/user/userpagePwd").hasAnyRole("USER", "SELLER", "ADMIN")
+                        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/seller/**").hasAnyRole("SELLER","ADMIN")
                         .anyRequest().authenticated()
                 )
                 .logout(logout -> logout

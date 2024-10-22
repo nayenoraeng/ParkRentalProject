@@ -30,6 +30,6 @@ function refreshToken() {
     });
 }
 
-const refreshInterval = 15 * 60 * 1000;//자동토큰 갱신 - 30분
+const refreshInterval = 15 * 60 * 1000;//자동토큰 갱신 - 15분
 
 setInterval(refreshToken, refreshInterval);

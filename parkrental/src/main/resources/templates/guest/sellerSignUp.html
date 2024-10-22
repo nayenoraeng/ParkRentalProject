@@ -322,6 +322,7 @@
 
     </style>
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script th:src="@{/js/InfoCheck.js}"></script>
     <script th:src="@{/js/address.js}"></script>
     <script th:src="@{/js/validate.js}"></script>
 </head>
@@ -388,7 +389,7 @@
                 <p th:if="${#fields.hasErrors('phoneNum')}" th:errors="*{phoneNum}"></p>
             </div>
             <div class="col-sm-3">
-                <button type="button" id="checkPhoneNum" class="btn btn-secondary w-100">중복 확인</button>
+                <button type="button" id="checkSellerPhoneNum" class="btn btn-secondary w-100">중복 확인</button>
             </div>
         </div>
 
@@ -399,7 +400,7 @@
                 <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
             </div>
             <div class="col-sm-3">
-                <button type="button" id="checkEmail" class="btn btn-secondary w-100">중복 확인</button>
+                <button type="button" id="checkSellerEmail" class="btn btn-secondary w-100">중복 확인</button>
             </div>
         </div>
 

@@ -4,7 +4,7 @@ $(document).ready(function() {
         var username = $('#username').val();
         $.ajax({
             type: "POST",
-            url: "/guest/checkSellerUsername",
+            url: "/guest/checkUsername",
             data: {username: username},
             success: function (response) {
                 alert(response);
@@ -16,13 +16,26 @@ $(document).ready(function() {
         var email = $('#email').val();
         $.ajax({
             type: "POST",
-            url:"/guest/checkSellerEmail",
+            url:"/guest/checkEmail",
             data: {email:email},
             success: function (response) {
                 alert(response);
             }
         });
     });
+
+        $('#checkSellerEmail').click(function(){
+            var email = $('#email').val();
+            $.ajax({
+                type: "POST",
+                url:"/guest/checkSellerEmail",
+                data: {email:email},
+                success: function (response) {
+                    alert(response);
+                }
+            });
+        });
+
     $('#checkBusinessNum').click(function(){
         var businessNum = $('#businessNum').val();
         $.ajax({
@@ -36,6 +49,18 @@ $(document).ready(function() {
     });
 
      $('#checkPhoneNum').click(function(){
+        var phoneNum = $('#phoneNum').val();
+        $.ajax({
+            type: "POST",
+            url:"/guest/checkSellerPhoneNum",
+            data: {phoneNum:phoneNum},
+            success: function (response) {
+                alert(response);
+            }
+        });
+    });
+
+     $('#checkSellerPhoneNum').click(function(){
         var phoneNum = $('#phoneNum').val();
         $.ajax({
             type: "POST",

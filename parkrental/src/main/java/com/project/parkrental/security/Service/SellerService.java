@@ -9,6 +9,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class SellerService {
     @Autowired
@@ -20,8 +24,12 @@ public class SellerService {
     public void registerNewUser (Seller seller) {
         seller.setPassword(passwordEncoder.encode(seller.getPassword()));
         seller.setAuthority("ROLE_SELLER");
-        System.out.println("save method called");
+        System.out.println("seller register method called");
         sellerRepository.save(seller);
+    }
+
+    public boolean isBusinessNumTaken (String businessNum) {
+        return sellerRepository.existsByBusinessNum(businessNum);
     }
 
     public boolean isUsernameTaken (String username) {
@@ -30,6 +38,14 @@ public class SellerService {
 
     public Seller findByUsername(String username) {
         return sellerRepository.findByUsername(username);
+    }
+
+    public Boolean isSellerPhoneNumTaken (String phoneNum) {
+        return sellerRepository.existsByPhoneNum(phoneNum);
+    }
+
+    public Boolean isSellerEmailTaken (String email) {
+        return sellerRepository.existsByEmail(email);
     }
 
     public SellerDto getUserDetails() {
@@ -47,4 +63,37 @@ public class SellerService {
     public void updateUser(Seller seller) {
         sellerRepository.save(seller);
     }
+
+    public List<SellerDto> getAllSellers() {
+        List<Seller> sellers = sellerRepository.findAllByAuthority("ROLE_SELLER");
+
+        return sellers.stream()
+                .map(seller -> new SellerDto(
+                        seller.getIdx(),
+                        seller.getBusinessNum(),
+                        seller.getUsername(),
+                        seller.getName(),
+                        seller.getBusinessName(),
+                        seller.getPhoneNum(),
+                        seller.getEmail(),
+                        seller.getPostcode(),
+                        seller.getAddress(),
+                        seller.getDetailAddress(),
+                        seller.getRegidate(),
+                        seller.getAuthority(),
+                        seller.getEnabled(),
+                        seller.getProvider(),
+                        seller.getProviderId(),
+                        seller.getIsLocked(),
+                        seller.getFailCount(),
+                        seller.getLockTimes()
+                        ))
+                .collect(Collectors.toList());
+    }
+
+    public SellerDto findSellerById(long idx) {
+        Seller seller = sellerRepository.findById(idx);
+        return new SellerDto(seller);
+    }
+
 }

@@ -9,7 +9,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>공원</title>
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=485549cb66c6d13697d4b008125bc810"></script>
-    <script th:src="@{/js/jwtHander.js}"></script>
 </head>
     <link rel="stylesheet" th:href="@{/css/Footer.css}" />
     <link rel="stylesheet" th:href="@{/css/MainImages.css}" />
@@ -72,7 +71,7 @@
             </li>
             <li sec:authorize="isAuthenticated()"><a th:href="@{/user/userpage}">마이페이지</a></li>
             <li sec:authorize="hasRole('ROLE_SELLER')"><a th:href="@{/seller/sellerpage}">판매자페이지</a></li>
-            <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/user/membermnger}">회원관리</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/admin/userlist}">회원관리</a></li>
         </ul>
     </nav>
 
@@ -519,7 +518,7 @@
         <li>항목 3</li>
         <li>항목 4</li>
     </ul>
-    <p>Copyright © 2023 한화시스템(주). 모든 권리는 보유됩니다.</p>
+    <p>.</p>
 </footer>
 
 <script th:src="@{/js/jQuery.js}"></script>
@@ -639,6 +638,6 @@ function translateText(text, targetLang, callback) {
     });
 });
 </script>
-
+<script th:src="@{/js/jwtHandler.js}"></script>
 </body>
 </html>
