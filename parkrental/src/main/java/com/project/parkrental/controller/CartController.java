@@ -42,7 +42,7 @@ public String addProductToCart(
                 return "redirect:/user/Cart";
             }
 
-            cartService.addProductToCart(username, product, 1);  // 수량을 기본적으로 1로 설정
+            cartService.addProductToCart(username, product, 1);  // 수량을 기본 1로 설정
         }
 
         return "redirect:/user/Cart";
@@ -114,7 +114,7 @@ public String addProductToCart(
 
             Long newTotalPrice = cartService.calculateTotalPrice(username);
             response.put("newTotalPrice", String.valueOf(newTotalPrice));
-            response.put("success", "수량이 업데이트되었습니다.");
+            response.put("success", "수량이 변경되었습니다.");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             e.printStackTrace();
