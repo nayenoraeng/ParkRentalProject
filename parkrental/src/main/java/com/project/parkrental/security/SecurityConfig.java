@@ -52,8 +52,8 @@ public class SecurityConfig {
                         .requestMatchers("/", "/css/**", "/files/**", "/js/**", "/image/**","/guest/**",
                                 "/ParkList/**", "/ParkDetail/**", "/Product/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/user/**").hasRole("USER")
-                        .requestMatchers("/seller/**").hasRole("SELLER")
+                        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/seller/**").hasAnyRole("SELLER", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .logout(logout -> logout

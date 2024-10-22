@@ -35,33 +35,51 @@ public class InquiryController {
     @GetMapping("/guest/inquiryList")
     public String inquiryList(@PageableDefault(size = 10, sort = "postdate", direction = Sort.Direction.DESC) Pageable pageable,
                               @RequestParam(value = "keyword", required = false) String keyword,
+                              @RequestParam(value = "filter", required = false) String filter,
                               Model model) {
         Page<InquiryResponseDTO> inquiryResponseDTOs;
         if (keyword != null && !keyword.trim().isEmpty()) {
-            inquiryResponseDTOs = inquiryService.searchInquiries(keyword, pageable);
+            if ("제목만".equals(filter)) {
+                System.out.println("제목으로 검색: " + keyword);
+                inquiryResponseDTOs = inquiryService.searchInquiriesByTitle(keyword, pageable);
+            } else if ("내용만".equals(filter)) {
+                inquiryResponseDTOs = inquiryService.searchInquiriesByContent(keyword, pageable);
+            } else if ("작성자".equals(filter)) {
+                inquiryResponseDTOs = inquiryService.searchInquiriesByUsername(keyword, pageable);
+            } else {
+                inquiryResponseDTOs = inquiryService.findAll(pageable); // 필터가 설정되지 않은 경우
+            }
         } else {
             inquiryResponseDTOs = inquiryService.findAll(pageable);
         }
 
         model.addAttribute("inquiries", inquiryResponseDTOs);
-        model.addAttribute("keyword", keyword);  // 검색어를 모델에 추가
+        model.addAttribute("keyword", keyword); // 검색어를 모델에 추가
+        model.addAttribute("filter", filter); // 선택된 필터를 모델에 추가
         return "guest/inquiryList"; // Thymeleaf 템플릿 이름
     }
 
-//    //전체 목록 보기
-//    @GetMapping("/guest/inquiryList")
-//    public String inquiryList(@PageableDefault(size = 10, sort = "postdate", direction = Sort.Direction.DESC) Pageable pageable,
-//                              Model model) {
-//        Page<InquiryResponseDTO> inquiryResponseDTOs = inquiryService.findAll(pageable);
-//        model.addAttribute("inquiries", inquiryResponseDTOs);
-//        return "guest/inquiryList"; // Thymeleaf 템플릿 이름
-//    }
 
     //비밀번호 확인창
     @RequestMapping("/user/inquiryPass")
     public String inquiryPass(HttpServletRequest request, Model model){
         Long idx = Long.valueOf(request.getParameter("idx"));
         Inquiry inquiry = inquiryService.inquiryView(idx);
+
+        // 사용자 권한 확인
+        if (inquiry != null) {
+            // admin 권한 확인
+            boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                    .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+
+            if (isAdmin) {
+                // admin 권한이면 바로 상세 뷰로 이동
+                inquiryService.inquiryUpdateViewCount(idx);
+                model.addAttribute("inquiries", inquiry);
+                model.addAttribute("isImageFile", inquiryService.isImageFile(inquiry.getSfile()));
+                return "redirect:/user/inquiryView?idx=" + idx;
+            }
+        }
 
         model.addAttribute("inquiry", inquiry);
         return "user/inquiryPass";
@@ -76,16 +94,19 @@ public class InquiryController {
         Long idx = Long.valueOf(request.getParameter("idx"));
         Inquiry inquiry = inquiryService.inquiryView(idx);
 
-        if(inquiry != null && inquiry.getInquiryPassword().equals(password)){
-            inquiryService.inquiryUpdateViewCount(idx);
-            model.addAttribute("inquiries", inquiry);
-            return "user/inquiryView";
-        } else {
-            model.addAttribute("error", "비밀번호가 맞지 않습니다.");
-            model.addAttribute("Id", sId);
-            model.addAttribute("idx", idx); // 다시 idx를 전달하여 다시 시도 가능하게 함
-            return "user/inquiryPass";
-        }
+
+            if (inquiry != null && inquiry.getInquiryPassword().equals(password)) {
+                inquiryService.inquiryUpdateViewCount(idx);
+                model.addAttribute("inquiries", inquiry);
+                model.addAttribute("isImageFile", inquiryService.isImageFile(inquiry.getSfile()));
+                return "user/inquiryView";
+            } else {
+                model.addAttribute("error", "비밀번호가 맞지 않습니다.");
+                model.addAttribute("Id", sId);
+                model.addAttribute("idx", idx); // 다시 idx를 전달하여 다시 시도 가능하게 함
+                return "user/inquiryPass";
+            }
+
     }
 
     //상세 뷰
@@ -95,6 +116,8 @@ public class InquiryController {
         String sId = SecurityContextHolder.getContext().getAuthentication().getName();
         Long idx = Long.valueOf(request.getParameter("idx"));
         Inquiry inquiry = inquiryService.inquiryView(idx);
+        model.addAttribute("inquiries", inquiry);
+        model.addAttribute("isImageFile", inquiryService.isImageFile(inquiry.getSfile()));
 
         return "user/inquiryView";
     }

@@ -43,12 +43,35 @@ public class InquiryService {
         return inquiryResponseDTOs;
     }
 
-    // 검색 기능 추가
-    public Page<InquiryResponseDTO> searchInquiries(String keyword, Pageable pageable) {
-        Page<Inquiry> inquiries = (Page<Inquiry>) inquiryRepository.findByTitleContainingOrContentContainingOrUsernameContaining(
-                keyword, keyword, keyword, pageable);
+    //제목검색
+    public Page<InquiryResponseDTO> searchInquiriesByTitle(String title, Pageable pageable) {
+        Page<Inquiry> inquiries = inquiryRepository.findByTitleContaining(title, pageable);
+        return inquiries.map(inquiry -> new InquiryResponseDTO(
+                inquiry.getIdx(),
+                inquiry.getTitle(),
+                inquiry.getUsername(),
+                inquiry.getContent(),
+                inquiry.getPostdate(),
+                inquiry.getViewCount()
+        ));
+    }
 
-        // Inquiry 객체를 InquiryResponseDTO로 변환
+    //내용검색
+    public Page<InquiryResponseDTO> searchInquiriesByContent(String content, Pageable pageable) {
+        Page<Inquiry> inquiries = inquiryRepository.findByContentContaining(content, pageable);
+        return inquiries.map(inquiry -> new InquiryResponseDTO(
+                inquiry.getIdx(),
+                inquiry.getTitle(),
+                inquiry.getUsername(),
+                inquiry.getContent(),
+                inquiry.getPostdate(),
+                inquiry.getViewCount()
+        ));
+    }
+
+    //아이디검색
+    public Page<InquiryResponseDTO> searchInquiriesByUsername(String username, Pageable pageable) {
+        Page<Inquiry> inquiries = inquiryRepository.findByUsernameContaining(username, pageable);
         return inquiries.map(inquiry -> new InquiryResponseDTO(
                 inquiry.getIdx(),
                 inquiry.getTitle(),
@@ -163,120 +186,16 @@ public class InquiryService {
         }
     }
 
-
-//    //글 수정
-//    @Transactional
-//    public void inquiryUpdate(Long idx, InquiryRequestDTO inquiryRequest, MultipartFile file,
-//                              HttpServletRequest request)  throws IOException, ServletException{
-//        Optional<Inquiry> optionalInquiry =  inquiryRepository.findById(idx);
-//
-//        if (optionalInquiry.isPresent()) {
-//            Inquiry inquiry = optionalInquiry.get();
-//
-//            String originalOfile = inquiry.getOfile();
-//            String originalSfile = inquiry.getSfile();
-//
-//            if (file != null && !file.isEmpty()) {
-//                String ofile = file.getOriginalFilename();
-//                String uploadDir = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files"; // 이미지 저장 경로 지정
-//
-//                File dir = new File(uploadDir);
-//                if (!dir.exists()) {
-//                    dir.mkdirs(); // mkdirs()를 사용하여 필요한 모든 디렉토리 생성
-//                }
-//
-//                String sfile = UUID.randomUUID().toString() + "_" + ofile;
-//
-//                File destination = new File(dir, sfile);
-//                file.transferTo(destination); // 파일 저장
-//
-//                // 파일 이름 업데이트
-//                inquiryRequest.setOfile(ofile);
-//                inquiryRequest.setSfile(sfile);
-//            } else {
-//                // 파일이 없을 경우 기존 파일 이름 유지
-//                inquiryRequest.setOfile(originalOfile);
-//                inquiryRequest.setSfile(originalSfile);
-//            }
-//
-//            Inquiry updatePost = Inquiry.builder()
-//                    .idx(inquiry.getIdx())
-//                    .parentId(inquiryRequest.getParentId())
-//                    .inquiryReRef(inquiryRequest.getInquiryReRef())
-//                    .inquiryReLev(inquiryRequest.getInquiryReLev() != null ? inquiryRequest.getInquiryReLev() : 0)
-//                    .inquiryReSeq(inquiryRequest.getInquiryReSeq() != null ? inquiryRequest.getInquiryReSeq() : 0)
-//                    .username(inquiry.getUsername())
-//                    .title(inquiryRequest.getTitle())
-//                    .content(inquiryRequest.getContent())
-//                    .postdate(inquiry.getPostdate())
-//                    .viewCount(inquiry.getViewCount()) // 기존 값 유지
-//                    .responses(inquiry.getResponses())
-//                    .ofile(inquiryRequest.getOfile())
-//                    .sfile(inquiryRequest.getSfile())
-//                    .inquiryPassword(inquiryRequest.getInquiryPassword())
-//                    .build();// 새로운 파일이 있는 경우 파일 업로드
-//
-//            // 게시글 업데이트
-//            inquiryRepository.save(updatePost);
-//        } else {
-//            throw new EntityNotFoundException("해당 ID의 게시글을 찾을 수 없습니다: " + idx);
-//        }
-//    }
-
-//    //글 수정
-//    @Transactional
-//    public void inquiryUpdate(Long idx, InquiryRequestDTO inquiryRequest, MultipartFile file,
-//                                            HttpServletRequest request)  throws IOException, ServletException{
-//        Optional<Inquiry> optionalInquiry =  inquiryRepository.findById(idx);
-//
-//        if (optionalInquiry.isPresent()) {
-//            Inquiry inquiry = optionalInquiry.get();
-//
-//            String originalOfile = inquiry.getOfile();
-//            String originalSfile = inquiry.getSfile();
-//
-//            if (file != null && !file.isEmpty()) {
-//                String ofile = file.getOriginalFilename();
-//                String uploadDir = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files"; // 이미지 저장 경로 지정
-//
-//                File dir = new File(uploadDir);
-//                if (!dir.exists()) {
-//                    dir.mkdirs(); // mkdirs()를 사용하여 필요한 모든 디렉토리 생성
-//                }
-//
-//                String sfile = UUID.randomUUID().toString() + "_" + ofile;
-//
-//                File destination = new File(dir, sfile);
-//                file.transferTo(destination); // 파일 저장
-//
-//                // 파일 이름 업데이트
-//                inquiryRequest.setOfile(ofile);
-//                inquiryRequest.setSfile(sfile);
-//            } else {
-//                // 파일이 없을 경우 기존 파일 이름 유지
-//                inquiryRequest.setOfile(originalOfile);
-//                inquiryRequest.setSfile(originalSfile);
-//            }
-//
-//            Inquiry updatePost = Inquiry.builder()
-//                    .idx(inquiry.getIdx())
-//                    .username(inquiry.getUsername())
-//                    .title(inquiryRequest.getTitle())
-//                    .content(inquiryRequest.getContent())
-//                    .postdate(inquiry.getPostdate())
-//                    .viewCount(inquiry.getViewCount()) // 기존 값 유지
-//                    .responses(inquiry.getResponses())
-//                    .ofile(inquiryRequest.getOfile())
-//                    .sfile(inquiryRequest.getSfile())
-//                    .inquiryPassword(inquiryRequest.getInquiryPassword())
-//                    .build();// 새로운 파일이 있는 경우 파일 업로드
-//
-//            // 게시글 업데이트
-//            inquiryRepository.save(updatePost);
-//        } else {
-//            throw new EntityNotFoundException("해당 ID의 게시글을 찾을 수 없습니다: " + idx);
-//        }
-//    }
-
+    //이미지 파일 확인하기
+    public boolean isImageFile(String fileName) {
+        // 파일 확장자를 대소문자 구분 없이 체크
+        String lowerCaseFileName = fileName.toLowerCase();
+        return lowerCaseFileName.endsWith(".jpg") ||
+                lowerCaseFileName.endsWith(".jpeg") ||
+                lowerCaseFileName.endsWith(".png") ||
+                lowerCaseFileName.endsWith(".gif") ||
+                lowerCaseFileName.endsWith(".bmp") ||
+                lowerCaseFileName.endsWith(".webp");
+    }
 
 }

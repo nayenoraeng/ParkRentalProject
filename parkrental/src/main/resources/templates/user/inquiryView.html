@@ -100,7 +100,17 @@
             <tr>
                 <th scope="row">첨부파일</th>
                 <td>
-                    <a th:href="@{${inquiries.sfile}}" th:if="${inquiries.sfile != null}" th:text="${inquiries.sfile}">첨부파일 다운로드</a>
+                    <div th:if="${inquiries.sfile != null and inquiries.sfile.trim() != ''}">
+                        <span th:if="${@inquiryService.isImageFile(inquiries.sfile)}">
+                            <img th:src="@{/files/} + ${inquiries.sfile}" alt="첨부된 이미지" style="max-width: 300px; max-height: 200px;" />
+                        </span>
+                                    <span th:if="${!@inquiryService.isImageFile(inquiries.sfile)}">
+                            <a th:href="@{/files/} + ${inquiries.sfile}" th:text="${inquiries.sfile}">첨부파일 다운로드</a>
+                        </span>
+                    </div>
+                    <div th:if="${inquiries.sfile == null or inquiries.sfile.trim() == ''}">
+                        <p>첨부파일이 없습니다.</p>
+                    </div>
                 </td>
             </tr>
             </tbody>

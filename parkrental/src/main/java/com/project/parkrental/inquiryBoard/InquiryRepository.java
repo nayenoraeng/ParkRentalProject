@@ -1,5 +1,6 @@
 package com.project.parkrental.inquiryBoard;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -19,9 +20,13 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
     @Query("UPDATE Inquiry i SET i.groupOrd = i.groupOrd + 1 WHERE i.originNo = :originNo AND i.groupOrd > :groupOrd")
     void updateGroupOrd(@Param("originNo") Long originNo, @Param("groupOrd") Integer groupOrd);
 
-    // 제목이나 내용으로 검색
-    List<Inquiry> findByTitleContainingOrContentContainingOrUsernameContaining(
-            String title, String content, String username, Pageable pageable);
-    
 
+    // 제목으로 검색
+    Page<Inquiry> findByTitleContaining(String title, Pageable pageable);
+
+    // 내용으로 검색
+    Page<Inquiry> findByContentContaining(String content, Pageable pageable);
+
+    // 작성자로 검색
+    Page<Inquiry> findByUsernameContaining(String username, Pageable pageable);
 }
