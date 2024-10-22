@@ -63,6 +63,7 @@ public class InquiryController {
     //비밀번호 확인창
     @RequestMapping("/user/inquiryPass")
     public String inquiryPass(HttpServletRequest request, Model model){
+        String sId = SecurityContextHolder.getContext().getAuthentication().getName();
         Long idx = Long.valueOf(request.getParameter("idx"));
         Inquiry inquiry = inquiryService.inquiryView(idx);
 
@@ -82,6 +83,7 @@ public class InquiryController {
         }
 
         model.addAttribute("inquiry", inquiry);
+        model.addAttribute("Id", sId);
         return "user/inquiryPass";
     }
 
@@ -239,15 +241,28 @@ public class InquiryController {
     }
 
     //답글 란
-    @GetMapping("/user/inquiryReply/{idx}")
+    @GetMapping("/admin/inquiryReply/{idx}")
     public String inquiryReplyForm(Model model, @PathVariable("idx") Long idx){
-        inquiryService.inquiryView(idx);
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName(); // 현재 로그인한 사용자 이름
+
+        // 현재 로그인한 사용자 이름
+        String username = authentication.getName();
         model.addAttribute("username", username);
 
-        return "user/inquiryReply";
+        try {
+            Inquiry replyPost = inquiryService.inquiryView(idx);
+
+            if (replyPost == null) {
+                model.addAttribute("errorMessage", "게시글을 찾을 수 없습니다.");
+                return "error"; // 적절한 에러 페이지로 이동
+            }
+
+            model.addAttribute("inquiry", replyPost);
+            return "admin/inquiryReply";
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "오류 발생: " + e.getMessage());
+            return "guest/inquiryErrorPage"; // 적절한 에러 페이지로 이동
+        }
     }
 
 

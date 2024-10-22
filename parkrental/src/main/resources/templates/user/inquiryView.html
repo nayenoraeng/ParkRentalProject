@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -118,7 +119,10 @@
 
         <div class="navigation">
             <button onclick="location.href='/guest/inquiryList'" class="btn btn-secondary">목록으로 돌아가기</button>
-            <button th:onclick="|location.href='@{/user/inquiryReply/{idx}(idx=${inquiries.idx})}'|">답글달기</button>
+            <button sec:authorize="hasRole('ADMIN')"
+                    th:onclick="|location.href='@{/admin/inquiryReply/{idx}(idx=${inquiries.idx})}'|">
+                답글달기
+            </button>
             <button th:onclick="|location.href='@{/user/inquiryEdit/{idx}(idx=${inquiries.idx})}'|">수정하기</button>
             <button th:onclick="'deletePost(' + ${inquiries.idx} + ')'">게시글 삭제</button>
         </div>

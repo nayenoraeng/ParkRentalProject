@@ -6,6 +6,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -111,8 +114,8 @@ public class InquiryService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName(); // 로그인한 사용자 이름
 
+
         Inquiry inquiry = Inquiry.builder()
-                .originNo(inquiryCreate.getOriginNo())
                 .groupOrd(inquiryCreate.getGroupOrd() != null ? inquiryCreate.getGroupOrd() : 0)
                 .groupLayer(inquiryCreate.getGroupLayer() != null ? inquiryCreate.getGroupLayer() : 0)
                 .username(username)
@@ -129,8 +132,11 @@ public class InquiryService {
         System.out.println("Saving Inquiry: " + inquiry);
 
         inquiryRepository.save(inquiry);
+
+
     }
 
+    //수정하기
     @Transactional
     public void inquiryUpdate(Long idx, InquiryRequestDTO inquiryRequest, MultipartFile file) throws IOException {
         Inquiry inquiry = inquiryRepository.findById(idx)
@@ -159,6 +165,7 @@ public class InquiryService {
         inquiryRepository.save(updatedInquiry);
     }
 
+    //파일 업로드
     private void handleFileUpload(MultipartFile file, InquiryRequestDTO inquiryRequest) throws IOException {
         String originalOfile = inquiryRequest.getOfile();
         String originalSfile = inquiryRequest.getSfile();
@@ -188,6 +195,10 @@ public class InquiryService {
 
     //이미지 파일 확인하기
     public boolean isImageFile(String fileName) {
+
+        if(fileName == null){
+            return true;
+        }
         // 파일 확장자를 대소문자 구분 없이 체크
         String lowerCaseFileName = fileName.toLowerCase();
         return lowerCaseFileName.endsWith(".jpg") ||
@@ -197,5 +208,71 @@ public class InquiryService {
                 lowerCaseFileName.endsWith(".bmp") ||
                 lowerCaseFileName.endsWith(".webp");
     }
+
+    // 그룹 순서 업데이트
+    @Modifying
+    @Transactional
+    @Query("UPDATE Inquiry i SET i.groupOrd = i.groupOrd + 1 WHERE i.originNo = :originNo AND i.groupOrd > :groupOrd")
+    public void updateGroupOrd(@Param("originNo") Long originNo, @Param("groupOrd") Integer groupOrd) {
+        inquiryRepository.updateGroupOrd(originNo, groupOrd);
+    }
+
+    //답글쓰기
+    @Transactional
+    public void inquiryReplyWrite(InquiryRequestDTO inquiryReply, HttpServletRequest request, MultipartFile file)
+            throws IOException, ServletException
+    {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName(); // 로그인한 사용자 이름
+
+        // 원글의 정보를 조회
+        Inquiry parentInquiry = getInquiryById(inquiryReply.getIdx());
+        if (parentInquiry == null) {
+            throw new RuntimeException("Parent Inquiry not found"); // 예외 처리
+        }
+
+        // 파일 업로드 처리
+        handleFileUpload(file, inquiryReply);
+
+        // 새로운 문의 객체 생성
+        Inquiry inquiry = Inquiry.builder()
+                .originNo(parentInquiry.getIdx()) // originNo는 원글의 idx
+                .groupOrd(parentInquiry.getGroupOrd() + 1) // groupOrd는 원글의 groupOrd + 1
+                .groupLayer(parentInquiry.getGroupLayer() + 1) // groupLayer는 원글의 groupLayer + 1
+                .username(inquiryReply.getUsername()) // 추가된 사용자 이름
+                .title(inquiryReply.getTitle())
+                .content(inquiryReply.getContent())
+                .postdate(inquiryReply.getPostdate()) // 현재 시간으로 설정
+                .viewCount(0) // 기본값 처리
+                .responses(0) // 기본값 처리
+                .ofile(inquiryReply.getOfile())
+                .sfile(inquiryReply.getSfile())
+                .inquiryPassword(inquiryReply.getInquiryPassword())
+                .build();
+
+        System.out.println("Saving Inquiry: " + inquiry);
+
+
+        inquiryRepository.save(inquiry);
+
+        updateParentResponses(parentInquiry.getIdx());
+    }
+
+    // 부모 글의 responses 필드를 1로 업데이트하는 메서드
+    @Transactional
+    public void updateParentResponses(Long parentIdx) {
+        Inquiry parentInquiry = inquiryRepository.findById(parentIdx)
+                .orElseThrow(() -> new RuntimeException("Parent Inquiry not found"));
+
+        parentInquiry.setResponses(1); // responses 필드를 1로 설정
+
+        inquiryRepository.save(parentInquiry); // 부모 글 업데이트
+    }
+    // 원글 조회 메서드 추가
+    public Inquiry getInquiryById(Long idx) {
+        return inquiryRepository.findById(idx)
+                .orElse(null); // 원글이 존재하지 않으면 null 반환
+    }
+
 
 }

@@ -63,7 +63,7 @@
         </div>
     </header>
     <br/><br/><br/>
-    <form th:action="@{/user/inquiryReply/{parentId}(parentId=${parentInquiry.idx})}" method="post" method="post" enctype="multipart/form-data" th:object="${inquiryRequest}" onsubmit="return saveContent();">
+    <form th:action="@{/user/inquiryReplyPro/{idx}(idx=${inquiry.idx})}" method="post" method="post" enctype="multipart/form-data" th:object="${inquiry}" onsubmit="return saveContent();">
         <div class="container">
             <h1>게시판 답글쓰기</h1>
 
