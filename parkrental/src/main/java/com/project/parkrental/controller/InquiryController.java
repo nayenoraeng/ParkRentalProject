@@ -7,15 +7,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -26,7 +22,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -38,30 +33,116 @@ public class InquiryController {
 
     //전체 목록 보기
     @GetMapping("/guest/inquiryList")
-    public String inquiryList(@PageableDefault(size = 10) Pageable pageable, Model model) {
-        Page<InquiryResponseDTO> inquiryResponseDTOs = inquiryService.findAll(pageable);
+    public String inquiryList(@PageableDefault(size = 10, sort = "postdate", direction = Sort.Direction.DESC) Pageable pageable,
+                              @RequestParam(value = "keyword", required = false) String keyword,
+                              @RequestParam(value = "filter", required = false) String filter,
+                              Model model) {
+        Page<InquiryResponseDTO> inquiryResponseDTOs;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            if ("제목만".equals(filter)) {
+                System.out.println("제목으로 검색: " + keyword);
+                inquiryResponseDTOs = inquiryService.searchInquiriesByTitle(keyword, pageable);
+            } else if ("내용만".equals(filter)) {
+                inquiryResponseDTOs = inquiryService.searchInquiriesByContent(keyword, pageable);
+            } else if ("작성자".equals(filter)) {
+                inquiryResponseDTOs = inquiryService.searchInquiriesByUsername(keyword, pageable);
+            } else {
+                inquiryResponseDTOs = inquiryService.findAll(pageable); // 필터가 설정되지 않은 경우
+            }
+        } else {
+            inquiryResponseDTOs = inquiryService.findAll(pageable);
+        }
+
         model.addAttribute("inquiries", inquiryResponseDTOs);
+        model.addAttribute("keyword", keyword); // 검색어를 모델에 추가
+        model.addAttribute("filter", filter); // 선택된 필터를 모델에 추가
         return "guest/inquiryList"; // Thymeleaf 템플릿 이름
     }
 
+
+    //비밀번호 확인창
+    @RequestMapping("/user/inquiryPass")
+    public String inquiryPass(HttpServletRequest request, Model model){
+        String sId = SecurityContextHolder.getContext().getAuthentication().getName();
+        Long idx = Long.valueOf(request.getParameter("idx"));
+        Inquiry inquiry = inquiryService.inquiryView(idx);
+
+        // 사용자 권한 확인
+        if (inquiry != null) {
+            // admin 권한 확인
+            boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                    .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+
+            if (isAdmin) {
+                // admin 권한이면 바로 상세 뷰로 이동
+                inquiryService.inquiryUpdateViewCount(idx);
+                model.addAttribute("inquiries", inquiry);
+                model.addAttribute("isImageFile", inquiryService.isImageFile(inquiry.getSfile()));
+                return "redirect:/user/inquiryView?idx=" + idx;
+            }
+        }
+
+        model.addAttribute("inquiry", inquiry);
+        model.addAttribute("Id", sId);
+        return "user/inquiryPass";
+    }
+
+    // 비밀번호 확인
+    @PostMapping("/user/inquiryViewPro")
+    public String inquiryPassPro(HttpServletRequest request, Model model) {
+
+        String sId = SecurityContextHolder.getContext().getAuthentication().getName();
+        String password = request.getParameter("password");
+        Long idx = Long.valueOf(request.getParameter("idx"));
+        Inquiry inquiry = inquiryService.inquiryView(idx);
+
+
+            if (inquiry != null && inquiry.getInquiryPassword().equals(password)) {
+                inquiryService.inquiryUpdateViewCount(idx);
+                model.addAttribute("inquiries", inquiry);
+                model.addAttribute("isImageFile", inquiryService.isImageFile(inquiry.getSfile()));
+                return "user/inquiryView";
+            } else {
+                model.addAttribute("error", "비밀번호가 맞지 않습니다.");
+                model.addAttribute("Id", sId);
+                model.addAttribute("idx", idx); // 다시 idx를 전달하여 다시 시도 가능하게 함
+                return "user/inquiryPass";
+            }
+
+    }
+
     //상세 뷰
-    @GetMapping("/user/inquiryView")
-    public String inquiryView(Model model, @RequestParam("idx")Long idx){
-       model.addAttribute("inquiries", inquiryService.inquiryView(idx));
+    @RequestMapping("/user/inquiryView")
+    public String inquiryBoardView(HttpServletRequest request, Model model) {
+
+        String sId = SecurityContextHolder.getContext().getAuthentication().getName();
+        Long idx = Long.valueOf(request.getParameter("idx"));
+        Inquiry inquiry = inquiryService.inquiryView(idx);
+        model.addAttribute("inquiries", inquiry);
+        model.addAttribute("isImageFile", inquiryService.isImageFile(inquiry.getSfile()));
+
         return "user/inquiryView";
     }
 
     //글쓰기 란
     @GetMapping("/user/inquiryWrite")
     public String inquiryWriteForm(Model model){
-        model.addAttribute("inquiryCreate", new InquiryRequestDTO());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName(); // 현재 로그인한 사용자 이름
+        model.addAttribute("username", username);
         return "user/inquiryWrite";
     }
 
     //수정 란
     @GetMapping("/user/inquiryEdit/{idx}")
     public String inquiryEditForm(Model model, @PathVariable("idx") Long idx){
+
         Inquiry updatePost = inquiryService.inquiryView(idx);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName(); // 현재 로그인한 사용자 이름
+
+        model.addAttribute("username", username);
         model.addAttribute("inquiryRequest", updatePost);
 
         return "user/inquiryEdit";
@@ -81,12 +162,12 @@ public class InquiryController {
         }
 
         try {
-            inquiryService.inquiryUpdate(idx, inquiryRequest, file, request);
+            inquiryService.inquiryUpdate(idx, inquiryRequest, file);
             model.addAttribute("message", "게시글이 성공적으로 업데이트되었습니다.");
         } catch (EntityNotFoundException e) {
             model.addAttribute("message", e.getMessage());
             return "user/inquiryEdit"; // 해당 게시글이 없을 경우 다시 폼으로
-        } catch (IOException | ServletException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             model.addAttribute("message", "게시글 업데이트 중 오류가 발생했습니다.");
             return "user/inquiryEdit"; // 오류 발생 시 폼으로 돌아감
@@ -101,6 +182,7 @@ public class InquiryController {
     public String inquiryWritePro(@ModelAttribute("inquiryCreate") @Valid InquiryRequestDTO inquiryCreate, BindingResult bindingResult,
                                   @RequestPart(value="file", required = false) MultipartFile file,
                                   HttpServletRequest request, Model model) throws FileNotFoundException {
+
         if (bindingResult.hasErrors()) {
             model.addAttribute("errors", bindingResult.getAllErrors());
             //model.addAttribute("message", "입력한 내용에 오류가 있습니다.");
@@ -135,6 +217,7 @@ public class InquiryController {
             inquiryService.inquiryWrite(inquiryCreate, request); // inquiryWrite 호출
             model.addAttribute("message", "글이 성공적으로 등록되었습니다.");
 
+
         } catch (IOException | ServletException e) {
             e.printStackTrace();
             model.addAttribute("message", "파일 업로드 중 오류가 발생했습니다.");
@@ -158,58 +241,29 @@ public class InquiryController {
     }
 
     //답글 란
-    @GetMapping("/user/inquiryReply/{idx}")
+    @GetMapping("/admin/inquiryReply/{idx}")
     public String inquiryReplyForm(Model model, @PathVariable("idx") Long idx){
-        Inquiry replyPost = inquiryService.inquiryView(idx);
-        model.addAttribute("inquiryRequest", replyPost);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        return "user/inquiryReply";
+        // 현재 로그인한 사용자 이름
+        String username = authentication.getName();
+        model.addAttribute("username", username);
+
+        try {
+            Inquiry replyPost = inquiryService.inquiryView(idx);
+
+            if (replyPost == null) {
+                model.addAttribute("errorMessage", "게시글을 찾을 수 없습니다.");
+                return "error"; // 적절한 에러 페이지로 이동
+            }
+
+            model.addAttribute("inquiry", replyPost);
+            return "admin/inquiryReply";
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "오류 발생: " + e.getMessage());
+            return "guest/inquiryErrorPage"; // 적절한 에러 페이지로 이동
+        }
     }
 
-    //게시판 답글 쓰기
-//    @PostMapping("/user/inquiryReplyPro")
-//    public String inquiryReply (@ModelAttribute InquiryRequestDTO requestDTO,
-//                                @RequestParam("file") MultipartFile file,
-//                                HttpServletRequest request, Model model, Long parentId)
-//    {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String username = authentication.getName();
-//
-//       try {
-//                if(username != null) {
-//                      requestDTO.setUsername(username); // 작성자 필드에 설정
-//                }
-//
-//            if (file != null && !file.isEmpty()) {
-//                String ofile = file.getOriginalFilename();
-//                String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/files";// 이미지 저장 경로 지정
-//                System.out.println(uploadDir);
-//
-//                File dir = new File(uploadDir);
-//                if (!dir.exists()) {
-//                    dir.mkdir();
-//                }
-//
-//                String sfile = UUID.randomUUID().toString() + "_" + ofile;
-//
-//                File destination = new File(dir, sfile);
-//                file.transferTo(destination);
-//
-//                // 파일이 있을 경우에만 DTO에 이미지 설정
-//                requestDTO.setOfile(ofile);
-//                requestDTO.setSfile(sfile);
-//            } else {
-//                // 파일이 없을 때 처리할 내용 (필요한 경우)
-//                System.out.println("No file uploaded.");
-//            }
-//
-//            inquiryService.inquiryReply(parentId, requestDTO); // 서비스에서 답글 생성
-//
-//        } catch (Exception e) {
-//            model.addAttribute("errorMessage", "답글 작성 중 오류가 발생했습니다.");
-//            e.printStackTrace();
-//            return "user/inquiryReply"; // 오류가 발생하면 목록으로 돌아감
-//        }
-//        return "redirect:/guest/inquiryList";
-//    }
+
 }

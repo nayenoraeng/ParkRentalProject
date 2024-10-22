@@ -63,8 +63,7 @@
             <!-- 게시판 선택 -->
             <div class="form-group">
                 <label for="username">작성자</label>
-                <input type="text" id="username" th:field="${inquiryRequest.username}" placeholder="작성자." readonly/>
-
+                <input type="text" id="username" th:value="*{username}" placeholder="작성자." readonly/>
             </div>
 
             <!-- 제목 입력 -->
@@ -88,7 +87,7 @@
 
             <div class="form-group">
                 <label for="inquiryPassword">비밀번호를 입력해 주세요.</label>
-                <input type="password" th:field="${inquiryRequest.inquiryPassword}" id="inquiryPassword" placeholder="비밀번호를 입력해 주세요." required>
+                <input type="password" th:field="${inquiryRequest.inquiryPassword}" id="inquiryPassword" disabled>
                 <button type="button" class="btn btn-secondary btn-custom" onclick="#">비밀번호 변경</button>
             </div>
 

@@ -63,24 +63,24 @@
         </div>
     </header>
     <br/><br/><br/>
-    <form th:action="@{/user/inquiryReplyPro}" method="post" enctype="multipart/form-data" th:object="${inquiryRequest}" onsubmit="return saveContent();">
+    <form th:action="@{/user/inquiryReplyPro/{idx}(idx=${inquiry.idx})}" method="post" method="post" enctype="multipart/form-data" th:object="${inquiry}" onsubmit="return saveContent();">
         <div class="container">
             <h1>게시판 답글쓰기</h1>
 
             <div class="form-group">
                 <label for="username">작성자</label>
-                <input type="text" th:field="*{username}" id="username" placeholder="작성자." required>
+                <input type="text" th:value="${username}" id="username" placeholder="작성자." required>
             </div>
 
             <div class="form-group">
                 <label for="title">제목을 입력해 주세요.</label>
-                <input type="text" th:field="*{title}" id="title" placeholder="제목을 입력해 주세요." required>
+                <input type="text" id="title" placeholder="제목을 입력해 주세요." required>
             </div>
 
             <div class="form-group">
                 <label for="editor-container">내용을 입력해 주세요.</label>
                 <div id="editor-container" style="height: 300px;"></div>
-                <input type="hidden" th:field="*{content}" id="content" required>
+                <input type="hidden" id="content" required>
             </div>
 
             <div class="form-group">

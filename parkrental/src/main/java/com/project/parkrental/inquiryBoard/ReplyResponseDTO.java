@@ -12,7 +12,7 @@ public class ReplyResponseDTO {
     private String content; // 내용
     private LocalDateTime postdate; // 작성일
 
-    public ReplyResponseDTO(Long idx, String username, String content, LocalDateTime postdate) {
+    public ReplyResponseDTO(Long idx, String username, String content, String replyContent, LocalDateTime postdate) {
         this.idx = idx;
         this.username = username;
         this.content = content;

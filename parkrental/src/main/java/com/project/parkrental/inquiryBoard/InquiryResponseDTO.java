@@ -16,9 +16,9 @@ import java.util.Optional;
 public class InquiryResponseDTO {
 
     private Long idx;
-    private Long inquiryReRef;
-    private Integer inquiryReLev;
-    private Integer inquiryReSeq;
+    private Long originNo;
+    private Integer groupOrd;
+    private Integer groupLayer;
     private String username;
     @NotBlank(message = "제목을 입력해주세요.")
     private String title;
@@ -29,17 +29,18 @@ public class InquiryResponseDTO {
     private Integer responses;
     private String ofile;
     private String sfile;
-    private List<ReplyResponseDTO> replies = new ArrayList<>();
-    private Inquiry parent;
 
-    public InquiryResponseDTO(Long idx, String title, String content, LocalDateTime postdate,
-                              Integer viewCount, List<ReplyResponseDTO> replies)
+    public InquiryResponseDTO(Long idx, String title, String username, String content, LocalDateTime postdate,
+                              Integer viewCount)
     {
         this.idx = idx;
         this.title = title;
+        this.username = username;
         this.content = content;
         this.postdate = postdate;
         this.viewCount = viewCount;
-        this.replies = replies;
+    }
+
+    public InquiryResponseDTO(Long idx, String title, String content, LocalDateTime postdate, Integer viewCount) {
     }
 }

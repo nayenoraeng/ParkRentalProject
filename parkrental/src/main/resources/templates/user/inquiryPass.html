@@ -45,7 +45,7 @@
                     <a href="#">게시판</a>
                     <ul class="dropdown">
                         <li><a href="#">공지사항</a></li>
-                        <li><a href="#">문의사항</a></li>
+                        <li><a href="guest/inquiryList">문의사항</a></li>
                         <li><a href="#">커뮤니티</a></li>
                     </ul>
                 </li>
@@ -63,46 +63,26 @@
         </div>
     </header>
     <br/><br/><br/>
-    <form th:action="@{/user/inquiryWritePro}" method="post" enctype="multipart/form-data" onsubmit="return saveContent();">
+    <form th:action="@{/user/inquiryViewPro}" method="post">
         <div class="container">
-            <h1>게시판 글쓰기</h1>
+            <h1>비밀번호 확인</h1>
             <div class="form-group">
-                <label for="name">작성자</label>
-                <input type="text" th:value="${username}" id="name" placeholder="작성자." required>
+                <input type="hidden" name="idx" id="idx" th:value="${inquiry.idx}">
             </div>
 
             <div class="form-group">
-                <label for="title">제목을 입력해 주세요.</label>
-                <input type="text" name="title" id="title" placeholder="제목을 입력해 주세요." required>
-            </div>
-
-            <div class="form-group">
-                <label for="editor-container">내용을 입력해 주세요.</label>
-                <div id="editor-container" style="height: 300px;"></div>
-                <input type="hidden" id="content" name="content" required>
-            </div>
-
-            <div class="form-group">
-                <label for="file">첨부 파일</label>
-                <input type="file" class="form-control-file" id="file" name="file"/>
-                <img id="imagePreview" class="img-preview" src="" alt="이미지 미리보기" style="display:none;"/>
-            </div>
-
-            <div class="form-group">
-                <label for="inquiryPassword">비밀번호를 입력해 주세요.</label>
-                <input type="password" name="inquiryPassword" id="inquiryPassword" placeholder="비밀번호를 입력해 주세요." required>
+                <label for="password"> 비밀번호를 입력해 주세요.</label>
+                <input type="password" name="password" id="password" placeholder="비밀번호를 입력해 주세요." required>
             </div>
 
             <div class="form-group btn-group">
-                <button type="submit" class="btn btn-primary btn-custom">등록</button>
+                <button type="submit" class="btn btn-primary btn-custom">확인</button>
                 <button type="button" class="btn btn-secondary btn-custom" onclick="location.href='/guest/inquiryList'">목록 바로가기</button>
             </div>
         </div>
     </form>
-    <div th:if="${errors}" class="error">
-        <ul>
-            <li th:each="error : ${errors}" th:text="${error.defaultMessage}"></li>
-        </ul>
+    <div style="color: red;">
+        <p>${error}</p>
     </div>
     <br/><br/><br/>
 
@@ -121,28 +101,4 @@
     </footer>
 
 </body>
-<script>
-    // Quill 에디터 초기화
-    var quill = new Quill('#editor-container', {
-        theme: 'snow',  // 'bubble' 스타일도 가능
-        placeholder: '내용을 입력해 주세요...',
-        modules: {
-            toolbar: [
-                [{ 'header': [1, 2, 3, false] }],
-                ['bold', 'italic', 'underline', 'strike'], // 굵게, 기울임, 밑줄, 취소선
-                ['link', 'blockquote', 'code-block'],
-                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                [{ 'align': [] }],
-                ['clean'] // 포맷 초기화 버튼
-            ]
-        }
-    });
-
-    function saveContent() {
-        // Quill 에디터의 내용을 가져와서 숨겨진 필드에 설정
-        var content = quill.root.innerHTML;  // HTML 형식으로 가져오기
-        document.getElementById('content').value = content; // 숨겨진 input 필드에 저장
-        return true; // 폼 제출 계속 진행
-    }
-</script>
 </html>
