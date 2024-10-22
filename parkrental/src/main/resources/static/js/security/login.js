@@ -13,7 +13,8 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     }).then(data => {
         if (data.success) {
             alert(data.message);
-            window.location.href = '/'; // Redirect to the main page
+            window.location.href = 'guest/Main';
+            window.location.href = '/';
         } else {
             alert(data.message);
         }

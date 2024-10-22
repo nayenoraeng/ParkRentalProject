@@ -92,7 +92,8 @@ public class UserController {
     }
 
     @PostMapping("/Login")
-    public ResponseEntity<?> authUser(@RequestParam("username") String username, @RequestParam("password") String password, HttpServletResponse res) {
+    public ResponseEntity<?> authUser(@RequestParam("username") String username, @RequestParam("password") String password,
+                                      HttpServletRequest req, HttpServletResponse res) {
         try {
             Authentication authentication = authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(username, password)

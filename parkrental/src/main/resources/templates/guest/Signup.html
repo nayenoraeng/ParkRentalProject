@@ -322,8 +322,8 @@
             
         </style>
         <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-        <script th:src="@{/js/address.js}"></script>
-        <script th:src="@{/js/validate.js}"></script>
+        <script th:src="@{/js/security/address.js}"></script>
+        <script th:src="@{/js/security/validate.js}"></script>
     </head>
     <body>
         <div class="container mt-5">
@@ -419,45 +419,7 @@
             </div>
         </div>
         <script>
-            //유저네임 ajax로 서버와 연동 후 확인 기능
             $(document).ready(function() {
-                $('#checkUsername').click(function(){
-                    var username = $('#username').val();
-                    $.ajax({
-                        type: "POST",
-                        url: "/guest/checkUsername",
-                        data: {username: username},
-                        success: function (response) {
-                            alert(response);
-                        }
-                    });
-                });
-
-                //이메일 ajax로 서버와 연동 후 확인 기능
-                $('#checkEmail').click(function(){
-                    var email = $('#email').val();
-                    $.ajax({
-                        type: "POST",
-                        url:"/guest/checkEmail",
-                        data: {email:email},
-                        success: function (response) {
-                            alert(response);
-                        }
-                    });
-                });
-
-                 $('#checkPhoneNum').click(function(){
-                    var phoneNum = $('#phoneNum').val();
-                    $.ajax({
-                        type: "POST",
-                        url:"/guest/checkPhoneNum",
-                        data: {phoneNum:phoneNum},
-                        success: function (response) {
-                            alert(response);
-                        }
-                    });
-                });
-
                 //비밀번호와 비밀번호 확인 비동기화로 바로 확인
                 const password = document.getElementById('password');
                 const confirmPassword = document.getElementById('confirmPassword');
@@ -478,19 +440,7 @@
             });
         </script>
         <!--전화번호 형식 만들기 -->
-        <script>
-            document.getElementById("phoneNum").addEventListener('input', function(phoneNumForm) {
-                let input = phoneNumForm.target.value;
-                input = input.replace(/[^0-9]/g, '');
-
-                if (input.length < 4) {
-                    phoneNumForm.target.value = input;
-                } else if (input.length < 8) {
-                    phoneNumForm.target.value = input.slice(0, 3) + '-' + input.slice(3);
-                } else {
-                    phoneNumForm.target.value = input.slice(0, 3) + '-' + input.slice(3, 7) + '-' + input.slice(7, 11);
-                }
-            });
-        </script>
+        <script th:src="@{/js/security/InfoCheck.js}"></script>
+        <script th:src="@{/js/security/phoneNumFormatter.js}"></script>
     </body>
 </html>

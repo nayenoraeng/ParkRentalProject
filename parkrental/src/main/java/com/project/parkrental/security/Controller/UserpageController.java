@@ -10,6 +10,7 @@ import com.project.parkrental.security.Service.UserService;
 import com.project.parkrental.security.DTO.User;
 import com.project.parkrental.security.DTO.UserDto;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -165,7 +166,7 @@ public class UserpageController {
     }
 
     @PostMapping("/deleteAccount")
-    public ResponseEntity<?> deleteAccount(HttpServletResponse res) {
+    public ResponseEntity<?> deleteAccount(HttpServletRequest req, HttpServletResponse res) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
         String role = auth.getAuthorities().iterator().next().getAuthority();
@@ -174,7 +175,6 @@ public class UserpageController {
             User user = userRepository.findByUsername(username);
             if(user != null) {
                 userRepository.delete(user);
-                SecurityContextHolder.clearContext();
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\": \"사용자를 찾을 수 없습니다.\"}");
             }
@@ -182,11 +182,12 @@ public class UserpageController {
             Seller seller = sellerRepository.findByUsername(username);
             if (seller != null) {
                 sellerRepository.delete(seller);
-                SecurityContextHolder.clearContext();
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\": \"판매자를 찾을 수 없습니다.\"}");
             }
         }
+        SecurityContextHolder.clearContext();
+        req.getSession().invalidate();
 
         Cookie cookie = new Cookie("JWT", null);
         cookie.setHttpOnly(true);
@@ -196,6 +197,5 @@ public class UserpageController {
         res.addCookie(cookie);
 
         return ResponseEntity.ok("{\"message\": \"성공적으로 회원 탈퇴가 완료되었습니다.\"}");
-
     }
 }

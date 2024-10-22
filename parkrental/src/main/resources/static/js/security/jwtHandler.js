@@ -2,10 +2,9 @@ window.addEventListener('beforeunload', function() {
     deleteJWTCookie();
 });
 
-
 function deleteJWTCookie() {
-    const cookieName = "JWT"
-    document.cookie = cookieName += '=; Max-Age=0; path=/; domain=localhost:8081';
+    document.cookie = 'JWT=; Max-Age=0; path=/; domain=; secure; HttpOnly;';
+    console.log('JWT cookie deleted');
 }
 
 function refreshToken() {
@@ -33,3 +32,8 @@ function refreshToken() {
 const refreshInterval = 15 * 60 * 1000;//자동토큰 갱신 - 15분
 
 setInterval(refreshToken, refreshInterval);
+
+function deleteJWTCookie() {
+    document.cookie = 'JWT=; Max-Age=0; path=/; domain=; secure; HttpOnly;';
+    console.log('JWT cookie deleted');
+}
