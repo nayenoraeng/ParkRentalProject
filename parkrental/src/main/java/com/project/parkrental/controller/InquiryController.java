@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -79,37 +80,42 @@ public class InquiryController {
                 model.addAttribute("inquiries", inquiry);
                 model.addAttribute("isImageFile", inquiryService.isImageFile(inquiry.getSfile()));
                 return "redirect:/user/inquiryView?idx=" + idx;
+            }else if (inquiry.getUsername().equals(sId)) {
+                // 일반 사용자가 자신이 쓴 글을 조회할 경우
+                model.addAttribute("inquiry", inquiry);
+                model.addAttribute("Id", sId);
+            } else {
+                // 일반 사용자가 자신이 쓴 글이 아닐 경우
+                model.addAttribute("message", "권한이 없습니다.");
+                model.addAttribute("searchUrl", "/guest/inquiryList");
+                return "guest/message"; // 메시지를 띄울 페이지
             }
         }
 
-        model.addAttribute("inquiry", inquiry);
-        model.addAttribute("Id", sId);
         return "user/inquiryPass";
     }
 
-    // 비밀번호 확인
+    //바말번호 확인!
     @PostMapping("/user/inquiryViewPro")
-    public String inquiryPassPro(HttpServletRequest request, Model model) {
-
-        String sId = SecurityContextHolder.getContext().getAuthentication().getName();
+    @ResponseBody
+    public Map<String, Object> inquiryPassPro(HttpServletRequest request) {
+        Map<String, Object> response = new HashMap<>();
         String password = request.getParameter("password");
         Long idx = Long.valueOf(request.getParameter("idx"));
         Inquiry inquiry = inquiryService.inquiryView(idx);
 
+        if (inquiry != null && inquiry.getInquiryPassword().equals(password)) {
+            inquiryService.inquiryUpdateViewCount(idx);
+            response.put("success", true);
+            response.put("idx", idx);
+        } else {
+            response.put("success", false);
+            response.put("error", "비밀번호가 맞지 않습니다.");
+        }
 
-            if (inquiry != null && inquiry.getInquiryPassword().equals(password)) {
-                inquiryService.inquiryUpdateViewCount(idx);
-                model.addAttribute("inquiries", inquiry);
-                model.addAttribute("isImageFile", inquiryService.isImageFile(inquiry.getSfile()));
-                return "user/inquiryView";
-            } else {
-                model.addAttribute("error", "비밀번호가 맞지 않습니다.");
-                model.addAttribute("Id", sId);
-                model.addAttribute("idx", idx); // 다시 idx를 전달하여 다시 시도 가능하게 함
-                return "user/inquiryPass";
-            }
-
+        return response; // JSON 형식으로 반환
     }
+
 
     //상세 뷰
     @RequestMapping("/user/inquiryView")
@@ -127,9 +133,11 @@ public class InquiryController {
     //글쓰기 란
     @GetMapping("/user/inquiryWrite")
     public String inquiryWriteForm(Model model){
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName(); // 현재 로그인한 사용자 이름
         model.addAttribute("username", username);
+        model.addAttribute("inquiryCreate", new InquiryRequestDTO());
         return "user/inquiryWrite";
     }
 
@@ -156,6 +164,7 @@ public class InquiryController {
                                  @RequestPart(value = "file", required = false) MultipartFile file,
                                  HttpServletRequest request,
                                  Model model){
+
         if (bindingResult.hasErrors()){
             model.addAttribute("errors", bindingResult.getAllErrors());
             return "user/inquiryEdit"; // 오류 발생 시 폼으로 돌아감
@@ -164,6 +173,7 @@ public class InquiryController {
         try {
             inquiryService.inquiryUpdate(idx, inquiryRequest, file);
             model.addAttribute("message", "게시글이 성공적으로 업데이트되었습니다.");
+            model.addAttribute("searchUrl", "/guest/inquiryList");
         } catch (EntityNotFoundException e) {
             model.addAttribute("message", e.getMessage());
             return "user/inquiryEdit"; // 해당 게시글이 없을 경우 다시 폼으로
@@ -173,19 +183,22 @@ public class InquiryController {
             return "user/inquiryEdit"; // 오류 발생 시 폼으로 돌아감
         }
 
-        return "redirect:/guest/inquiryList"; // 목록 페이지로 리다이렉트
+        return "guest/message"; // 목록 페이지로 리다이렉트
     }
 
 
     //글쓰기
     @PostMapping("/user/inquiryWritePro")
-    public String inquiryWritePro(@ModelAttribute("inquiryCreate") @Valid InquiryRequestDTO inquiryCreate, BindingResult bindingResult,
+    public String inquiryWritePro(@ModelAttribute("inquiryCreate") @Validated(WriteGroup.class) InquiryRequestDTO inquiryCreate, BindingResult bindingResult,
                                   @RequestPart(value="file", required = false) MultipartFile file,
                                   HttpServletRequest request, Model model) throws FileNotFoundException {
 
         if (bindingResult.hasErrors()) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
             model.addAttribute("errors", bindingResult.getAllErrors());
-            //model.addAttribute("message", "입력한 내용에 오류가 있습니다.");
+            model.addAttribute("username", username);
+            model.addAttribute("inquiryCreate", inquiryCreate);
             return "user/inquiryWrite"; // 오류 발생 시 폼으로 돌아감
         }
 
@@ -215,7 +228,8 @@ public class InquiryController {
             }
 
             inquiryService.inquiryWrite(inquiryCreate, request); // inquiryWrite 호출
-            model.addAttribute("message", "글이 성공적으로 등록되었습니다.");
+            model.addAttribute("message", "글 작성이 완료되었습니다.");
+            model.addAttribute("searchUrl", "/guest/inquiryList");
 
 
         } catch (IOException | ServletException e) {
@@ -224,7 +238,7 @@ public class InquiryController {
             return "user/inquiryWrite";
         }
 
-        return "redirect:/guest/inquiryList"; // 목록 페이지로 리다이렉트
+        return "guest/message"; // 목록 페이지로 리다이렉트
     }
 
     //글 삭제하기
@@ -248,22 +262,31 @@ public class InquiryController {
         // 현재 로그인한 사용자 이름
         String username = authentication.getName();
         model.addAttribute("username", username);
-
-        try {
-            Inquiry replyPost = inquiryService.inquiryView(idx);
-
-            if (replyPost == null) {
-                model.addAttribute("errorMessage", "게시글을 찾을 수 없습니다.");
-                return "error"; // 적절한 에러 페이지로 이동
-            }
-
-            model.addAttribute("inquiry", replyPost);
-            return "admin/inquiryReply";
-        } catch (Exception e) {
-            model.addAttribute("errorMessage", "오류 발생: " + e.getMessage());
-            return "guest/inquiryErrorPage"; // 적절한 에러 페이지로 이동
-        }
+        Inquiry replyPost = inquiryService.inquiryView(idx);
+        model.addAttribute("inquiry", replyPost);
+        return "admin/inquiryReply";
     }
 
+    //답글 작성
+    @PostMapping("/admin/inquiryReplyPro/{idx}")
+    public String inquiryReply(@PathVariable Long idx, @ModelAttribute("inquiry") @Valid InquiryRequestDTO inquiryReply,
+                               @RequestParam MultipartFile file){
+        Long inquiryIdx = inquiryReply.getIdx();
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName(); // 현재 로그인한 사용자 이름
+        inquiryReply.setUsername(username); // DTO에 사용자 이름 설정
+
+        try {
+            // 답글 작성 서비스 호출
+            inquiryService.inquiryReplyWrite(inquiryReply, inquiryIdx != null ? inquiryIdx : idx, file);
+            return "redirect:/user/inquiryView?idx=" + inquiryIdx;
+        } catch (Exception e) {
+            // 예외 처리 로직
+            e.printStackTrace();
+            return "admin/inquiryReply";
+        }
+
+    }
 
 }

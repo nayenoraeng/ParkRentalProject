@@ -13,13 +13,15 @@ GRANT ALL PRIVILEGES ON project.* TO 'project'@'localhost';
 
 
 # 유저(소비자) 테이블
-DROP TABLE user;
-CREATE table user (
+DROP TABLE User;
+CREATE table User (
 	idx BIGINT(10) primary key AUTO_INCREMENT,
 	username VARCHAR(50) UNIQUE KEY not null,
 	password varchar(100) not null,
 	name varchar(50) not null,
+	phoneNum varchar(15) not null,
 	email varchar(50),
+	phoneNum varchar(15) not null,
 	postcode varchar(10),
   	address varchar(200),
   	detailAddress varchar(200),
@@ -35,7 +37,7 @@ CREATE table user (
 
 
 -- user 테이블에 더미 데이터 추가
-INSERT INTO user (username, password, email, name) VALUES
+INSERT INTO User (username, password, email, name) VALUES
 ('user1', 'password1', 'user1@example.com', '사용자 1'),
 ('user2', 'password2', 'user2@example.com', '사용자 2'),
 ('user3', 'password3', 'user3@example.com', '사용자 3');
@@ -66,11 +68,10 @@ CREATE table seller (
   	lockTimes TIMESTAMP
 );
 
-INSERT INTO seller (businessNum, username, password, name, businessName, phoneNum) 
-VALUES
-('B001', 'user1', '1234', '판매자1', 'Business A', '010-1111-1111'),
-('B002', 'user2', '1234', '판매자2', 'Business B', '010-2222-2222'),
-('B003', 'user3', '1234', '판매자3', 'Business C', '010-3333-3333');
+INSERT INTO seller (businessNum,username,name,password,businessName) VALUES
+('B001', 'user1','password1','사용자1','Business A'),
+('B002', 'user2','password2','사용자2','Business B'),
+('B003', 'user3','password3','사용자3','Business C');
 
 select * from seller;
 
@@ -83,7 +84,13 @@ CREATE table admin (
 	email varchar(100),
 	authority varchar(20) default 'ROLE_ADMIN'
 );
+INSERT INTO admin (username, password, email) VALUES
+('admin', '{bcrypt}$2a$10$CWM93JFRp7V36DAYtZM3wegLBlV9RDc0768jUEUhsEm0NEySsraTS', 'admin@admin.com');
 
+DELETE
+    FROM admin;
+   
+SELECT * FROM admin;
 
 # 테이블에 초기 관리자 넣기
 INSERT into admin (idx, username, password, email, authority)
@@ -128,6 +135,7 @@ SELECT * FROM Product;
 
 
 # 예약 테이블 생성 
+SELECT * FROM reservation;
 DROP TABLE reservation;
 CREATE TABLE reservation (
 	idx BIGINT(10) PRIMARY KEY AUTO_INCREMENT,
@@ -140,7 +148,9 @@ CREATE TABLE reservation (
 	businessName varchar(100) not null,
 	productName varchar(30) not null
 );
+
 ALTER TABLE reservation DROP FOREIGN KEY reservation_ibfk_2;
+
 # API 정보 가져와서 공원 리스트로 저장하기
 drop table parkList;
 CREATE TABLE parkList (
@@ -198,7 +208,9 @@ create table commuComment (
 );
 
 # 커뮤니티 게시판 좋아요 테이블
+ß
 drop table commuLike;
+
 CREATE TABLE commuLike (
 	likeCount INT(10) default 0,
 	username VARCHAR(50) NOT NULL,
@@ -236,26 +248,6 @@ INSERT INTO announcement (username, title, content, postdate, ofile, sfile) VALU
 
 ######## 1대1 문의 게시판 ##########
 DROP TABLE inquiry;
-CREATE TABLE inquiry (
-	idx bigint(10) PRIMARY KEY AUTO_INCREMENT,
-	inquiryReRef bigint(10) default 0,
-	inquiryReLev int(10) DEFAULT 0 NOT NULL,
-	inquiryReSeq int(10) DEFAULT 0 NOT NULL,
-	username varchar(100) not null,
- 	title varchar(50) not null,
-	content varchar(1000) not null,
-	postdate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	viewCount int(10) DEFAULT 0 NOT NULL,
-	responses int(10) DEFAULT 0 NOT NULL,
-  	ofile varchar(200),
-  	sfile varchar(100),
-  	inquiryPassword varchar(20) not null,
-  	parentId bigint,
-  	FOREIGN KEY (parentId) REFERENCES inquiry (idx), 
-  	FOREIGN KEY (username) REFERENCES user (username)  	
-  	ON DELETE CASCADE
-	ON UPDATE CASCADE
-);
 
 CREATE TABLE inquiry (
 	idx bigint(10) PRIMARY KEY AUTO_INCREMENT,
@@ -270,11 +262,9 @@ CREATE TABLE inquiry (
 	responses int(10) DEFAULT 0 NOT NULL,
   	ofile varchar(200),
   	sfile varchar(100),
-  	inquiryPassword varchar(20) not null,
-  	FOREIGN KEY (username) REFERENCES user (username)  	
-  	ON DELETE CASCADE
-	ON UPDATE CASCADE
+  	inquiryPassword varchar(20) not null
 );
+DELETE FROM inquiry WHERE idx=7;
 
 ######## 장바구니 ##########
 DROP table cart;
@@ -294,7 +284,8 @@ CREATE TABLE cart (
         ON UPDATE CASCADE
 );
 ## 이거 추가해야 카트 테이블 생성됨;; ##
-ALTER TABLE product ADD INDEX (productName);
-CREATE INDEX idxProductNameParkId ON product (productName, parkId);
+ALTER TABLE product ADD INDEX (productNum);
+CREATE INDEX idxProductNumParkId ON product (productNum, parkId);
+
 
 SELECT productNum FROM cart;

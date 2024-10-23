@@ -75,3 +75,8 @@ button:hover {
 .btn-secondary:hover {
     background-color: darkgreen;
 }
+
+.error-message {
+    color: red; /* 오류 메시지 색상 */
+    font-size: 0.9em; /* 폰트 크기 */
+}

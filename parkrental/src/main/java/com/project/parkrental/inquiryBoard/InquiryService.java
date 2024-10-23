@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -26,36 +27,45 @@ public class InquiryService {
     @Autowired
     private InquiryRepository inquiryRepository;
 
+
+
     //전체 리스트 띄우기 (페이징)
     public Page<InquiryResponseDTO> findAll(Pageable pageable) {
         // Pageable을 사용하여 페이지 요청 처리
-        Page<Inquiry> inquiryPage = inquiryRepository.findAll(pageable);
+        Page<Inquiry> inquiryPage = inquiryRepository.findAllOrderedByOriginAndGroupOrd(pageable);
 
         // Inquiry 객체를 InquiryResponseDTO로 변환
         Page<InquiryResponseDTO> inquiryResponseDTOs = inquiryPage.map(
                 inquiry -> new InquiryResponseDTO(
                         inquiry.getIdx(),          // 필요한 필드로 변경
+                        inquiry.getGroupOrd(),
+                        inquiry.getGroupLayer(),
                         inquiry.getTitle(),        // 제목 필드 예시
                         inquiry.getUsername(),
                         inquiry.getContent(),
                         inquiry.getPostdate(),
-                        inquiry.getViewCount()// 생성일 필드 예시
+                        inquiry.getViewCount(),// 생성일 필드 예시
+                        inquiry.getResponses()
                 )
         );
 
         return inquiryResponseDTOs;
     }
 
+
     //제목검색
     public Page<InquiryResponseDTO> searchInquiriesByTitle(String title, Pageable pageable) {
         Page<Inquiry> inquiries = inquiryRepository.findByTitleContaining(title, pageable);
         return inquiries.map(inquiry -> new InquiryResponseDTO(
-                inquiry.getIdx(),
-                inquiry.getTitle(),
+                inquiry.getIdx(),          // 필요한 필드로 변경
+                inquiry.getGroupOrd(),
+                inquiry.getGroupLayer(),
+                inquiry.getTitle(),        // 제목 필드 예시
                 inquiry.getUsername(),
                 inquiry.getContent(),
                 inquiry.getPostdate(),
-                inquiry.getViewCount()
+                inquiry.getViewCount(),// 생성일 필드 예시
+                inquiry.getResponses()
         ));
     }
 
@@ -63,12 +73,15 @@ public class InquiryService {
     public Page<InquiryResponseDTO> searchInquiriesByContent(String content, Pageable pageable) {
         Page<Inquiry> inquiries = inquiryRepository.findByContentContaining(content, pageable);
         return inquiries.map(inquiry -> new InquiryResponseDTO(
-                inquiry.getIdx(),
-                inquiry.getTitle(),
+                inquiry.getIdx(),          // 필요한 필드로 변경
+                inquiry.getGroupOrd(),
+                inquiry.getGroupLayer(),
+                inquiry.getTitle(),        // 제목 필드 예시
                 inquiry.getUsername(),
                 inquiry.getContent(),
                 inquiry.getPostdate(),
-                inquiry.getViewCount()
+                inquiry.getViewCount(),// 생성일 필드 예시
+                inquiry.getResponses()
         ));
     }
 
@@ -76,12 +89,15 @@ public class InquiryService {
     public Page<InquiryResponseDTO> searchInquiriesByUsername(String username, Pageable pageable) {
         Page<Inquiry> inquiries = inquiryRepository.findByUsernameContaining(username, pageable);
         return inquiries.map(inquiry -> new InquiryResponseDTO(
-                inquiry.getIdx(),
-                inquiry.getTitle(),
+                inquiry.getIdx(),          // 필요한 필드로 변경
+                inquiry.getGroupOrd(),
+                inquiry.getGroupLayer(),
+                inquiry.getTitle(),        // 제목 필드 예시
                 inquiry.getUsername(),
                 inquiry.getContent(),
                 inquiry.getPostdate(),
-                inquiry.getViewCount()
+                inquiry.getViewCount(),// 생성일 필드 예시
+                inquiry.getResponses()
         ));
     }
 
@@ -116,6 +132,7 @@ public class InquiryService {
 
 
         Inquiry inquiry = Inquiry.builder()
+                .originNo(inquiryCreate.getIdx())
                 .groupOrd(inquiryCreate.getGroupOrd() != null ? inquiryCreate.getGroupOrd() : 0)
                 .groupLayer(inquiryCreate.getGroupLayer() != null ? inquiryCreate.getGroupLayer() : 0)
                 .username(username)
@@ -131,8 +148,15 @@ public class InquiryService {
 
         System.out.println("Saving Inquiry: " + inquiry);
 
-        inquiryRepository.save(inquiry);
+        Inquiry savedInquiry = inquiryRepository.save(inquiry);
 
+        // originNo를 idx 값으로 설정
+        if (savedInquiry.getOriginNo() == null) {
+            savedInquiry.setOriginNo(savedInquiry.getIdx()); // originNo에 idx 값 설정
+
+            // 2차 저장
+            inquiryRepository.save(savedInquiry); // 두 번째 저장
+        }
 
     }
 
@@ -148,7 +172,7 @@ public class InquiryService {
         // 게시글 업데이트
         Inquiry updatedInquiry = Inquiry.builder()
                 .idx(inquiry.getIdx())
-                .originNo(inquiryRequest.getOriginNo())
+                .originNo(inquiryRequest.getOriginNo() != null ? inquiryRequest.getOriginNo() : inquiry.getOriginNo())
                 .groupOrd(inquiryRequest.getGroupOrd() != null ? inquiryRequest.getGroupOrd() : 0)
                 .groupLayer(inquiryRequest.getGroupLayer() != null ? inquiryRequest.getGroupLayer() : 0)
                 .username(inquiry.getUsername())
@@ -219,14 +243,15 @@ public class InquiryService {
 
     //답글쓰기
     @Transactional
-    public void inquiryReplyWrite(InquiryRequestDTO inquiryReply, HttpServletRequest request, MultipartFile file)
+    public void inquiryReplyWrite(InquiryRequestDTO inquiryReply, Long idx, MultipartFile file)
             throws IOException, ServletException
     {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName(); // 로그인한 사용자 이름
 
         // 원글의 정보를 조회
-        Inquiry parentInquiry = getInquiryById(inquiryReply.getIdx());
+        Inquiry parentInquiry = getInquiryById(idx);
+
         if (parentInquiry == null) {
             throw new RuntimeException("Parent Inquiry not found"); // 예외 처리
         }
@@ -234,12 +259,15 @@ public class InquiryService {
         // 파일 업로드 처리
         handleFileUpload(file, inquiryReply);
 
+        // 답글의 groupLayer와 groupOrd 설정
+        if (inquiryReply.getGroupLayer() == null) {
+            inquiryReply.setGroupLayer(0); // 기본값으로 설정
+        }
+
         // 새로운 문의 객체 생성
         Inquiry inquiry = Inquiry.builder()
-                .originNo(parentInquiry.getIdx()) // originNo는 원글의 idx
-                .groupOrd(parentInquiry.getGroupOrd() + 1) // groupOrd는 원글의 groupOrd + 1
-                .groupLayer(parentInquiry.getGroupLayer() + 1) // groupLayer는 원글의 groupLayer + 1
-                .username(inquiryReply.getUsername()) // 추가된 사용자 이름
+                .originNo(parentInquiry.getIdx())
+                .username(username) // 추가된 사용자 이름
                 .title(inquiryReply.getTitle())
                 .content(inquiryReply.getContent())
                 .postdate(inquiryReply.getPostdate()) // 현재 시간으로 설정
@@ -247,11 +275,21 @@ public class InquiryService {
                 .responses(0) // 기본값 처리
                 .ofile(inquiryReply.getOfile())
                 .sfile(inquiryReply.getSfile())
-                .inquiryPassword(inquiryReply.getInquiryPassword())
+                .inquiryPassword(parentInquiry.getInquiryPassword())
                 .build();
 
-        System.out.println("Saving Inquiry: " + inquiry);
+        // 답글인 경우
+        if (inquiryReply.getGroupLayer() == 0) {
+            // 새로운 답글의 groupOrd 및 groupLayer를 설정
+            inquiry.setGroupOrd(parentInquiry.getGroupOrd() + 1); // groupOrd는 원글의 groupOrd + 1
+            inquiry.setGroupLayer(parentInquiry.getGroupLayer() + 1); // groupLayer는 원글의 groupLayer + 1
+        } else {
+            // 답답글인 경우
+            inquiry.setGroupOrd(parentInquiry.getGroupOrd()); // 부모의 groupOrd 유지
+            inquiry.setGroupLayer(parentInquiry.getGroupLayer() + 1); // 부모의 groupLayer + 1
+        }
 
+        System.out.println("Saving Inquiry: " + inquiry);
 
         inquiryRepository.save(inquiry);
 
