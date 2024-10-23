@@ -40,8 +40,9 @@
             <li>
                 <a href="#">공원 검색</a>
                 <ul class="dropdown">
-                    <li><a href="#">국립공원</a></li>
-                    <li><a href="#">자연공원</a></li>
+                    <li><a th:href="@{/ParkList?category=natural}">자연/휴양 공원</a></li>
+                    <li><a th:href="@{/ParkList?category=urban}">도시 생활 공원</a></li>
+                    <li><a th:href="@{/ParkList?category=special}">특수 목적 공원</a></li>
                 </ul>
             </li>
             <li>
@@ -55,67 +56,134 @@
             <li>
                 <a href="#">게시판</a>
                 <ul class="dropdown">
-                    <li><a href="#">공지사항</a></li>
-                    <li><a href="#">문의사항</a></li>
+                    <li><a href="/guest/noticeList">공지사항</a></li>
+                    <li><a href="/guest/inquiryList">문의사항</a></li>
                     <li><a href="#">커뮤니티</a></li>
                 </ul>
             </li>
         </ul>
         <ul class="right-menu">
-            <li><a href="#">로그인</a></li>
-            <li><a href="#">회원가입</a></li>
+            <!-- Translation buttons for the whole page -->
+            <li class="language-buttons">
+                <button id="translate-en">English</button>
+                <button id="translate-ja">Japanese</button> <!-- 일본어 버튼으로 변경 -->
+                <button id="translate-ko">Korean</button>
+            </li>
+
+            <li sec:authorize="isAnonymous()"><a th:href="@{/guest/Login}">로그인</a></li>
+            <li sec:authorize="isAnonymous()"><a th:href="@{/guest/Signup}">회원가입</a></li>
+            <!-- 로그인 시 메뉴 변경 -->
+            <li sec:authorize="isAuthenticated()">
+                <a th:href="@{/guest/Logout}" onclick="deleteJWTCookie(); return confirm('로그아웃하시겠습니까?')">로그아웃</a>
+            </li>
+            <li sec:authorize="isAuthenticated()"><a th:href="@{/user/userpage}">마이페이지</a></li>
+            <li sec:authorize="hasRole('ROLE_SELLER')"><a th:href="@{/seller/sellerpage}">판매자페이지</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/admin/userlist}">회원관리</a></li>
         </ul>
     </nav>
 </header>
 
 <main>
     <div class="container">
-        <h1>게시글 상세보기</h1>
-
+        <h1>문의사항 상세보기</h1>
         <input type="hidden" name="idx" th:value="${inquiries.idx}"> <!-- 게시글 ID 히든 필드 -->
 
-        <table class="table">
+        <table class="table table-bordered">
+            <colgroup>
+                <col width="20%" />
+                <col width="30%" />
+                <col width="20%" />
+                <col width="*" />
+            </colgroup>
             <tbody>
             <tr>
-                <th scope="row">작성자</th>
-                <td><span th:text="${inquiries.username}"></span></td>
+                <th class="text-center" style="vertical-align:middle;">제목</th>
+                <td colspan="3" th:text="${inquiries.title}"></td>
             </tr>
             <tr>
-                <th scope="row">제목</th>
-                <td><span th:text="${inquiries.title}"></span></td>
+                <th class="text-center" style="vertical-align:middle;">작성자</th>
+                <td th:text="${inquiries.username}"></td>
+                <th class="text-center" style="vertical-align:middle;">작성일</th>
+                <td th:text="${#temporals.format(inquiries.postdate, 'yyyy.MM.dd HH:mm:ss')}"></td>
             </tr>
             <tr>
-                <th scope="row">작성일</th>
-                <td><span th:text="${#temporals.format(inquiries.postdate, 'yyyy.MM.dd HH:mm:ss')}"></span></td>
-            </tr>
-            <tr>
-                <th scope="row">조회수</th>
-                <td><span th:text="${inquiries.viewCount}"></span></td>
-            </tr>
-            <tr>
-                <th scope="row">내용</th>
+                <th class="text-center" style="vertical-align:middle;">조회수</th>
+                <td th:text="${inquiries.viewCount}"></td>
+                <th class="text-center" style="vertical-align:middle;">답변</th>
                 <td>
+                    <span th:if="${inquiries.responses > 0}">답변 완료</span>
+                    <span th:if="${inquiries.responses == 0}">답변 대기</span>
+                </td>
+            </tr>
+            <tr style="height: 300px">
+                <th class="text-center" style="vertical-align:middle;">내용</th>
+                <td colspan="3">
                     <div th:utext="${inquiries.content}"></div>
                 </td>
             </tr>
             <tr>
-                <th scope="row">첨부파일</th>
-                <td>
-                    <div th:if="${inquiries.sfile != null and inquiries.sfile.trim() != ''}">
-                        <span th:if="${@inquiryService.isImageFile(inquiries.sfile)}">
-                            <img th:src="@{/files/} + ${inquiries.sfile}" alt="첨부된 이미지" style="max-width: 300px; max-height: 200px;" />
-                        </span>
-                                    <span th:if="${!@inquiryService.isImageFile(inquiries.sfile)}">
-                            <a th:href="@{/files/} + ${inquiries.sfile}" th:text="${inquiries.sfile}">첨부파일 다운로드</a>
-                        </span>
-                    </div>
-                    <div th:if="${inquiries.sfile == null or inquiries.sfile.trim() == ''}">
-                        <p>첨부파일이 없습니다.</p>
-                    </div>
+                <th class="text-center" style="vertical-align:middle;">첨부파일</th>
+                <td colspan="3">
+                <span th:if="${inquiries.sfile != null and inquiries.sfile.trim() != ''}">
+                    <span th:if="${@inquiryService.isImageFile(inquiries.sfile)}">
+                        <img th:src="@{/files/{sfile}(sfile=${inquiries.sfile})}" alt="첨부된 이미지" style="max-width: 300px; max-height: 200px;" />
+                    </span>
+                    <span th:if="${!@inquiryService.isImageFile(inquiries.sfile)}">
+                        <a th:href="@{/files/{sfile}(sfile=${inquiries.sfile})}" th:text="${inquiries.sfile}">첨부파일 다운로드</a>
+                    </span>
+                </span>
+                <span th:if="${inquiries.sfile == null or inquiries.sfile.trim() == ''}">
+                    <p>첨부파일이 없습니다.</p>
+                </span>
                 </td>
             </tr>
             </tbody>
         </table>
+
+<!--        <input type="hidden" name="idx" th:value="${inquiries.idx}"> &lt;!&ndash; 게시글 ID 히든 필드 &ndash;&gt;-->
+
+<!--        <table class="table">-->
+<!--            <tbody>-->
+<!--            <tr>-->
+<!--                <th scope="row">작성자</th>-->
+<!--                <td><span th:text="${inquiries.username}"></span></td>-->
+<!--            </tr>-->
+<!--            <tr>-->
+<!--                <th scope="row">제목</th>-->
+<!--                <td><span th:text="${inquiries.title}"></span></td>-->
+<!--            </tr>-->
+<!--            <tr>-->
+<!--                <th scope="row">작성일</th>-->
+<!--                <td><span th:text="${#temporals.format(inquiries.postdate, 'yyyy.MM.dd HH:mm:ss')}"></span></td>-->
+<!--            </tr>-->
+<!--            <tr>-->
+<!--                <th scope="row">조회수</th>-->
+<!--                <td><span th:text="${inquiries.viewCount}"></span></td>-->
+<!--            </tr>-->
+<!--            <tr>-->
+<!--                <th scope="row">내용</th>-->
+<!--                <td>-->
+<!--                    <div th:utext="${inquiries.content}"></div>-->
+<!--                </td>-->
+<!--            </tr>-->
+<!--            <tr>-->
+<!--                <th scope="row">첨부파일</th>-->
+<!--                <td>-->
+<!--                    <div th:if="${inquiries.sfile != null and inquiries.sfile.trim() != ''}">-->
+<!--                        <span th:if="${@inquiryService.isImageFile(inquiries.sfile)}">-->
+<!--                            <img th:src="@{/files/} + ${inquiries.sfile}" alt="첨부된 이미지" style="max-width: 300px; max-height: 200px;" />-->
+<!--                        </span>-->
+<!--                                    <span th:if="${!@inquiryService.isImageFile(inquiries.sfile)}">-->
+<!--                            <a th:href="@{/files/} + ${inquiries.sfile}" th:text="${inquiries.sfile}">첨부파일 다운로드</a>-->
+<!--                        </span>-->
+<!--                    </div>-->
+<!--                    <div th:if="${inquiries.sfile == null or inquiries.sfile.trim() == ''}">-->
+<!--                        <p>첨부파일이 없습니다.</p>-->
+<!--                    </div>-->
+<!--                </td>-->
+<!--            </tr>-->
+<!--            </tbody>-->
+<!--        </table>-->
 
         <div class="navigation">
             <button onclick="location.href='/guest/inquiryList'" class="btn btn-secondary">목록으로 돌아가기</button>
@@ -127,15 +195,6 @@
             <button th:onclick="'deletePost(' + ${inquiries.idx} + ')'">게시글 삭제</button>
         </div>
     </div>
-<!--    <script th:inline="javascript">-->
-<!--        /*<![CDATA[*/-->
-<!--          function replyDelete(idx) {-->
-<!--            var message = [[${message}]]-->
-<!--            alert(message);-->
-<!--            location.replace([[${searchUrl}]]);-->
-<!--          }-->
-<!--        /*]]>*/-->
-<!--    </script>-->
 </main>
 
 <!-- 풋터 섹션 -->

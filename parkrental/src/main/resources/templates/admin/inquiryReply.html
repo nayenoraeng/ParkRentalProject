@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,8 +30,9 @@
                 <li>
                     <a href="#">공원 검색</a>
                     <ul class="dropdown">
-                        <li><a href="#">국립공원</a></li>
-                        <li><a href="#">자연공원</a></li>
+                        <li><a th:href="@{/ParkList?category=natural}">자연/휴양 공원</a></li>
+                        <li><a th:href="@{/ParkList?category=urban}">도시 생활 공원</a></li>
+                        <li><a th:href="@{/ParkList?category=special}">특수 목적 공원</a></li>
                     </ul>
                 </li>
                 <li>
@@ -44,16 +46,30 @@
                 <li>
                     <a href="#">게시판</a>
                     <ul class="dropdown">
-                        <li><a href="#">공지사항</a></li>
-                        <li><a href="#">문의사항</a></li>
+                        <li><a href="/guest/noticeList">공지사항</a></li>
+                        <li><a href="/guest/inquiryList">문의사항</a></li>
                         <li><a href="#">커뮤니티</a></li>
                     </ul>
                 </li>
             </ul>
             <!-- 오른쪽에 위치할 메뉴 -->
             <ul class="right-menu">
-                <li><a href="#">로그인</a></li>
-                <li><a href="#">회원가입</a></li>
+                <!-- Translation buttons for the whole page -->
+                <li class="language-buttons">
+                    <button id="translate-en">English</button>
+                    <button id="translate-ja">Japanese</button> <!-- 일본어 버튼으로 변경 -->
+                    <button id="translate-ko">Korean</button>
+                </li>
+
+                <li sec:authorize="isAnonymous()"><a th:href="@{/guest/Login}">로그인</a></li>
+                <li sec:authorize="isAnonymous()"><a th:href="@{/guest/Signup}">회원가입</a></li>
+                <!-- 로그인 시 메뉴 변경 -->
+                <li sec:authorize="isAuthenticated()">
+                    <a th:href="@{/guest/Logout}" onclick="deleteJWTCookie(); return confirm('로그아웃하시겠습니까?')">로그아웃</a>
+                </li>
+                <li sec:authorize="isAuthenticated()"><a th:href="@{/user/userpage}">마이페이지</a></li>
+                <li sec:authorize="hasRole('ROLE_SELLER')"><a th:href="@{/seller/sellerpage}">판매자페이지</a></li>
+                <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/admin/userlist}">회원관리</a></li>
             </ul>
         </nav>
         <!-- 배경 이미지 위의 텍스트 -->
@@ -63,9 +79,12 @@
         </div>
     </header>
     <br/><br/><br/>
-    <form th:action="@{/user/inquiryReplyPro/{idx}(idx=${inquiry.idx})}" method="post" method="post" enctype="multipart/form-data" th:object="${inquiry}" onsubmit="return saveContent();">
+    <form th:action="@{/admin/inquiryReplyPro/{idx}(idx=${inquiry.idx})}" method="post"  enctype="multipart/form-data" th:object="${inquiry}" onsubmit="return saveContent();">
         <div class="container">
             <h1>게시판 답글쓰기</h1>
+            <div class="form-group">
+                <input type="hidden" name="idx"  th:value="${inquiry.idx}" />
+            </div>
 
             <div class="form-group">
                 <label for="username">작성자</label>
@@ -74,13 +93,13 @@
 
             <div class="form-group">
                 <label for="title">제목을 입력해 주세요.</label>
-                <input type="text" id="title" placeholder="제목을 입력해 주세요." required>
+                <input type="text" id="title" name="title" placeholder="제목을 입력해 주세요." required>
             </div>
 
             <div class="form-group">
                 <label for="editor-container">내용을 입력해 주세요.</label>
                 <div id="editor-container" style="height: 300px;"></div>
-                <input type="hidden" id="content" required>
+                <input type="hidden" id="content" name="content" required>
             </div>
 
             <div class="form-group">
@@ -88,7 +107,6 @@
                 <input type="file" class="form-control-file" id="file" name="file"/>
                 <img id="imagePreview" class="img-preview" src="" alt="이미지 미리보기" style="display:none;"/>
             </div>
-
 
             <div class="form-group btn-group">
                 <button type="submit" class="btn btn-primary btn-custom">등록</button>

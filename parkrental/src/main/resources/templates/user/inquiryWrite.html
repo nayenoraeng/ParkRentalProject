@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,8 +30,9 @@
                 <li>
                     <a href="#">공원 검색</a>
                     <ul class="dropdown">
-                        <li><a href="#">국립공원</a></li>
-                        <li><a href="#">자연공원</a></li>
+                        <li><a th:href="@{/ParkList?category=natural}">자연/휴양 공원</a></li>
+                        <li><a th:href="@{/ParkList?category=urban}">도시 생활 공원</a></li>
+                        <li><a th:href="@{/ParkList?category=special}">특수 목적 공원</a></li>
                     </ul>
                 </li>
                 <li>
@@ -44,16 +46,29 @@
                 <li>
                     <a href="#">게시판</a>
                     <ul class="dropdown">
-                        <li><a href="#">공지사항</a></li>
-                        <li><a href="#">문의사항</a></li>
+                        <li><a href="/guest/noticeList">공지사항</a></li>
+                        <li><a href="/guest/inquiryList">문의사항</a></li>
                         <li><a href="#">커뮤니티</a></li>
                     </ul>
                 </li>
             </ul>
             <!-- 오른쪽에 위치할 메뉴 -->
             <ul class="right-menu">
-                <li><a href="#">로그인</a></li>
-                <li><a href="#">회원가입</a></li>
+                <li class="language-buttons">
+                    <button id="translate-en">English</button>
+                    <button id="translate-ja">Japanese</button> <!-- 일본어 버튼으로 변경 -->
+                    <button id="translate-ko">Korean</button>
+                </li>
+
+                <li sec:authorize="isAnonymous()"><a th:href="@{/guest/Login}">로그인</a></li>
+                <li sec:authorize="isAnonymous()"><a th:href="@{/guest/Signup}">회원가입</a></li>
+                <!-- 로그인 시 메뉴 변경 -->
+                <li sec:authorize="isAuthenticated()">
+                    <a th:href="@{/guest/Logout}" onclick="deleteJWTCookie(); return confirm('로그아웃하시겠습니까?')">로그아웃</a>
+                </li>
+                <li sec:authorize="isAuthenticated()"><a th:href="@{/user/userpage}">마이페이지</a></li>
+                <li sec:authorize="hasRole('ROLE_SELLER')"><a th:href="@{/seller/sellerpage}">판매자페이지</a></li>
+                <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/admin/userlist}">회원관리</a></li>
             </ul>
         </nav>
         <!-- 배경 이미지 위의 텍스트 -->
@@ -63,23 +78,30 @@
         </div>
     </header>
     <br/><br/><br/>
-    <form th:action="@{/user/inquiryWritePro}" method="post" enctype="multipart/form-data" onsubmit="return saveContent();">
+    <form th:action="@{/user/inquiryWritePro}" method="post" enctype="multipart/form-data" th:object="${inquiryCreate}"
+          onsubmit="return saveContent();">
         <div class="container">
             <h1>게시판 글쓰기</h1>
             <div class="form-group">
                 <label for="name">작성자</label>
-                <input type="text" th:value="${username}" id="name" placeholder="작성자." required>
+                <input type="text" th:value="${username}" id="name" placeholder="작성자." readonly>
             </div>
 
             <div class="form-group">
                 <label for="title">제목을 입력해 주세요.</label>
-                <input type="text" name="title" id="title" placeholder="제목을 입력해 주세요." required>
+                <input type="text" th:field="*{title}" name="title" id="title" placeholder="제목을 입력해 주세요." >
+                <div th:if="${#fields.hasErrors('title')}" class="error-message">
+                    <span th:errors="*{title}"></span>
+                </div>
             </div>
 
             <div class="form-group">
                 <label for="editor-container">내용을 입력해 주세요.</label>
                 <div id="editor-container" style="height: 300px;"></div>
-                <input type="hidden" id="content" name="content" required>
+                <input type="hidden" th:field="*{content}" id="content" name="content" />
+                <div th:if="${#fields.hasErrors('content')}" class="error-message">
+                    <span th:errors="*{content}"></span>
+                </div>
             </div>
 
             <div class="form-group">
@@ -90,7 +112,10 @@
 
             <div class="form-group">
                 <label for="inquiryPassword">비밀번호를 입력해 주세요.</label>
-                <input type="password" name="inquiryPassword" id="inquiryPassword" placeholder="비밀번호를 입력해 주세요." required>
+                <input type="password" th:field="*{inquiryPassword}" name="inquiryPassword" id="inquiryPassword" placeholder="비밀번호를 숫자로 4자 입력해 주세요." />
+                <div th:if="${#fields.hasErrors('inquiryPassword')}" class="error-message">
+                    <span th:errors="*{inquiryPassword}"></span>
+                </div>
             </div>
 
             <div class="form-group btn-group">
@@ -99,11 +124,7 @@
             </div>
         </div>
     </form>
-    <div th:if="${errors}" class="error">
-        <ul>
-            <li th:each="error : ${errors}" th:text="${error.defaultMessage}"></li>
-        </ul>
-    </div>
+
     <br/><br/><br/>
 
 
@@ -140,7 +161,7 @@
 
     function saveContent() {
         // Quill 에디터의 내용을 가져와서 숨겨진 필드에 설정
-        var content = quill.root.innerHTML;  // HTML 형식으로 가져오기
+        var content = quill.root.innerText;  // HTML 태그없이
         document.getElementById('content').value = content; // 숨겨진 input 필드에 저장
         return true; // 폼 제출 계속 진행
     }

@@ -20,6 +20,11 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
     @Query("UPDATE Inquiry i SET i.groupOrd = i.groupOrd + 1 WHERE i.originNo = :originNo AND i.groupOrd > :groupOrd")
     void updateGroupOrd(@Param("originNo") Long originNo, @Param("groupOrd") Integer groupOrd);
 
+    @Query("SELECT i FROM Inquiry i ORDER BY i.originNo DESC, i.groupOrd ASC")
+    Page<Inquiry> findAllOrderedByOriginAndGroupOrd(Pageable pageable);
+
+    @Query("SELECT i FROM Inquiry i ORDER BY i.postdate DESC, i.originNo DESC, i.groupOrd ASC")
+    Page<Inquiry> findAllOrderedByPostdate(Pageable pageable);
 
     // 제목으로 검색
     Page<Inquiry> findByTitleContaining(String title, Pageable pageable);
