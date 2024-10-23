@@ -14,8 +14,8 @@
         <p><strong>예약 날짜: </strong><span th:text="${reservation.reserveDate}">예약 날짜</span></p>
         <p><strong>대여 시간: </strong><span th:text="${reservation.reserveTime}">대여 시간</span></p>
         <p><strong>총 결제 금액: </strong><span th:text="${reservation.costAll}">총 결제 금액</span></p>
-        <p><strong>판매자: </strong><span th:text="${reservation.seller.businessName}">판매자 이름</span></p>
-        <p><strong>대여 상품: </strong><span th:text="${reservation.product.productName}">대여 상품 이름</span></p>
+        <p><strong>판매자: </strong><span th:text="${reservation.businessName}">판매자 이름</span></p>
+        <p><strong>대여 상품: </strong><span th:text="${reservation.productName}">대여 상품 이름</span></p>
     </div>
 
     <div class="text-center mt-5">

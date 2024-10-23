@@ -1,7 +1,5 @@
 package com.project.parkrental.reservation;
 
-import com.project.parkrental.parkList.model.Product;
-import com.project.parkrental.security.DTO.Seller;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -20,10 +18,10 @@ public class Reservation {
     @Column(nullable = false, unique = true)
     private String reserveNum;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private LocalDate reserveDate;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private LocalTime reserveTime;
 
     @Column(nullable = false)
@@ -32,16 +30,14 @@ public class Reservation {
     @Column(nullable = false)
     private int isPaid; // 결제 상태 (1 = 결제 완료, 0 = 결제 안됨)
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private Long costAll;
 
-    // 연관된 판매자 (businessName 참조)
-    @ManyToOne
-    @JoinColumn(name = "businessName", referencedColumnName = "businessName", nullable = false)
-    private Seller seller;
+    // 판매자 이름 (businessName 참조)
+    @Column(nullable = false)
+    private String businessName;
 
-    // 연관된 상품 (productName 참조)
-    @ManyToOne
-    @JoinColumn(name = "productName", referencedColumnName = "productName", nullable = false)
-    private Product product;
+    // 상품 이름 (productName 참조)
+    @Column(nullable = false)
+    private String productName;
 }

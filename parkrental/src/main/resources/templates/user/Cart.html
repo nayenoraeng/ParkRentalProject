@@ -5,6 +5,7 @@
     <title>장바구니</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Flatpickr CSS, JS 라이브러리 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
@@ -25,6 +26,9 @@
         .quantity-input input {
             width: 70px;
             text-align: center;
+            border: 2px solid #D5D5D5;
+            border-radius: 4px;
+            padding: 5px;
         }
         .container {
             max-width: 800px;
@@ -40,10 +44,13 @@
             text-align: center;
         }
         .form-control::placeholder {
-            color: #999;
+            color: #BDBDBD;
         }
         .modal-body .form-control {
             text-align: center;
+        }
+        #reservationDate {
+            border: 1px solid #A6A6A6;
         }
     </style>
 </head>
@@ -64,7 +71,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="cart : ${cartProducts}">
+        <tr th:each="cart : ${cartProducts}" th:data-product-idx="${cart.product.idx}">
             <td>
                 <img th:src="@{'/image/rental/' + ${cart.productName.toLowerCase()} + '.png'}"
                      alt="Product Image" style="width: 40px; height: 40px; margin-right: 10px; vertical-align: middle;">
@@ -100,16 +107,45 @@
     </div>
 
     <div class="text-center">
-        <button type="button" id="updateQuantityBtn" class="btn btn-primary">수량 변경</button>
+        <button type="button" class="btn btn-primary" onclick="updateQuantities()">수량 변경</button>
         <button type="button" class="btn btn-warning" onclick="validateParks()">예약하기</button>
         <button type="button" class="btn btn-secondary" onclick="history.back()">이전 페이지</button>
+    </div>
+</div>
+
+<!-- 예약 모달 창 -->
+<div class="modal fade" id="reservationModal" tabindex="-1" aria-labelledby="reservationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reservationModalLabel">예약하기</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center-modal">
+                <form id="reservationForm">
+                    <div class="mb-3">
+                        <label for="reservationDate" class="form-label">예약 날짜</label>
+                        <input type="text" class="form-control" id="reservationDate" name="reservationDate" placeholder="날짜를 선택하세요" required>
+                    </div>
+                    <p>대여 시간: 09:00 ~ 18:00</p>
+                    <p id="totalCartAmount">총 합계 금액 : <span id="cartTotalAmountText"></span></p>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="submitReservation()">결제하기</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+            </div>
+        </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+    let selectedProductIdx = [];
+
     function updateProductTotal(idx, price) {
+        console.log('updateProductTotal called with idx:', idx, 'and price:', price);  // 추가 로그
         const quantityElement = document.getElementById('quantity_' + idx);
         const totalElement = document.getElementById('total_product_' + idx);
 
@@ -123,6 +159,7 @@
     }
 
     function updateTotalPrice() {
+        console.log('updateTotalPrice called');
         let totalPrice = 0;
 
         document.querySelectorAll('td[id^="total_product_"]').forEach(product => {
@@ -130,9 +167,11 @@
         });
 
         document.getElementById('totalPrice').innerText = totalPrice + ' 원';
+        console.log('Total price:', totalPrice);  // 추가 로그
     }
 
     function updateQuantities() {
+        console.log('updateQuantities called');
         const payload = [];
 
         document.querySelectorAll('input[type="number"]').forEach(input => {
@@ -151,7 +190,9 @@
             }
         });
 
-        fetch(`/user/Cart/update`, {
+        console.log('Sending update quantities payload:', payload);  // 추가 로그
+
+        fetch('/user/cart/update', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -177,71 +218,10 @@
         });
     }
 
-    // 이벤트 리스너를 통해 수량 변경 버튼을 클릭할 때 updateQuantities 호출
-    document.addEventListener('DOMContentLoaded', function () {
-        document.getElementById('updateQuantityBtn').addEventListener('click', updateQuantities);
-
-        flatpickr("#reservationDate", {
-            dateFormat: "Y-m-d",
-            locale: {
-                firstDayOfWeek: 0
-            },
-            onDayCreate: function(dObj, dStr, fp, dayElem) {
-                if (dayElem.classList.contains("flatpickr-day--prevMonthDay") || dayElem.classList.contains("flatpickr-day--nextMonthDay")) {
-                    dayElem.style.opacity = "0.3";
-                    dayElem.classList.remove('sunday');
-                } else {
-                    if (dayElem.dateObj.getDay() === 0) {
-                        dayElem.classList.add('sunday');
-                    } else {
-                        dayElem.classList.remove('sunday');
-                    }
-                }
-            },
-            onChange: function(selectedDates, dateStr, instance) {
-                if (selectedDates.length > 0) {
-                    const dayName = ['일', '월', '화', '수', '목', '금', '토'][new Date(dateStr).getDay()];
-                    document.getElementById('reservationDate').value = `${dateStr} (${dayName})`;
-                }
-            }
-        });
-
-        const totalCartAmount = document.getElementById('totalPrice').innerText;
-        document.getElementById('cartTotalAmountText').innerText = totalCartAmount;
-    });
-
-    function validateParks() {
-        const parkIds = [];
-        document.querySelectorAll('td[data-parkid]').forEach(parkElement => {
-            const parkId = parkElement.getAttribute('data-parkid');
-            if (parkId) {
-                parkIds.push(parkId);
-            }
-        });
-
-        const uniqueParkIds = [...new Set(parkIds)];
-        if (uniqueParkIds.length > 1) {
-            alert('여러 공원의 물품이 선택되었습니다.\n한 공원의 물품만 대여 가능합니다.');
-            return;
-        }
-
-        // 공원이 동일하면 모달창을 띄움
-        const reservationModal = new bootstrap.Modal(document.getElementById('reservationModal'));
-        reservationModal.show();
-    }
-
-    // 이벤트 리스너를 통해 예약하기 버튼을 클릭할 때 validateParks 호출
-    document.addEventListener('DOMContentLoaded', function () {
-        document.getElementById('updateQuantityBtn').addEventListener('click', updateQuantities);
-        document.getElementById('reserveBtn').addEventListener('click', validateParks);  // 예약하기 버튼 이벤트 리스너
-    });
-
-
-    // 기존 함수들 유지
-
     function deleteProduct(idx) {
+        console.log('deleteProduct called with idx:', idx);  // 추가 로그
         if (confirm('이 물품을 삭제하시겠습니까?')) {
-            fetch(`/user/Cart/delete/${idx}`, {
+            fetch(`/user/cart/delete/${idx}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -267,18 +247,133 @@
         }
     }
 
-    // 이벤트 리스너를 통해 삭제 버튼을 클릭할 때 deleteProduct 호출
-    document.addEventListener('DOMContentLoaded', function () {
-        document.getElementById('updateQuantityBtn').addEventListener('click', updateQuantities);
-        document.getElementById('reserveBtn').addEventListener('click', validateParks);  // 예약하기 버튼 이벤트 리스너
+    function validateParks() {
+        console.log('validateParks called');
+        const parkIds = [];
+        const selectedProductIds = [];  // 장바구니에 있는 모든 상품들의 인덱스를 저장할 배열
 
-        // 삭제 버튼에 이벤트 리스너 연결
-        document.querySelectorAll('button.deleteProductBtn').forEach(button => {
-            const idx = button.getAttribute('data-idx');  // 버튼에 data-idx 속성으로 idx 값을 설정
-            button.addEventListener('click', function () {
-                deleteProduct(idx);
-            });
+        // 각 상품의 공원 ID를 가져와 배열에 저장
+        document.querySelectorAll('td[data-parkid]').forEach(parkElement => {
+            const parkId = parkElement.getAttribute('data-parkid');
+            if (parkId) {
+                parkIds.push(parkId);
+            }
         });
+
+        // 공원이 여러 개일 경우 경고 메시지
+        const uniqueParkIds = [...new Set(parkIds)];
+        if (uniqueParkIds.length > 1) {
+            alert('여러 공원의 물품이 선택되었습니다.\n한 공원의 물품만 대여 가능합니다.');
+            return;
+        }
+
+        // 모든 상품 인덱스를 배열로 저장
+        document.querySelectorAll('tbody tr').forEach(row => {
+            const productIdx = row.getAttribute('data-product-idx');
+            if (productIdx) {
+                selectedProductIds.push(productIdx);
+            }
+        });
+
+        // 장바구니가 비어 있을 경우
+        if (selectedProductIds.length === 0) {
+            alert('장바구니가 비어 있습니다.');
+            return;
+        }
+
+        // 장바구니에 있는 모든 상품의 인덱스를 설정
+        selectedProductIdx = selectedProductIds;
+
+        console.log('Selected products for reservation:', selectedProductIdx);  // 추가 로그
+
+        const reservationModal = new bootstrap.Modal(document.getElementById('reservationModal'));
+        reservationModal.show();
+    }
+
+    const username = /*[[${username}]]*/ '';
+    console.log('현재 사용자 이름:', username);
+
+    function submitReservation() {
+        console.log('submitReservation called');
+        const dateField = document.getElementById('reservationDate');
+        const date = dateField.dataset.dateValue;  // 선택된 날짜 가져오기 (YYYY-MM-DD 형식)
+
+        console.log('전송되는 reserveDate 값:', date);  // 추가 로그
+
+        if (!date) {
+            alert('날짜를 선택하세요.');
+            return;
+        }
+
+        const totalPrice = parseInt(document.getElementById('totalPrice').innerText.replace(' 원', ''), 10);
+        console.log('전송되는 totalPrice 값:', totalPrice);  // 추가 로그
+
+        console.log('Selected product indices:', selectedProductIdx);  // 추가 로그
+
+        // cartIdx 값을 프론트엔드에서 전송하도록 수정
+        fetch('/user/reservation/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: username,
+                reserveDate: date,
+                costAll: Number(totalPrice),  // 숫자로 변환
+                cartIdx: Number(selectedProductIdx[0])  // cartIdx로 변경
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                alert('예약이 완료되었습니다.');
+                window.location.href = '/reservation/confirmation';
+            }
+        })
+        .catch(error => {
+            console.error('예약 에러 발생:', error);
+            alert('예약 중 에러가 발생했습니다. 관리자에게 문의바랍니다.');
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('DOM fully loaded and parsed');
+        flatpickr("#reservationDate", {
+            dateFormat: "Y-m-d",
+            locale: {
+                firstDayOfWeek: 0
+            },
+            onDayCreate: function(dObj, dStr, fp, dayElem) {
+                if (dayElem.classList.contains("flatpickr-day--prevMonthDay") || dayElem.classList.contains("flatpickr-day--nextMonthDay")) {
+                    dayElem.style.opacity = "0.3";
+                    dayElem.classList.remove('sunday');
+                } else {
+                    if (dayElem.dateObj.getDay() === 0) {
+                        dayElem.classList.add('sunday');
+                    } else {
+                        dayElem.classList.remove('sunday');
+                    }
+                }
+            },
+            onChange: function(selectedDates, dateStr, instance) {
+                if (selectedDates.length > 0) {
+                    const date = selectedDates[0];
+                    const dayName = ['일', '월', '화', '수', '목', '금', '토'][date.getDay()];
+                    document.getElementById('reservationDate').value = `${dateStr} (${dayName})`;  // 필드에는 요일 포함
+                    document.getElementById('reservationDate').dataset.dateValue = dateStr;  // 전송용 데이터는 요일 없이 저장
+                }
+            }
+        });
+
+        const totalCartAmount = document.getElementById('totalPrice').innerText;
+        document.getElementById('cartTotalAmountText').innerText = totalCartAmount;
     });
 </script>
 

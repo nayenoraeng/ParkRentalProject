@@ -138,7 +138,7 @@ CREATE TABLE reservation (
 	isPaid int(1) not null,
 	costAll bigint(10) UNIQUE KEY NOT NULL,
 	businessName varchar(100) not null,
-	productName varchar(30) not null
+	productName varchar(50) not null
 );
 ALTER TABLE reservation DROP FOREIGN KEY reservation_ibfk_2;
 # API 정보 가져와서 공원 리스트로 저장하기
@@ -236,27 +236,6 @@ INSERT INTO announcement (username, title, content, postdate, ofile, sfile) VALU
 
 ######## 1대1 문의 게시판 ##########
 DROP TABLE inquiry;
-CREATE TABLE inquiry (
-	idx bigint(10) PRIMARY KEY AUTO_INCREMENT,
-	inquiryReRef bigint(10) default 0,
-	inquiryReLev int(10) DEFAULT 0 NOT NULL,
-	inquiryReSeq int(10) DEFAULT 0 NOT NULL,
-	username varchar(100) not null,
- 	title varchar(50) not null,
-	content varchar(1000) not null,
-	postdate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	viewCount int(10) DEFAULT 0 NOT NULL,
-	responses int(10) DEFAULT 0 NOT NULL,
-  	ofile varchar(200),
-  	sfile varchar(100),
-  	inquiryPassword varchar(20) not null,
-  	parentId bigint,
-  	FOREIGN KEY (parentId) REFERENCES inquiry (idx), 
-  	FOREIGN KEY (username) REFERENCES user (username)  	
-  	ON DELETE CASCADE
-	ON UPDATE CASCADE
-);
-
 CREATE TABLE inquiry (
 	idx bigint(10) PRIMARY KEY AUTO_INCREMENT,
 	originNo bigint(10) default 0,
