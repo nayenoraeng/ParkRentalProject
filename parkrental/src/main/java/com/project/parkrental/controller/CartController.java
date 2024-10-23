@@ -12,12 +12,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/user/Cart")
+@RequestMapping("/user/cart")
 public class CartController {
 
     @Autowired
@@ -26,45 +27,38 @@ public class CartController {
     @Autowired
     private ProductService productService;
 
-@PostMapping("/add")
-public String addProductToCart(
-        @RequestParam("idx[]") List<Long> idxList,  
-        Model model) {
-    try {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+    @PostMapping("/add")
+    public String addProductToCart(
+            @RequestParam("idx[]") List<Long> idxList,
+            Model model) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
 
-        for (Long productIdx : idxList) {
-            Product product = productService.getProductById(productIdx);
+            for (Long productIdx : idxList) {
+                Product product = productService.getProductById(productIdx);
 
-            if (product.getParkList() == null) {
-                model.addAttribute("error", "공원 정보가 없습니다.");
-                return "redirect:/user/Cart";
+                if (product.getParkList() == null) {
+                    model.addAttribute("error", "공원 정보가 없습니다.");
+                    return "redirect:/user/cart";
+                }
+
+                cartService.addProductToCart(username, product, 1);  // 수량을 기본 1로 설정
             }
 
-            cartService.addProductToCart(username, product, 1);  // 수량을 기본 1로 설정
+            return "redirect:/user/cart";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", e.getMessage());
+            return "redirect:/user/cart";
         }
-
-        return "redirect:/user/Cart";
-
-    } catch (Exception e) {
-        e.printStackTrace();
-        model.addAttribute("error", e.getMessage());
-        return "redirect:/user/Cart";
     }
-}
 
     @GetMapping
-    public String getCartProducts(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication != null ? authentication.getName() : null;
-
+    public String getCartProducts(Model model, Principal principal) {
+        String username = principal.getName(); // 로그인된 사용자 이름 가져오기
         List<Cart> cartProducts = cartService.getCartProducts(username);
-        cartProducts.forEach(cart -> {
-            Product product = productService.getProductByNameAndParkId(cart.getProductName(), cart.getParkId());
-            System.out.println("Product Name: " + product.getProductName());
-            System.out.println("Product Price: " + cart.getProductPrice());
-        });
 
         Long totalPrice = cartProducts.stream()
                 .mapToLong(cart -> cart.getProductPrice() * cart.getQuantity())
@@ -72,8 +66,9 @@ public String addProductToCart(
 
         model.addAttribute("cartProducts", cartProducts);
         model.addAttribute("totalPrice", totalPrice);
+        model.addAttribute("username", username);
 
-        return "user/Cart";
+        return "user/cart";
     }
 
     @PostMapping("/update")
@@ -84,30 +79,9 @@ public String addProductToCart(
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName();
 
-            System.out.println("Received payload: " + payload);
-
             for (Map<String, Object> item : payload) {
-                Long idx;
-                Object idxObj = item.get("idx");
-
-                if (idxObj instanceof Number) {
-                    idx = ((Number) idxObj).longValue();
-                } else if (idxObj instanceof String) {
-                    idx = Long.parseLong((String) idxObj);
-                } else {
-                    throw new IllegalArgumentException("idx 값이 유효하지 않습니다: " + idxObj);
-                }
-
-                int quantity;
-                Object quantityObj = item.get("quantity");
-
-                if (quantityObj instanceof Number) {
-                    quantity = ((Number) quantityObj).intValue();
-                } else if (quantityObj instanceof String) {
-                    quantity = Integer.parseInt((String) quantityObj);
-                } else {
-                    throw new IllegalArgumentException("quantity 값이 유효하지 않습니다: " + quantityObj);
-                }
+                Long idx = Long.parseLong(item.get("idx").toString());
+                int quantity = Integer.parseInt(item.get("quantity").toString());
 
                 cartService.updateQuantity(idx, quantity);
             }
@@ -130,7 +104,6 @@ public String addProductToCart(
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName();
 
-            // 장바구니에서 해당 사용자의 항목인지 확인 후 삭제
             Cart cart = cartService.findByIdxAndUsername(idx, username);
             if (cart != null) {
                 cartService.deleteProductFromCart(idx);
@@ -147,4 +120,11 @@ public String addProductToCart(
         }
     }
 
+    // 사용자 이름을 가져와 JavaScript에서 사용할 수 있도록 전달
+    @GetMapping("/cart")
+    public String showCart(Model model, Principal principal) {
+        String username = principal.getName(); // 로그인한 사용자 이름 가져오기
+        model.addAttribute("username", username); // 사용자 이름을 Thymeleaf로 전달
+        return "cart";
+    }
 }

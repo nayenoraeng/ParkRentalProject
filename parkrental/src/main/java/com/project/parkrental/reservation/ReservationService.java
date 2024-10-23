@@ -1,11 +1,11 @@
 package com.project.parkrental.reservation;
 
 import com.project.parkrental.parkList.model.Product;
-import com.project.parkrental.security.DTO.Seller;
+import com.project.parkrental.parkList.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Service
 public class ReservationService {
@@ -13,26 +13,29 @@ public class ReservationService {
     @Autowired
     private ReservationRepository reservationRepository;
 
-    public Reservation createReservation(String username, String reserveNum, LocalDate reserveDate, LocalTime reserveTime, Long costAll, Product product, Seller seller) {
+    @Autowired
+    private ProductRepository productRepository;
+
+    public Reservation createReservation(String username, LocalDate reserveDate, Long costAll, Long productIdx) {
+        // productIdx로 Product 객체 조회
+        Product product = productRepository.findById(productIdx)
+                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+
+        // Reservation 객체 생성 및 필드 설정
         Reservation reservation = new Reservation();
         reservation.setUsername(username);
-        reservation.setReserveNum(reserveNum);
-        reservation.setReserveDate(reserveDate);
-        reservation.setReserveTime(reserveTime);
+        reservation.setReserveDate(reserveDate);  // 날짜만 처리
         reservation.setCostAll(costAll);
-        reservation.setProduct(product);
-        reservation.setSeller(seller);
-        reservation.setIsPaid(0); // 기본 결제 상태는 결제 안됨으로 설정
+        reservation.setProductName(product.getProductName());
+        reservation.setBusinessName(product.getBusinessName());
+        reservation.setIsPaid(0);  // 결제 상태 기본값
 
-        return reservationRepository.save(reservation);
-    }
+        // 예약 번호 생성
+        Reservation savedReservation = reservationRepository.save(reservation);
+        String reserveNum = "R" + savedReservation.getIdx();
+        savedReservation.setReserveNum(reserveNum);
 
-    // 결제 상태 업데이트 로직 (결제 완료 처리)
-    public void updatePaymentStatus(String reserveNum, int isPaid) {
-        Reservation reservation = reservationRepository.findByReserveNum(reserveNum);
-        if (reservation != null) {
-            reservation.setIsPaid(isPaid);
-            reservationRepository.save(reservation);
-        }
+        // 예약 번호 저장 후 최종적으로 다시 저장
+        return reservationRepository.save(savedReservation);
     }
 }

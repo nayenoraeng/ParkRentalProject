@@ -146,7 +146,7 @@ CREATE TABLE reservation (
 	isPaid int(1) not null,
 	costAll bigint(10) UNIQUE KEY NOT NULL,
 	businessName varchar(100) not null,
-	productName varchar(30) not null
+	productName varchar(50) not null
 );
 
 ALTER TABLE reservation DROP FOREIGN KEY reservation_ibfk_2;
@@ -249,6 +249,8 @@ INSERT INTO announcement (username, title, content, postdate, ofile, sfile) VALU
 ######## 1대1 문의 게시판 ##########
 DROP TABLE inquiry;
 
+
+=======
 CREATE TABLE inquiry (
 	idx bigint(10) PRIMARY KEY AUTO_INCREMENT,
 	originNo bigint(10) default 0,

@@ -59,7 +59,6 @@ public class ProductService {
         return product;
     }
 
-
     // 대여 불가능한 제품 리스트를 반환하는 메서드
     public List<String> getUnavailableProductsForCategory(String parkCategory) {
         switch (parkCategory) {
@@ -158,5 +157,9 @@ public class ProductService {
         // productName과 parkId로 Product를 조회하여 반환
         return productRepository.findByProductNameAndParkId(productName, parkId)
                 .orElseThrow(() -> new RuntimeException("해당 공원의 상품을 찾을 수 없습니다: " + productName));
+    }
+
+    public Product findByName(String productName) {
+        return productRepository.findByProductName(productName);
     }
 }
