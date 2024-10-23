@@ -102,4 +102,9 @@ public class UserService {
         User user = userRepository.findById(idx);
         return new UserDto(user);
     }
+
+    public String findUsernameByEmail(String email) {
+        User user = userRepository.findByEmail(email);
+        return user.getUsername();
+    }
 }

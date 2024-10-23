@@ -236,26 +236,6 @@ INSERT INTO announcement (username, title, content, postdate, ofile, sfile) VALU
 
 ######## 1대1 문의 게시판 ##########
 DROP TABLE inquiry;
-CREATE TABLE inquiry (
-	idx bigint(10) PRIMARY KEY AUTO_INCREMENT,
-	inquiryReRef bigint(10) default 0,
-	inquiryReLev int(10) DEFAULT 0 NOT NULL,
-	inquiryReSeq int(10) DEFAULT 0 NOT NULL,
-	username varchar(100) not null,
- 	title varchar(50) not null,
-	content varchar(1000) not null,
-	postdate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	viewCount int(10) DEFAULT 0 NOT NULL,
-	responses int(10) DEFAULT 0 NOT NULL,
-  	ofile varchar(200),
-  	sfile varchar(100),
-  	inquiryPassword varchar(20) not null,
-  	parentId bigint,
-  	FOREIGN KEY (parentId) REFERENCES inquiry (idx), 
-  	FOREIGN KEY (username) REFERENCES user (username)  	
-  	ON DELETE CASCADE
-	ON UPDATE CASCADE
-);
 
 CREATE TABLE inquiry (
 	idx bigint(10) PRIMARY KEY AUTO_INCREMENT,
@@ -298,3 +278,16 @@ ALTER TABLE product ADD INDEX (productName);
 CREATE INDEX idxProductNameParkId ON product (productName, parkId);
 
 SELECT productNum FROM cart;
+
+DROP TABLE PwdResetToken;
+CREATE TABLE PwdResetToken (
+    idx BIGINT AUTO_INCREMENT PRIMARY KEY,
+    token VARCHAR(255) NOT NULL,
+   	userIdx BIGINT NOT NULL,
+    expirationDate TIMESTAMP NOT NULL,
+    CONSTRAINT fk_user
+        FOREIGN KEY (userIdx) REFERENCES user(idx)
+        ON DELETE CASCADE
+);
+
+SELECT * from PwdResetToken;

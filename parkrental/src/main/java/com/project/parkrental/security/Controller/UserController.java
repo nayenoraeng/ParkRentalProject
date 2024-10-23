@@ -5,20 +5,9 @@ import com.project.parkrental.security.Repository.UserRepository;
 import com.project.parkrental.security.Service.SellerService;
 import com.project.parkrental.security.Service.UserService;
 import com.project.parkrental.security.DTO.User;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,18 +21,6 @@ public class UserController {
     private UserService userService;
     @Autowired
     private SellerService sellerService;
-
-    @Autowired
-    private AuthenticationManager authManager;
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder pwdEncoder;
 
     @GetMapping("/Signup")
     public String signup (Model model) {
@@ -91,39 +68,5 @@ public class UserController {
         return "redirect:/guest/Login";
     }
 
-    @PostMapping("/Login")
-    public ResponseEntity<?> authUser(@RequestParam("username") String username, @RequestParam("password") String password,
-                                      HttpServletRequest req, HttpServletResponse res) {
-        try {
-            Authentication authentication = authManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password)
-            );
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            String jwtToken = jwtUtil.generateToken(username);
-            Cookie cookie = new Cookie("JWT", jwtToken);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true); // Only set to true if using HTTPS
-            cookie.setPath("/");
-            res.addCookie(cookie);
-
-            return ResponseEntity.ok().body("{\"success\": true, \"message\": \"로그인되었습니다.\"}");
-        } catch (AuthenticationException e) {
-            return ResponseEntity.ok().body("{\"success\": false, \"message\": \"로그인 실패. 아이디와 비밀번호를 확인해주세요.\"}");
-        }
-    }
-
-    @GetMapping("/Logout")
-    public String logout (HttpServletResponse res) {
-        SecurityContextHolder.clearContext();
-        Cookie cookie = new Cookie("JWT", null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        res.addCookie(cookie);
-
-        return "redirect:/";
-    }
 
 }

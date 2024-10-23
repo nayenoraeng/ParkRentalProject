@@ -13,8 +13,11 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     }).then(data => {
         if (data.success) {
             alert(data.message);
-            window.location.href = 'guest/Main';
             window.location.href = '/';
+            setTimeout(function() {
+                window.location.href = '/';
+            }, 300);
+
         } else {
             alert(data.message);
         }
