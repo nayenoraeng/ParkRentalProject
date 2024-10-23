@@ -13,5 +13,5 @@ public interface SellerRepository extends JpaRepository<Seller, Long> {
     boolean existsByPhoneNum(String phoneNum);
     boolean existsByBusinessNum(String businessNum);
     List<Seller> findAllByAuthority(String authority);
-
+    Seller findByEmail(String email);
 }

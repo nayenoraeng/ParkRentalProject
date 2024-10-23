@@ -9,7 +9,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -94,6 +93,11 @@ public class SellerService {
     public SellerDto findSellerById(long idx) {
         Seller seller = sellerRepository.findById(idx);
         return new SellerDto(seller);
+    }
+
+    public String findUsernameByEmail(String email) {
+        Seller seller = sellerRepository.findByEmail(email);
+        return seller.getUsername();
     }
 
 }

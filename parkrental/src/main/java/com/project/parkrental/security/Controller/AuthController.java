@@ -14,8 +14,6 @@ import java.util.Map;
 public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
-    @Autowired
-    private UserService userService;
 
     @PostMapping("/auth/refresh-token")
     public ResponseEntity<?> refreshAccessToken(@RequestBody Map<String, String> request) {

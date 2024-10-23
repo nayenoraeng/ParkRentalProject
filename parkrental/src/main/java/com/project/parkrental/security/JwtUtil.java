@@ -16,7 +16,7 @@ import java.security.Key;
 @Component
 public class JwtUtil {
     private final String SECRET_KEY = "cdd25add35d284a7ef5f06ace359bfe5241dd3b2151dae03e9487155c9c8ada7";
-    private final long EXPIRATION_TIME = 1000*60*15; //15분
+    private final long EXPIRATION_TIME = 1000*60*30; //30분
     private final long REFRESH_TIME = 1000*60*30; //30분
 
     public String extractUsername(String token) {
